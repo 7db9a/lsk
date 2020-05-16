@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  coding:
+    image: ls-key:0.1.0
+    volumes:
+      - ./:/ls-key
+      - ls-key-cargo-data-volume:/usr/local/cargo
+    tty: true
+
+volumes:
+ ls-key-cargo-data-volume:
+   external: true
