@@ -1,4 +1,5 @@
 pub mod xdotool {
+    use::std::thread;
     use xdotool;
     use xdotool::keyboard;
     use xdotool::option_vec;
@@ -11,10 +12,22 @@ pub mod xdotool {
         ]);
     }
 
-    pub fn type_text<T: AsRef<str>>(text: T/*, options: Option<KeyboardOption>*/) -> std::process::Output {
+    pub fn type_text<T: AsRef<str>>(text: T, delay: u32/*, options: Option<KeyboardOption>*/) -> std::process::Output {
         keyboard::type_text(text.as_ref(), option_vec![
-            KeyboardOption::Delay(200)
+            KeyboardOption::Delay(delay)
         ])
+    }
+
+    pub fn type_text_spawn<T: AsRef<str>>(text: T, delay: u32/*, options: Option<KeyboardOption>*/)  -> thread::JoinHandle<()> {
+        let text = text.as_ref().to_string();
+	    let type_text = thread::spawn(move || {
+	       // Send loop
+	       // Send the message
+           type_text(text, delay);
+	    });
+        //super::xdotool::type_text(r#""$(printf 'cd $HOME && fzf \n ')""#);
+
+	   type_text
     }
 }
 pub mod termion {
@@ -261,8 +274,8 @@ mod tests {
     fn xdotool_type_text() {
         println!("");
         println!("");
-
-        super::xdotool::type_text(r#""$(printf 'cd $HOME && fzf \n ')""#);
+        let spawn = super::xdotool::type_text_spawn(r#""$(printf 'cd $HOME && fzf \n ')""#, 200);
+        spawn.join();
     }
 
     #[test]
@@ -277,8 +290,10 @@ mod tests {
     }
     #[test]
     fn takes_input_read() {
-       println!("");
-       super::termion::read();
+        println!("");
+        let spawn = super::xdotool::type_text_spawn(r#""$(printf 'hello \n ')""#, 200);
+        spawn.join();
+        super::termion::read();
     }
 
     #[test]
