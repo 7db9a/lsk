@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sed -i 's/\#\[ignore\]\/\/docker/\/\/#[ignore]\/\/docker/g' src/mod.rs
+sed -i 's/\#\[ignore\]\/\/docker/\/\/#[ignore]\/\/docker/g' src/terminal.rs
+sed -i 's/\#\[ignore\]\/\/docker/\/\/#[ignore]\/\/docker/g' src/list.rs
+sed -i 's/\#\[ignore\]\/\/docker/\/\/#[ignore]\/\/docker/g' src/bin/main.rs

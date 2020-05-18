@@ -1,4 +1,5 @@
 pub mod xdotool {
+    use::std::thread;
     use xdotool;
     use xdotool::keyboard;
     use xdotool::option_vec;
@@ -11,10 +12,31 @@ pub mod xdotool {
         ]);
     }
 
-    pub fn type_text<T: AsRef<str>>(text: T/*, options: Option<KeyboardOption>*/) -> std::process::Output {
+    pub fn type_text<T: AsRef<str>>(text: T, delay: u32/*, options: Option<KeyboardOption>*/) -> std::process::Output {
         keyboard::type_text(text.as_ref(), option_vec![
-            KeyboardOption::Delay(200)
+            KeyboardOption::Delay(delay)
         ])
+    }
+
+    pub fn type_text_spawn(text: Vec<String>, delay: u32/*, options: Option<KeyboardOption>*/)  -> thread::JoinHandle<()> {
+        //let text = text.as_ref().to_string();
+	    let type_text = thread::spawn(move || {
+	       // Send loop
+	       // Send the message
+           let text_iter = text.iter();
+           let type_n_sleep = |text: String, delay: u32| {
+               let few_ms = std::time::Duration::from_millis(1000);
+               std::thread::sleep(few_ms);
+               type_text(text, delay);
+           };
+
+           text_iter.for_each(|x|
+               type_n_sleep(x.to_string(), delay)
+           );
+	    });
+        //super::xdotool::type_text(r#""$(printf 'cd $HOME && fzf \n ')""#);
+
+	   type_text
     }
 }
 pub mod termion {
@@ -257,31 +279,50 @@ mod tests {
     use std::path::{Path, PathBuf};
     use std::thread;
 
-    #[test]
-    fn xdotool_type_text() {
-        println!("");
-        println!("");
+    //#[test]
+    #[ignore] // Need a spawn in a spawn.
+    //fn xdotool_type_text() {
+    //    println!("");
+    //    println!("");
+    //    let text_vec = vec![
+    //         r#""$(printf 'cd $HOME && fzf \n ')""#.to_string(),
+    //         r#""$(printf '1\n ')""#.to_string(),
+    //         r#""$(printf 'cd - \n ')""#.to_string(),
+    //    ];
+    //    let spawn = super::xdotool::type_text_spawn(text_vec, 50);
+    //    spawn.join();
+    //}
 
-        super::xdotool::type_text(r#""$(printf 'cd $HOME && fzf \n ')""#);
-    }
-
     #[test]
+    #[ignore]//host
     fn termion_key() {
-        super::termion_key::run();
+	    let test_spawn = thread::spawn(move || {
+            super::termion_key::run()
+	    });
+
+        let spawn = super::xdotool::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+
+        test_spawn.join();
+        spawn.join();
     }
 
     #[test]
+    #[ignore]//docker
     fn tterminal_size_with_termion() {
         let (w, h) = super::termion::size();
         println!("\nwidth: {}\nheight: {}", w, h);
     }
     #[test]
+    #[ignore]//host
     fn takes_input_read() {
-       println!("");
-       super::termion::read();
+        println!("");
+        let spawn = super::xdotool::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
+        spawn.join();
+        super::termion::read();
     }
 
     #[test]
+    #[ignore]//docker
     fn display_grid() {
         println!("");
         println!("");
@@ -290,6 +331,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//docker
     fn terminal_grid() {
         let entry = "entry".to_string();
 

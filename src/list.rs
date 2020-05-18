@@ -217,6 +217,7 @@ mod tests {
     use fixture::Fixture;
 
     #[test]
+    #[ignore]//docker
     fn current_print_list_include_hidden() {
         let path = "./";
 
@@ -228,6 +229,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//docker
     fn get_non_hidden_paths_by_key() {
         let path = "/tmp/lsk_tests/";
 
@@ -268,6 +270,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//docker
     fn get_all_paths_by_key() {
         let path = "/tmp/lsk_tests/";
 

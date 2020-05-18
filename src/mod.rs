@@ -173,6 +173,7 @@ mod tests {
 
 
     #[test]
+    #[ignore]//host
     fn parse() {
         let input = Input::new();
         let input = input.parse("vim Cargo.toml".to_string());
@@ -194,6 +195,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//host
     fn parse_long() {
         let input = Input::new();
         let input = input.parse("git clone https://github.com/7db9a/ls-key --depth 1".to_string());
@@ -222,6 +224,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//host
     fn parse_single_cmd() {
         let input = Input::new();
         let input = input.parse("vim".to_string());
@@ -243,6 +246,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//host
     fn parse_key() {
         let input = Input::new();
         let input = input.parse("33".to_string());
@@ -264,6 +268,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//host
     fn parse_bad() {
         let input = Input::new();
         let input = input.parse(" vim Cargo.toml".to_string());
@@ -285,6 +290,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]//host
     fn parse_cmd() {
         let input = Input::new();
         let (cmd, args) = input.parse_cmd("vim Cargo.toml".to_string());
@@ -306,32 +312,52 @@ mod tests {
     }
 
     //#[test]
+    #[ignore]
     fn shell_pipe_cmd() {
         super::terminal::shell::cmd(r#"du -ah . | sort -hr | head -n 10"#.to_string());
     }
 
     //#[test]
+    #[ignore]
     fn shell_cat_cmd() {
         super::terminal::shell::cmd("cat Cargo.toml".to_string());
     }
 
     //#[test]
+    #[ignore]
     fn shell_cat() {
         super::terminal::shell::spawn("cat".to_string(), vec!["Cargo.toml".to_string()]);
     }
 
     #[test]
+    #[ignore]//host
     fn takes_input_run_list_read() {
         let path = env::current_dir().unwrap();
         println!("");
-        //println!("{:#?}", output);
-        super::run_list_read(path, false);
+        let text_vec = vec![
+             r#""$(printf '2 \n ')""#.to_string(),
+             r#""$(printf ':q \n ')""#.to_string(),
+        ];
+        let spawn = super::terminal::xdotool::type_text_spawn(text_vec, 200);
+        //let spawn_quite = super::terminal::xdotool::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
+        super::run_list_read(path, true);
+        spawn.join();
+        //spawn_quite.join();
     }
 
     #[test]
+    #[ignore]//host
     fn takes_input_run_list_all_read() {
         let path = env::current_dir().unwrap();
         println!("");
+        let text_vec = vec![
+             r#""$(printf '7 \n ')""#.to_string(),
+             r#""$(printf ':q \n ')""#.to_string(),
+        ];
+        let spawn = super::terminal::xdotool::type_text_spawn(text_vec, 200);
+        //let spawn_quite = super::terminal::xdotool::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         super::run_list_read(path, true);
+        spawn.join();
+        //spawn_quite.join();
     }
 }

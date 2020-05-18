@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/mod.rs
+sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/terminal.rs
+sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/list.rs
+sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/bin/main.rs
