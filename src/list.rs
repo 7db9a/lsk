@@ -17,7 +17,6 @@ impl List {
         let mut list: List = Default::default();
         list.relative_parent_dir_path = path.as_ref().to_path_buf();
         list.path_history.push(list.relative_parent_dir_path.clone());
-        println!("new:\n\n{:#?}", list);
         list.clone()
     }
 
@@ -34,7 +33,6 @@ impl List {
         self.path_history = old_path_history;
         self.relative_parent_dir_path = old_relative_parent_dir_path.join(basename);
         self.path_history.push(self.relative_parent_dir_path.clone());
-        println!("update:\n\n{:#?}", self);
         self.clone()
     }
 
