@@ -141,7 +141,7 @@ mod cli {
     use std::process::Command;
 
     #[test]
-    #[ignore]
+    #[ignore]//docker
     fn print_list_include_hidden() {
         let path = "/tmp/lsk_tests/";
 
@@ -189,7 +189,7 @@ mod cli {
     }
 
     #[test]
-    #[ignore]
+    #[ignore]//docker
     fn get_file_by_key() {
         let path = "/tmp/lsk_tests/";
 
@@ -229,7 +229,7 @@ mod cli {
     }
 
     #[test]
-    #[ignore]
+    #[ignore]//docker
     fn get_file_by_key_in_dir() {
         let path = "/tmp/lsk_tests/";
 

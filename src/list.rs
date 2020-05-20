@@ -68,7 +68,7 @@ impl List {
         let mut done = false;
 
         while !done {
-            let mut n = 1;
+            let mut n = 0;
             if all_files.clone().count() > 0 {
                 for entry in all_files.clone() {
                     //println!("{} [{}]", entry.display(), n);
@@ -163,7 +163,7 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
 }
 
 pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
-    let mut n = 1;
+    let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
         let entry = entry.to_str().unwrap();
@@ -182,6 +182,10 @@ pub fn order_and_sort_list(list: List) -> Vec<PathBuf> {
     let mut done = false;
 
     let mut all_files: Vec<PathBuf> = vec![];
+
+    let previous_path = list.path_history.iter().last().unwrap();
+
+    all_files.push(previous_path.to_path_buf());
 
     while !done {
         if files.clone().count() > 0 {
@@ -210,7 +214,7 @@ pub fn order_and_sort_list(list: List) -> Vec<PathBuf> {
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(list);
-    let mut n = 1;
+    let mut n = 0;
     for entry in all_files {
         println!("{} [{}]", entry.display(), n);
         n += 1;
