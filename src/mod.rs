@@ -86,22 +86,27 @@ impl LsKey {
                         }
                     } else if input.is_key == Some(true) {
                         let key: usize = input.cmd.unwrap().parse().unwrap();
-                        let file_pathbuf = list.get_file_by_key(key).unwrap();
-                        if metadata(file_pathbuf.clone()).unwrap().is_dir() {
-                            let file_path =
-                                file_pathbuf
-                                .to_str().unwrap()
-                                .to_string();
+                        match key {
+                            0 => (),
+                            _ => {
+                                  let file_pathbuf = list.get_file_by_key(key).unwrap();
+                                  if metadata(file_pathbuf.clone()).unwrap().is_dir() {
+                                      let file_path =
+                                          file_pathbuf
+                                          .to_str().unwrap()
+                                          .to_string();
 
-                            let list = self.list.clone().update(file_pathbuf);
-                            self = self.update(list);
-                            self.run_list_read();
-                        } else {
-                            let file_path =
-                                file_pathbuf
-                                .to_str().unwrap()
-                                .to_string();
-                            terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                      let list = self.list.clone().update(file_pathbuf);
+                                      self = self.update(list);
+                                      self.run_list_read();
+                                  } else {
+                                      let file_path =
+                                          file_pathbuf
+                                          .to_str().unwrap()
+                                          .to_string();
+                                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                  }
+                            }
                         }
                     } else {
                     }
