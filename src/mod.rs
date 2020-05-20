@@ -19,8 +19,8 @@ pub fn run_list_read<P: AsRef<Path>>(path: P, all: bool) {
         let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
 
         let entries_keyed: Vec<String> = list::key_entries(entries);
-        //let res = terminal::terminal_n_grid::grid(entries_keyed);
-        let res = terminal::terminal_n_grid::_grid(entries_keyed);
+        //let res = terminal::input_n_display::grid(entries_keyed);
+        let res = terminal::input_n_display::grid(entries_keyed);
         if let Some(r) = res {
             let grid = r.0;
             let width = r.1;
@@ -37,7 +37,7 @@ pub fn run_list_read<P: AsRef<Path>>(path: P, all: bool) {
 }
 
 fn run_cmd(list: List, all: bool) {
-    let input = terminal::termion::read();
+    let input = terminal::input_n_display::read();
     match input {
         Ok(t) =>  {
             if let Some(i) = t {
@@ -338,8 +338,8 @@ mod tests {
              r#""$(printf '2 \n ')""#.to_string(),
              r#""$(printf ':q \n ')""#.to_string(),
         ];
-        let spawn = super::terminal::xdotool::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::xdotool::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
+        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
+        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         super::run_list_read(path, true);
         spawn.join();
         //spawn_quite.join();
@@ -354,8 +354,8 @@ mod tests {
              r#""$(printf '7 \n ')""#.to_string(),
              r#""$(printf ':q \n ')""#.to_string(),
         ];
-        let spawn = super::terminal::xdotool::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::xdotool::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
+        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
+        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         super::run_list_read(path, true);
         spawn.join();
         //spawn_quite.join();
