@@ -40,10 +40,12 @@ pub mod parent_shell {
     }
 }
 pub mod input_n_display {
+    use std::path::{Path, PathBuf};
     use termion::input::TermRead;
     use termion::event::Key;
     use termion::raw::IntoRawMode;
     use termion::terminal_size;
+    use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
     use std::io::{Write, stdout, stdin};
 
     pub fn read() -> Result<(Option<String>), std::io::Error> {
@@ -107,6 +109,83 @@ pub mod input_n_display {
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
+    }
+
+    pub use term_grid::{Grid, Display};
+
+   // pub fn display(grid: Grid, width: usize) {
+   //     println!("{}", grid.fit_into_width(width))
+   //     //let grid = grid.fit_into_width(w));
+   //     //if let Some(g) = grid {
+   //     //    true
+   //     //} else {
+   //     //    false
+   //     //}
+   // }
+
+    pub fn grid(entries: Vec<String>) -> Option<(Grid, usize)> {
+        let mut grid = Grid::new(GridOptions {
+                filling:     Filling::Spaces(3),
+                direction:   Direction::LeftToRight,
+        });
+
+        for s in &entries
+        {
+                grid.add(Cell::from(s.as_str()));
+        }
+
+        let stdout = stdout();
+        let mut stdout = stdout.lock();
+        let stdin = stdin();
+        let mut stdin = stdin.lock();
+
+        let res = terminal_size();
+        match res {
+          Ok(r) => {
+              let w = usize::from(r.0);
+              let h = usize::from(r.1);
+
+              Some((grid, w))
+          },
+          Err(_) => {
+              None
+          }
+        }
+    }
+
+    pub fn grid_display(entries: Vec<String>) /*Result<(Grid), Error>*/{
+        let mut grid = Grid::new(GridOptions {
+                filling:     Filling::Spaces(3),
+                direction:   Direction::LeftToRight,
+        });
+
+        for s in &entries
+        {
+                grid.add(Cell::from(s.as_str()));
+        }
+
+        let stdout = stdout();
+        let mut stdout = stdout.lock();
+        let stdin = stdin();
+        let mut stdin = stdin.lock();
+
+        let (w, h) = terminal_size()/*; match this     */.unwrap();
+        /*match (w, h) {
+            Ok((w, h)) => {
+                let w = usize::from(w);
+                let h = usize::from(h);
+                grid.fit_into_width(w)
+            },
+            Err(_) => {
+                None
+            }
+          }
+        */
+
+        let w = usize::from(w);
+        let h = usize::from(h);
+
+        println!("{}", grid.fit_into_width(w).unwrap());
     }
 }
 
@@ -182,93 +261,6 @@ pub mod grid_display {
     }
 }
 
-
-// Uses termion for input and term_grid for display.
-pub mod terminal_n_grid {
-    use std::path::{Path, PathBuf};
-    use termion::input::TermRead;
-    use termion::terminal_size;
-    use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
-    use std::io::{Write, stdout, stdin};
-
-    pub use term_grid::{Grid, Display};
-
-   // pub fn display(grid: Grid, width: usize) {
-   //     println!("{}", grid.fit_into_width(width))
-   //     //let grid = grid.fit_into_width(w));
-   //     //if let Some(g) = grid {
-   //     //    true
-   //     //} else {
-   //     //    false
-   //     //}
-   // }
-
-    pub fn _grid(entries: Vec<String>) -> Option<(Grid, usize)> {
-        let mut grid = Grid::new(GridOptions {
-                filling:     Filling::Spaces(3),
-                direction:   Direction::LeftToRight,
-        });
-
-        for s in &entries
-        {
-                grid.add(Cell::from(s.as_str()));
-        }
-
-        let stdout = stdout();
-        let mut stdout = stdout.lock();
-        let stdin = stdin();
-        let mut stdin = stdin.lock();
-
-        let res = terminal_size();
-        match res {
-          Ok(r) => {
-              let w = usize::from(r.0);
-              let h = usize::from(r.1);
-
-              Some((grid, w))
-          },
-          Err(_) => {
-              None
-          }
-        }
-    }
-
-    pub fn grid(entries: Vec<String>) /*Result<(Grid), Error>*/{
-        let mut grid = Grid::new(GridOptions {
-                filling:     Filling::Spaces(3),
-                direction:   Direction::LeftToRight,
-        });
-
-        for s in &entries
-        {
-                grid.add(Cell::from(s.as_str()));
-        }
-
-        let stdout = stdout();
-        let mut stdout = stdout.lock();
-        let stdin = stdin();
-        let mut stdin = stdin.lock();
-
-        let (w, h) = terminal_size()/*; match this     */.unwrap();
-        /*match (w, h) {
-            Ok((w, h)) => {
-                let w = usize::from(w);
-                let h = usize::from(h);
-                grid.fit_into_width(w)
-            },
-            Err(_) => {
-                None
-            }
-          }
-        */
-
-        let w = usize::from(w);
-        let h = usize::from(h);
-
-        println!("{}", grid.fit_into_width(w).unwrap());
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::path::{Path, PathBuf};
@@ -336,6 +328,6 @@ mod tests {
             entries.push(entry.clone())
         }
         println!("");
-        super::terminal_n_grid::grid(entries);
+        super::input_n_display::grid_display(entries);
     }
 }

@@ -19,8 +19,8 @@ pub fn run_list_read<P: AsRef<Path>>(path: P, all: bool) {
         let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
 
         let entries_keyed: Vec<String> = list::key_entries(entries);
-        //let res = terminal::terminal_n_grid::grid(entries_keyed);
-        let res = terminal::terminal_n_grid::_grid(entries_keyed);
+        //let res = terminal::input_n_display::grid(entries_keyed);
+        let res = terminal::input_n_display::grid(entries_keyed);
         if let Some(r) = res {
             let grid = r.0;
             let width = r.1;
