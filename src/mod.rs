@@ -29,6 +29,21 @@ impl LsKey {
             }
     }
 
+    pub fn update(mut self, list: List) -> Self {
+            let list = if self.all {
+                   list
+                   .list_include_hidden()
+                   .unwrap()
+            } else {
+                   list
+                   .list_skip_hidden()
+                   .unwrap()
+            };
+            
+            self.list = list;
+            self.clone()
+    }
+
     pub fn run_list_read(self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
@@ -78,8 +93,8 @@ impl LsKey {
                                 .to_str().unwrap()
                                 .to_string();
 
-                            let list = self.list.update(file_pathbuf);
-                            self.list = list;
+                            let list = self.list.clone().update(file_pathbuf);
+                            self = self.update(list);
                             self.run_list_read();
                         } else {
                             let file_path =

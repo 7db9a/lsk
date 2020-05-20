@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::fs::metadata;
+use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -16,15 +17,25 @@ impl List {
         let mut list: List = Default::default();
         list.relative_parent_dir_path = path.as_ref().to_path_buf();
         list.path_history.push(list.relative_parent_dir_path.clone());
+        println!("new:\n\n{:#?}", list);
         list.clone()
     }
 
     // Update due to going into a new directory.
     pub fn update<P: AsRef<Path>>(mut self, path: P) -> Self {
+        let old_path_history = self.path_history;
+        let old_parent_dir = self.parent_dir;
+        let old_relative_parent_dir_path = self.relative_parent_dir_path;
+        let p = path.as_ref().to_str().unwrap();
+        let np: String = basename(p, '/').into_owned();
+        let basename = Path::new(&np);
         let mut list: List = Default::default();
-        list.relative_parent_dir_path = path.as_ref().to_path_buf();
-        list.path_history.push(list.relative_parent_dir_path.clone());
-        list.clone()
+        self = list;
+        self.path_history = old_path_history;
+        self.relative_parent_dir_path = old_relative_parent_dir_path.join(basename);
+        self.path_history.push(self.relative_parent_dir_path.clone());
+        println!("update:\n\n{:#?}", self);
+        self.clone()
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
@@ -109,6 +120,14 @@ impl List {
         } else {
             None
         }
+    }
+}
+
+fn basename<'a>(path: &'a str, sep: char) -> Cow<'a, str> {
+    let mut pieces = path.rsplit(sep);
+    match pieces.next() {
+        Some(p) => p.into(),
+        None => path.into(),
     }
 }
 
