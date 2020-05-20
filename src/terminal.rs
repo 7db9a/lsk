@@ -1,4 +1,4 @@
-pub mod xdotool {
+pub mod parent_shell {
     use::std::thread;
     use xdotool;
     use xdotool::keyboard;
@@ -34,7 +34,7 @@ pub mod xdotool {
                type_n_sleep(x.to_string(), delay)
            );
 	    });
-        //super::xdotool::type_text(r#""$(printf 'cd $HOME && fzf \n ')""#);
+        //super::parent_shell::type_text(r#""$(printf 'cd $HOME && fzf \n ')""#);
 
 	   type_text
     }
@@ -289,7 +289,7 @@ mod tests {
     //         r#""$(printf '1\n ')""#.to_string(),
     //         r#""$(printf 'cd - \n ')""#.to_string(),
     //    ];
-    //    let spawn = super::xdotool::type_text_spawn(text_vec, 50);
+    //    let spawn = super::parent_shell::type_text_spawn(text_vec, 50);
     //    spawn.join();
     //}
 
@@ -300,7 +300,7 @@ mod tests {
             super::termion_key::run()
 	    });
 
-        let spawn = super::xdotool::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+        let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
 
         test_spawn.join();
         spawn.join();
@@ -316,7 +316,7 @@ mod tests {
     #[ignore]//host
     fn takes_input_read() {
         println!("");
-        let spawn = super::xdotool::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
+        let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
         spawn.join();
         super::termion::read();
     }

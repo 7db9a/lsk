@@ -338,8 +338,8 @@ mod tests {
              r#""$(printf '2 \n ')""#.to_string(),
              r#""$(printf ':q \n ')""#.to_string(),
         ];
-        let spawn = super::terminal::xdotool::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::xdotool::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
+        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
+        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         super::run_list_read(path, true);
         spawn.join();
         //spawn_quite.join();
@@ -354,8 +354,8 @@ mod tests {
              r#""$(printf '7 \n ')""#.to_string(),
              r#""$(printf ':q \n ')""#.to_string(),
         ];
-        let spawn = super::terminal::xdotool::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::xdotool::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
+        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
+        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         super::run_list_read(path, true);
         spawn.join();
         //spawn_quite.join();
