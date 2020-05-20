@@ -4,7 +4,7 @@ extern crate ls_key;
 
 use std::path::{Path, PathBuf};
 use std::env;
-use ls_key::list;
+use ls_key::{LsKey, list};
 use list::{List, print_list_with_keys, is_dir, is_file};
 use seahorse::{App, Command, Context, Flag, FlagType};
 
@@ -113,17 +113,21 @@ fn default_action(c: &Context) {
         println!("all, {:?}", c.args);
         println!("path, {:?}", path);
         if path != "" {
-            ls_key::run_list_read(path, true);
+            let ls_key = LsKey::new(path, true);
+            ls_key.run_list_read()
         } else {
-            ls_key::run_list_read(env::current_dir().unwrap(), true);
+            let ls_key = LsKey::new(env::current_dir().unwrap(), true);
+            ls_key.run_list_read()
         }
     } else {
         println!("regular, {:?}", c.args);
         println!("path, {:?}", path);
         if path != "" {
-            ls_key::run_list_read(path, false);
+            let ls_key = LsKey::new(path, false);
+            ls_key.run_list_read()
         } else {
-            ls_key::run_list_read(env::current_dir().unwrap(), false);
+            let ls_key = LsKey::new(env::current_dir().unwrap(), false);
+            ls_key.run_list_read()
         }
     }
 }
@@ -137,7 +141,7 @@ mod cli {
     use std::process::Command;
 
     #[test]
-    #[ignore]
+    #[ignore]//docker
     fn print_list_include_hidden() {
         let path = "/tmp/lsk_tests/";
 
@@ -185,7 +189,7 @@ mod cli {
     }
 
     #[test]
-    #[ignore]
+    #[ignore]//docker
     fn get_file_by_key() {
         let path = "/tmp/lsk_tests/";
 
@@ -225,7 +229,7 @@ mod cli {
     }
 
     #[test]
-    #[ignore]
+    #[ignore]//docker
     fn get_file_by_key_in_dir() {
         let path = "/tmp/lsk_tests/";
 

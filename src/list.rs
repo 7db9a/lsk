@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::fs::metadata;
+use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -8,13 +9,31 @@ pub struct List {
     pub dirs: Vec<PathBuf>,
     pub relative_parent_dir_path: PathBuf,
     pub parent_dir: Option<PathBuf>,
+    pub path_history: Vec<PathBuf>
 }
 
 impl List {
     pub fn new<P: AsRef<Path>>(path: P) -> Self {
         let mut list: List = Default::default();
         list.relative_parent_dir_path = path.as_ref().to_path_buf();
-        list
+        list.path_history.push(list.relative_parent_dir_path.clone());
+        list.clone()
+    }
+
+    // Update due to going into a new directory.
+    pub fn update<P: AsRef<Path>>(mut self, path: P) -> Self {
+        let old_path_history = self.path_history;
+        let old_parent_dir = self.parent_dir;
+        let old_relative_parent_dir_path = self.relative_parent_dir_path;
+        let p = path.as_ref().to_str().unwrap();
+        let np: String = basename(p, '/').into_owned();
+        let basename = Path::new(&np);
+        let mut list: List = Default::default();
+        self = list;
+        self.path_history = old_path_history;
+        self.relative_parent_dir_path = old_relative_parent_dir_path.join(basename);
+        self.path_history.push(self.relative_parent_dir_path.clone());
+        self.clone()
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
@@ -58,7 +77,7 @@ impl List {
         let mut done = false;
 
         while !done {
-            let mut n = 1;
+            let mut n = 0;
             if all_files.clone().count() > 0 {
                 for entry in all_files.clone() {
                     //println!("{} [{}]", entry.display(), n);
@@ -99,6 +118,14 @@ impl List {
         } else {
             None
         }
+    }
+}
+
+fn basename<'a>(path: &'a str, sep: char) -> Cow<'a, str> {
+    let mut pieces = path.rsplit(sep);
+    match pieces.next() {
+        Some(p) => p.into(),
+        None => path.into(),
     }
 }
 
@@ -153,7 +180,7 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
 }
 
 pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
-    let mut n = 1;
+    let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
         let entry = entry.to_str().unwrap();
@@ -172,6 +199,10 @@ pub fn order_and_sort_list(list: List) -> Vec<PathBuf> {
     let mut done = false;
 
     let mut all_files: Vec<PathBuf> = vec![];
+
+    let previous_path = list.path_history.iter().last().unwrap();
+
+    all_files.push(previous_path.to_path_buf());
 
     while !done {
         if files.clone().count() > 0 {
@@ -200,7 +231,7 @@ pub fn order_and_sort_list(list: List) -> Vec<PathBuf> {
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(list);
-    let mut n = 1;
+    let mut n = 0;
     for entry in all_files {
         println!("{} [{}]", entry.display(), n);
         n += 1;
