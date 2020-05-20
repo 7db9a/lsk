@@ -37,7 +37,7 @@ pub fn run_list_read<P: AsRef<Path>>(path: P, all: bool) {
 }
 
 fn run_cmd(list: List, all: bool) {
-    let input = terminal::termion::read();
+    let input = terminal::input_n_display::read();
     match input {
         Ok(t) =>  {
             if let Some(i) = t {

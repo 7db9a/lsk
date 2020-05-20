@@ -39,7 +39,7 @@ pub mod parent_shell {
 	   type_text
     }
 }
-pub mod termion {
+pub mod input_n_display {
     use termion::input::TermRead;
     use termion::event::Key;
     use termion::raw::IntoRawMode;
@@ -292,7 +292,7 @@ mod tests {
     #[ignore]//host
     fn termion_key() {
 	    let test_spawn = thread::spawn(move || {
-            super::termion::read_char()
+            super::input_n_display::read_char()
 	    });
 
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
@@ -304,7 +304,7 @@ mod tests {
     #[test]
     #[ignore]//docker
     fn tterminal_size_with_termion() {
-        let (w, h) = super::termion::size();
+        let (w, h) = super::input_n_display::size();
         println!("\nwidth: {}\nheight: {}", w, h);
     }
     #[test]
@@ -313,7 +313,7 @@ mod tests {
         println!("");
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
         spawn.join();
-        super::termion::read();
+        super::input_n_display::read();
     }
 
     #[test]
