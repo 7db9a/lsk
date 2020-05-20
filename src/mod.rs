@@ -78,7 +78,8 @@ impl LsKey {
                                 .to_str().unwrap()
                                 .to_string();
 
-                            self.list.path_history.push(file_pathbuf);
+                            let list = self.list.update(file_pathbuf);
+                            self.list = list;
                             self.run_list_read();
                         } else {
                             let file_path =

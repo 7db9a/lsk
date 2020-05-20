@@ -16,11 +16,15 @@ impl List {
         let mut list: List = Default::default();
         list.relative_parent_dir_path = path.as_ref().to_path_buf();
         list.path_history.push(list.relative_parent_dir_path.clone());
-        list
+        list.clone()
     }
 
-    pub fn update_path_history() {
-
+    // Update due to going into a new directory.
+    pub fn update<P: AsRef<Path>>(mut self, path: P) -> Self {
+        let mut list: List = Default::default();
+        list.relative_parent_dir_path = path.as_ref().to_path_buf();
+        list.path_history.push(list.relative_parent_dir_path.clone());
+        list.clone()
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
