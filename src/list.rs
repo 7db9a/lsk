@@ -19,6 +19,10 @@ impl List {
         list
     }
 
+    pub fn update_path_history() {
+
+    }
+
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
         let mut _list: List = Default::default();
         let walker = WalkDir::new(self.relative_parent_dir_path.clone()).max_depth(1).into_iter();

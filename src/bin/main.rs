@@ -114,20 +114,20 @@ fn default_action(c: &Context) {
         println!("path, {:?}", path);
         if path != "" {
             let ls_key = LsKey::new(path, true);
-            ls_key.run_list_read(true)
+            ls_key.run_list_read()
         } else {
             let ls_key = LsKey::new(env::current_dir().unwrap(), true);
-            ls_key.run_list_read(true)
+            ls_key.run_list_read()
         }
     } else {
         println!("regular, {:?}", c.args);
         println!("path, {:?}", path);
         if path != "" {
             let ls_key = LsKey::new(path, false);
-            ls_key.run_list_read(false)
+            ls_key.run_list_read()
         } else {
             let ls_key = LsKey::new(env::current_dir().unwrap(), false);
-            ls_key.run_list_read(false)
+            ls_key.run_list_read()
         }
     }
 }

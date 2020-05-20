@@ -8,6 +8,7 @@ use list::List;
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
     list: List,
+    all: bool,
 }
 
 impl LsKey {
@@ -23,11 +24,12 @@ impl LsKey {
             };
 
             LsKey {
-                list
+                list,
+                all
             }
     }
 
-    pub fn run_list_read(self, all: bool) {
+    pub fn run_list_read(self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
 
@@ -46,10 +48,10 @@ impl LsKey {
             } else {
                 list::print_list_with_keys(list.clone());
             }
-            self.run_cmd(list, all);
+            self.run_cmd(list);
     }
 
-    fn run_cmd(self, list: List, all: bool) {
+    fn run_cmd(self, list: List) {
         let input = terminal::input_n_display::read();
         match input {
             Ok(t) =>  {
@@ -76,7 +78,7 @@ impl LsKey {
                                 .to_str().unwrap()
                                 .to_string();
 
-                            self.run_list_read(all);
+                            self.run_list_read();
                         } else {
                             let file_path =
                                 file_path.unwrap()
@@ -355,7 +357,7 @@ mod tests {
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         let ls_key = super::LsKey::new(path, true);
-        ls_key.run_list_read(true);
+        ls_key.run_list_read();
         spawn.join();
         //spawn_quite.join();
     }
@@ -372,7 +374,7 @@ mod tests {
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         let ls_key = super::LsKey::new(path, true);
-        ls_key.run_list_read(true);
+        ls_key.run_list_read();
         spawn.join();
         //spawn_quite.join();
     }
