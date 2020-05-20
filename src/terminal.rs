@@ -41,6 +41,8 @@ pub mod parent_shell {
 }
 pub mod termion {
     use termion::input::TermRead;
+    use termion::event::Key;
+    use termion::raw::IntoRawMode;
     use termion::terminal_size;
     use std::io::{Write, stdout, stdin};
 
@@ -60,15 +62,8 @@ pub mod termion {
     pub fn size() -> (u16, u16) {
         terminal_size().unwrap()
     }
-}
 
-pub mod termion_key {
-    use termion::event::Key;
-    use termion::input::TermRead;
-    use termion::raw::IntoRawMode;
-    use std::io::{Write, stdout, stdin};
-
-    pub fn run() {
+    pub fn read_char() {
         let stdin = stdin();
         let mut stdout = stdout().into_raw_mode().unwrap();
 
@@ -297,7 +292,7 @@ mod tests {
     #[ignore]//host
     fn termion_key() {
 	    let test_spawn = thread::spawn(move || {
-            super::termion_key::run()
+            super::termion::read_char()
 	    });
 
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
