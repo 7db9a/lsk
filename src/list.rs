@@ -8,12 +8,14 @@ pub struct List {
     pub dirs: Vec<PathBuf>,
     pub relative_parent_dir_path: PathBuf,
     pub parent_dir: Option<PathBuf>,
+    pub path_history: Vec<PathBuf>
 }
 
 impl List {
     pub fn new<P: AsRef<Path>>(path: P) -> Self {
         let mut list: List = Default::default();
         list.relative_parent_dir_path = path.as_ref().to_path_buf();
+        list.path_history.push(list.relative_parent_dir_path.clone());
         list
     }
 
