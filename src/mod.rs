@@ -5,81 +5,95 @@ use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use list::List;
 
-pub fn run_list_read<P: AsRef<Path>>(path: P, all: bool) {
-        let list = if all {
-           list::List::new(path)
-               .list_include_hidden()
-               .unwrap()
-        } else {
-           list::List::new(path)
-               .list_skip_hidden()
-               .unwrap()
-        };
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct LsKey {
+    list: List,
+}
 
-        let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
+impl LsKey {
+    pub fn new<P: AsRef<Path>>(path: P, all: bool) -> Self {
+            let list = if all {
+               list::List::new(path)
+                   .list_include_hidden()
+                   .unwrap()
+            } else {
+               list::List::new(path)
+                   .list_skip_hidden()
+                   .unwrap()
+            };
 
-        let entries_keyed: Vec<String> = list::key_entries(entries);
-        //let res = terminal::input_n_display::grid(entries_keyed);
-        let res = terminal::input_n_display::grid(entries_keyed);
-        if let Some(r) = res {
-            let grid = r.0;
-            let width = r.1;
-            let display = grid.fit_into_width(width);
-            if let Some(d) = display {
-                 println!("{}", d);
+            LsKey {
+                list
+            }
+    }
+
+    pub fn run_list_read(self, all: bool) {
+            let list = self.list.clone();
+            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
+
+            let entries_keyed: Vec<String> = list::key_entries(entries);
+            //let res = terminal::input_n_display::grid(entries_keyed);
+            let res = terminal::input_n_display::grid(entries_keyed);
+            if let Some(r) = res {
+                let grid = r.0;
+                let width = r.1;
+                let display = grid.fit_into_width(width);
+                if let Some(d) = display {
+                     println!("{}", d);
+                } else {
+                    list::print_list_with_keys(list.clone());
+                }
             } else {
                 list::print_list_with_keys(list.clone());
             }
-        } else {
-            list::print_list_with_keys(list.clone());
-        }
-        run_cmd(list, all);
-}
+            self.run_cmd(list, all);
+    }
 
-fn run_cmd(list: List, all: bool) {
-    let input = terminal::input_n_display::read();
-    match input {
-        Ok(t) =>  {
-            if let Some(i) = t {
-                let input = Input::new();
-                let input = input.parse(i);
-                if input.is_key == Some(false) {
-                    let args = input.args;
-                    if let Some(a) = args {
-                        let args = a;
-                        // Unwrap is safe because is_key is not None and there are args.
-                        let cmd = input.cmd.unwrap();
-                        terminal::shell::spawn(cmd, args);
-                    } else {
-                        let as_read = input.as_read;
-                        terminal::shell::cmd(as_read);
-                    }
-                } else if input.is_key == Some(true) {
-                    let key: usize = input.cmd.unwrap().parse().unwrap();
-                    let file_path = list.get_file_by_key(key);
-                    if metadata(file_path.clone().unwrap()).unwrap().is_dir() {
-                        let file_path =
-                            file_path.unwrap()
-                            .to_str().unwrap()
-                            .to_string();
+    fn run_cmd(self, list: List, all: bool) {
+        let input = terminal::input_n_display::read();
+        match input {
+            Ok(t) =>  {
+                if let Some(i) = t {
+                    let input = Input::new();
+                    let input = input.parse(i);
+                    if input.is_key == Some(false) {
+                        let args = input.args;
+                        if let Some(a) = args {
+                            let args = a;
+                            // Unwrap is safe because is_key is not None and there are args.
+                            let cmd = input.cmd.unwrap();
+                            terminal::shell::spawn(cmd, args);
+                        } else {
+                            let as_read = input.as_read;
+                            terminal::shell::cmd(as_read);
+                        }
+                    } else if input.is_key == Some(true) {
+                        let key: usize = input.cmd.unwrap().parse().unwrap();
+                        let file_path = list.get_file_by_key(key);
+                        if metadata(file_path.clone().unwrap()).unwrap().is_dir() {
+                            let file_path =
+                                file_path.unwrap()
+                                .to_str().unwrap()
+                                .to_string();
 
-                        run_list_read(file_path, all);
+                            self.run_list_read(all);
+                        } else {
+                            let file_path =
+                                file_path.unwrap()
+                                .to_str().unwrap()
+                                .to_string();
+                            terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                        }
                     } else {
-                        let file_path =
-                            file_path.unwrap()
-                            .to_str().unwrap()
-                            .to_string();
-                        terminal::shell::spawn("vim".to_string(), vec![file_path]);
                     }
+
+                    ()
                 } else {
+                    ()
                 }
-
-                ()
-            } else {
-                ()
-            }
-        },
-        Err(_) => ()
+            },
+            Err(_) => ()
+        }
     }
 }
 
@@ -169,7 +183,7 @@ mod tests {
     use std::process::Command;
     use std::env;
     use fixture::Fixture;
-    use super::Input;
+    use super::{Input, LsKey};
 
 
     #[test]
@@ -340,7 +354,8 @@ mod tests {
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::run_list_read(path, true);
+        let ls_key = super::LsKey::new(path, true);
+        ls_key.run_list_read(true);
         spawn.join();
         //spawn_quite.join();
     }
@@ -356,7 +371,8 @@ mod tests {
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::run_list_read(path, true);
+        let ls_key = super::LsKey::new(path, true);
+        ls_key.run_list_read(true);
         spawn.join();
         //spawn_quite.join();
     }
