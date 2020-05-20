@@ -51,7 +51,7 @@ impl LsKey {
             self.run_cmd(list);
     }
 
-    fn run_cmd(self, list: List) {
+    fn run_cmd(mut self, list: List) {
         let input = terminal::input_n_display::read();
         match input {
             Ok(t) =>  {
@@ -71,17 +71,18 @@ impl LsKey {
                         }
                     } else if input.is_key == Some(true) {
                         let key: usize = input.cmd.unwrap().parse().unwrap();
-                        let file_path = list.get_file_by_key(key);
-                        if metadata(file_path.clone().unwrap()).unwrap().is_dir() {
+                        let file_pathbuf = list.get_file_by_key(key).unwrap();
+                        if metadata(file_pathbuf.clone()).unwrap().is_dir() {
                             let file_path =
-                                file_path.unwrap()
+                                file_pathbuf
                                 .to_str().unwrap()
                                 .to_string();
 
+                            self.list.path_history.push(file_pathbuf);
                             self.run_list_read();
                         } else {
                             let file_path =
-                                file_path.unwrap()
+                                file_pathbuf
                                 .to_str().unwrap()
                                 .to_string();
                             terminal::shell::spawn("vim".to_string(), vec![file_path]);
