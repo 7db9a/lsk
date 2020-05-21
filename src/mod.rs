@@ -81,8 +81,19 @@ impl LsKey {
                             let cmd = input.cmd.unwrap();
                             terminal::shell::spawn(cmd, args);
                         } else {
-                            let as_read = input.as_read;
-                            terminal::shell::cmd(as_read);
+                            let as_read = input.as_read.to_string();
+                            let work = 'w'.to_string();
+                            let quite = 'q'.to_string();
+                            match as_read {
+                                work => {
+                                     let path = self.list.relative_parent_dir_path;
+                                     let path = path.to_str().unwrap();
+                                     let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                                    terminal::parent_shell::type_text(cmd, 0);
+                                },
+                                quite => (),
+                                _ => {terminal::shell::cmd(as_read); ()}
+                            }
                         }
                     } else if input.is_key == Some(true) {
                         let key: usize = input.cmd.unwrap().parse().unwrap();
