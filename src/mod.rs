@@ -241,13 +241,13 @@ impl LsKey {
                             };
 
                             if let Some (r) = as_read_vec {
-                                println!("\n\nMultiple keys: {:#?}", r);
                                 let files_vec: Vec<&String> = vec![];
-                                let keys_iter =
+                                let keys_iter: Vec<String> =
                                     r.iter()
                                         .map(|mut key|
-                                            format!(r#"{}={:#?}"#, key, get_file(key.to_string()))
-                                        );
+                                            format!(r#"{}={}"#, key, get_file(key.to_string()).to_str().unwrap())
+                                        ).collect();
+                                println!("\n\nMultiple keys: {:#?}", keys_iter);
                             } else {
                                 ()
                             }
