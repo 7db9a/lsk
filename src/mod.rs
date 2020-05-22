@@ -84,7 +84,22 @@ impl LsKey {
                                 self.list.relative_parent_dir_path.as_path()
                             );
                             path_cache.switch();
-                            terminal::shell::spawn(cmd, args);
+                            match cmd.as_str() {
+                                "fzf" => {
+                                    println!("\nFzf command detected...\n");
+                                    //Split cmd ('fzf')
+                                    let split: Vec<&str> = input.as_read.split("fzf").collect();
+                                    let cmd = split.iter().last().unwrap();
+                                    let cmd = format!(r#"fzf {}"#, cmd);
+                                    println!("fzf commadn:\n{:#?}", cmd);
+                                    let output = terminal::shell::cmd(cmd.clone());
+                                    let file_path = output.unwrap();
+                                    terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                }
+                                _ => {
+                                     terminal::shell::spawn(cmd.to_string(), args);
+                                }
+                            }
                             path_cache.switch_back();
                             self.run_list_read();
                         } else {
@@ -119,7 +134,8 @@ impl LsKey {
                                         self.list.relative_parent_dir_path.as_path()
                                     );
                                     path_cache.switch();
-                                    terminal::shell::cmd(as_read.to_string()).unwrap();
+                                    let output = terminal::shell::cmd(as_read.to_string()).unwrap();
+                                    println!("\nls-key custom command results:\n{}\n", output);
                                     path_cache.switch_back();
                                     self.run_list_read();
                                 }
