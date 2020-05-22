@@ -79,6 +79,7 @@ impl LsKey {
                 if let Some(i) = t {
                     let input = Input::new();
                     let input = input.parse(i);
+                    println!("are all keys: {:#?}", input.are_all_keys);
                     if input.is_key == Some(false) {
                         let args = input.args;
                         if let Some(a) = args {
@@ -148,6 +149,23 @@ impl LsKey {
                                     path_cache.switch_back();
                                     self.run_list_read();
                                 },
+                                "zsh" => {
+                                    let mut path_cache = command_assistors::PathCache::new(
+                                        self.list.relative_parent_dir_path.as_path()
+                                    );
+                                    path_cache.switch();
+                                    println!("\nzsh command detected...\n");
+                                    //Split cmd ('zsh')
+                                    let split: Vec<&str> = input.as_read.split("zsh").collect();
+                                    let cmd = split.iter().last().unwrap();
+                                    let cmd = format!(r#"zsh {}"#, cmd);
+                                    println!("zsh commadn:\n{:#?}", cmd);
+                                    //let output = terminal::shell::cmd(cmd.clone());
+                                    //let file_path = output.unwrap();
+                                    terminal::shell::spawn("zsh".to_string(), vec![]);
+                                    path_cache.switch_back();
+                                    self.run_list_read();
+                                },
                                 _ => {
                                     let mut path_cache = command_assistors::PathCache::new(
                                         self.list.relative_parent_dir_path.as_path()
@@ -193,6 +211,7 @@ impl LsKey {
                             }
                         }
                     } else {
+                        println!("Not a valid command.")
                     }
 
                     ()
@@ -210,6 +229,7 @@ struct Input {
     cmd: Option<String>,
     args: Option<Vec<String>>,
     is_key: Option<bool>,
+    are_all_keys: Option<bool>,
     as_read: String
 }
 
@@ -251,9 +271,28 @@ impl Input {
             Some(false)
         };
 
+
+
+
+        let are_all_keys = if let Some(c) = cmd.clone() {
+             let cmd_vec = vec![c.clone()];
+             let _args = args.clone();
+             if let Some(a) = _args {
+                  let as_read_iter = cmd_vec.iter().chain(a.iter());
+                  let as_read_vec = as_read_iter.collect();
+                  self.are_all_keys(as_read_vec)
+             }
+             else {
+                 false
+             }
+        } else {
+            false
+        };
+
         self.cmd = cmd;
         self.args = args;
         self.is_key = is_key;
+        self.are_all_keys = Some(are_all_keys);
         self.as_read = input;
 
         self
@@ -269,6 +308,19 @@ impl Input {
             let args = self.defang_args(input);
             (Some(cmd), args)
         }
+     }
+
+     fn are_all_keys(&self, input: Vec<&String>) -> bool {
+        let is_num = |x: &str| {
+            let res: Result<(usize), std::num::ParseIntError> = x.parse();
+            match res {
+                Ok(_) => true,
+                Err(_) => false
+            }
+        };
+        let is_all_nums = !input.iter().any(|x| !is_num(x.as_str()));
+
+        is_all_nums
      }
 
      fn is_key(&self, input: &Vec<String>) -> bool {
