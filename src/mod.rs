@@ -235,8 +235,19 @@ impl LsKey {
                                 None
                             };
 
+                            let get_file = |key_string: String| {
+                                 let key: usize = key_string.parse().unwrap();
+                                 self.list.get_file_by_key(key).unwrap()
+                            };
+
                             if let Some (r) = as_read_vec {
                                 println!("\n\nMultiple keys: {:#?}", r);
+                                let files_vec: Vec<&String> = vec![];
+                                let keys_iter =
+                                    r.iter()
+                                        .map(|mut key|
+                                            format!(r#"{}={:#?}"#, key, get_file(key.to_string()))
+                                        );
                             } else {
                                 ()
                             }
