@@ -80,19 +80,26 @@ impl LsKey {
                             // Unwrap is safe because is_key is not None and there are args.
                             let cmd = input.cmd.unwrap();
                             terminal::shell::spawn(cmd, args);
+                            self.run_list_read();
                         } else {
-                            let as_read = input.as_read.to_string();
-                            let work = 'w'.to_string();
-                            let quite = 'q'.to_string();
+                            let as_read = input.as_read.as_str();
+                            println!("\n\nInput: {}", as_read);
+                            let work = "w";
+                            let quite = "q";
+                            let fzf = "f";
                             match as_read {
-                                work => {
+                                "w" => {
+                                     // Cd the parent shell into the directory viewed by ls-key.
                                      let path = self.list.relative_parent_dir_path;
                                      let path = path.to_str().unwrap();
                                      let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                                    terminal::parent_shell::type_text(cmd, 0);
+                                     terminal::parent_shell::type_text(cmd, 0);
                                 },
-                                quite => (),
-                                _ => {terminal::shell::cmd(as_read); ()}
+                                "q" => (),
+                                _ => {
+                                    terminal::shell::cmd(as_read.to_string());
+                                    self.run_list_read();
+                                }
                             }
                         }
                     } else if input.is_key == Some(true) {
@@ -123,6 +130,7 @@ impl LsKey {
                                           .to_str().unwrap()
                                           .to_string();
                                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                      self.run_list_read();
                                   }
                             }
                         }
