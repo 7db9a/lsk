@@ -67,6 +67,11 @@ impl LsKey {
             self.run_cmd(list);
     }
 
+    // If you want to return the output of a commands, see fzf example below.
+    // The commmand 'vim', without any args, is a special case handled by
+    // ls-key. If the non-built in command doesn't return output and enters
+    // into a child process (e.g. vim), then shell::cmd cannot be used, to my
+    // understanding.
     fn run_cmd(mut self, list: List) {
         let input = terminal::input_n_display::read();
         match input {
@@ -105,9 +110,6 @@ impl LsKey {
                         } else {
                             let as_read = input.as_read.as_str();
                             println!("\n\nInput: {}", as_read);
-                            let work = "w";
-                            let quite = "q";
-                            let fzf = "f";
                             match as_read {
                                 "w" => {
                                      // Cd the parent shell into the directory viewed by ls-key.
@@ -117,7 +119,7 @@ impl LsKey {
                                      terminal::parent_shell::type_text(cmd, 0);
                                 },
                                 "q" => (),
-                                "f" => {
+                                "fzf" => {
                                     let mut path_cache = command_assistors::PathCache::new(
                                         self.list.relative_parent_dir_path.as_path()
                                     );
@@ -126,6 +128,23 @@ impl LsKey {
                                     let file_path = output.unwrap();
                                     println!("Path: \n\n{}", file_path);
                                     terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                    path_cache.switch_back();
+                                    self.run_list_read();
+                                },
+                                "vim" => {
+                                    let mut path_cache = command_assistors::PathCache::new(
+                                        self.list.relative_parent_dir_path.as_path()
+                                    );
+                                    path_cache.switch();
+                                    println!("\nvim command detected...\n");
+                                    //Split cmd ('vim')
+                                    let split: Vec<&str> = input.as_read.split("vim").collect();
+                                    let cmd = split.iter().last().unwrap();
+                                    let cmd = format!(r#"vim {}"#, cmd);
+                                    println!("vim commadn:\n{:#?}", cmd);
+                                    //let output = terminal::shell::cmd(cmd.clone());
+                                    //let file_path = output.unwrap();
+                                    terminal::shell::spawn("vim".to_string(), vec![]);
                                     path_cache.switch_back();
                                     self.run_list_read();
                                 },
