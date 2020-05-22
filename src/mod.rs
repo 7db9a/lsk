@@ -215,7 +215,31 @@ impl LsKey {
                             }
                         },
                         CmdType::multiple_keys => {
-                            println!("\n\nMultiple keys\n");
+                            /*
+                                * get_file_by_key for each key
+                                * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
+                                * then type_text_spawn(text_vec);
+                            */
+
+                            let as_read_vec: Option<Vec<String>> = if let Some(c) = input.cmd {
+                                 let mut  cmd_vec = vec![c.clone()];
+                                 let _args = input.args.clone();
+                                 if let Some(mut a) = _args {
+                                      cmd_vec.append(&mut a);
+                                      Some(cmd_vec)
+                                 }
+                                 else {
+                                     None
+                                 }
+                            } else {
+                                None
+                            };
+
+                            if let Some (r) = as_read_vec {
+                                println!("\n\nMultiple keys: {:#?}", r);
+                            } else {
+                                ()
+                            }
                         }
                     }
                     ()
