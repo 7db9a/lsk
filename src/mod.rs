@@ -4,6 +4,7 @@ pub mod terminal;
 use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use list::List;
+use fixture::{command_assistors, Fixture};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
@@ -79,7 +80,12 @@ impl LsKey {
                             let args = a;
                             // Unwrap is safe because is_key is not None and there are args.
                             let cmd = input.cmd.unwrap();
+                            let mut path_cache = command_assistors::PathCache::new(
+                                self.list.relative_parent_dir_path.as_path()
+                            );
+                            path_cache.switch();
                             terminal::shell::spawn(cmd, args);
+                            path_cache.switch_back();
                             self.run_list_read();
                         } else {
                             let as_read = input.as_read.as_str();
@@ -97,7 +103,12 @@ impl LsKey {
                                 },
                                 "q" => (),
                                 _ => {
+                                    let mut path_cache = command_assistors::PathCache::new(
+                                        self.list.relative_parent_dir_path.as_path()
+                                    );
+                                    path_cache.switch();
                                     terminal::shell::cmd(as_read.to_string());
+                                    path_cache.switch_back();
                                     self.run_list_read();
                                 }
                             }
