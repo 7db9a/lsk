@@ -201,11 +201,8 @@ pub mod shell {
             .expect("unrecoverable failure to execute shell process.");
     }
 
-    pub fn cmd(cmd: String) -> Result<(), std::io::Error> {
-        let output  = run_fun!("{}", cmd).unwrap();
-        info!("{}", output);
-
-        Ok(())
+    pub fn cmd(cmd: String) -> Result<(String), std::io::Error> {
+        run_fun!("{}", cmd)
     }
 }
 

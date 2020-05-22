@@ -102,12 +102,24 @@ impl LsKey {
                                      terminal::parent_shell::type_text(cmd, 0);
                                 },
                                 "q" => (),
+                                "f" => {
+                                    let mut path_cache = command_assistors::PathCache::new(
+                                        self.list.relative_parent_dir_path.as_path()
+                                    );
+                                    path_cache.switch();
+                                    let output = terminal::shell::cmd("fzf".to_string());
+                                    let file_path = output.unwrap();
+                                    println!("Path: \n\n{}", file_path);
+                                    terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                    path_cache.switch_back();
+                                    self.run_list_read();
+                                },
                                 _ => {
                                     let mut path_cache = command_assistors::PathCache::new(
                                         self.list.relative_parent_dir_path.as_path()
                                     );
                                     path_cache.switch();
-                                    terminal::shell::cmd(as_read.to_string());
+                                    terminal::shell::cmd(as_read.to_string()).unwrap();
                                     path_cache.switch_back();
                                     self.run_list_read();
                                 }
