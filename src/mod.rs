@@ -79,141 +79,145 @@ impl LsKey {
                 if let Some(i) = t {
                     let input = Input::new();
                     let input = input.parse(i);
-                    println!("are all keys: {:#?}", input.are_all_keys);
-                    if input.is_key == Some(false) {
-                        let args = input.args;
-                        if let Some(a) = args {
-                            let args = a;
-                            // Unwrap is safe because is_key is not None and there are args.
-                            let cmd = input.cmd.unwrap();
-                            let mut path_cache = command_assistors::PathCache::new(
-                                self.list.relative_parent_dir_path.as_path()
-                            );
-                            path_cache.switch();
-                            match cmd.as_str() {
-                                "fzf" => {
-                                    println!("\nFzf command detected...\n");
-                                    //Split cmd ('fzf')
-                                    let split: Vec<&str> = input.as_read.split("fzf").collect();
-                                    let cmd = split.iter().last().unwrap();
-                                    let cmd = format!(r#"fzf {}"#, cmd);
-                                    println!("fzf commadn:\n{:#?}", cmd);
-                                    let output = terminal::shell::cmd(cmd.clone());
-                                    let file_path = output.unwrap();
-                                    terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                    println!("keytype: {:#?}", input.cmd_type);
+                    // Safe to unwrap.
+                    match input.cmd_type.unwrap() {
+                        CmdType::cmd => {
+                            let args = input.args;
+                            if let Some(a) = args {
+                                let args = a;
+                                // Unwrap is safe because is_key is not None and there are args.
+                                let cmd = input.cmd.unwrap();
+                                let mut path_cache = command_assistors::PathCache::new(
+                                    self.list.relative_parent_dir_path.as_path()
+                                );
+                                path_cache.switch();
+                                match cmd.as_str() {
+                                    "fzf" => {
+                                        println!("\nFzf command detected...\n");
+                                        //Split cmd ('fzf')
+                                        let split: Vec<&str> = input.as_read.split("fzf").collect();
+                                        let cmd = split.iter().last().unwrap();
+                                        let cmd = format!(r#"fzf {}"#, cmd);
+                                        println!("fzf commadn:\n{:#?}", cmd);
+                                        let output = terminal::shell::cmd(cmd.clone());
+                                        let file_path = output.unwrap();
+                                        terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                    }
+                                    _ => {
+                                         terminal::shell::spawn(cmd.to_string(), args);
+                                    }
                                 }
-                                _ => {
-                                     terminal::shell::spawn(cmd.to_string(), args);
+                                path_cache.switch_back();
+                                self.run_list_read();
+                            } else {
+                                let as_read = input.as_read.as_str();
+                                println!("\n\nInput: {}", as_read);
+                                match as_read {
+                                    "w" => {
+                                         // Cd the parent shell into the directory viewed by ls-key.
+                                         let path = self.list.relative_parent_dir_path;
+                                         let path = path.to_str().unwrap();
+                                         let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                                         terminal::parent_shell::type_text(cmd, 0);
+                                    },
+                                    "q" => (),
+                                    "fzf" => {
+                                        let mut path_cache = command_assistors::PathCache::new(
+                                            self.list.relative_parent_dir_path.as_path()
+                                        );
+                                        path_cache.switch();
+                                        let output = terminal::shell::cmd("fzf".to_string());
+                                        let file_path = output.unwrap();
+                                        println!("Path: \n\n{}", file_path);
+                                        terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                        path_cache.switch_back();
+                                        self.run_list_read();
+                                    },
+                                    "vim" => {
+                                        let mut path_cache = command_assistors::PathCache::new(
+                                            self.list.relative_parent_dir_path.as_path()
+                                        );
+                                        path_cache.switch();
+                                        println!("\nvim command detected...\n");
+                                        //Split cmd ('vim')
+                                        let split: Vec<&str> = input.as_read.split("vim").collect();
+                                        let cmd = split.iter().last().unwrap();
+                                        let cmd = format!(r#"vim {}"#, cmd);
+                                        println!("vim commadn:\n{:#?}", cmd);
+                                        //let output = terminal::shell::cmd(cmd.clone());
+                                        //let file_path = output.unwrap();
+                                        terminal::shell::spawn("vim".to_string(), vec![]);
+                                        path_cache.switch_back();
+                                        self.run_list_read();
+                                    },
+                                    "zsh" => {
+                                        let mut path_cache = command_assistors::PathCache::new(
+                                            self.list.relative_parent_dir_path.as_path()
+                                        );
+                                        path_cache.switch();
+                                        println!("\nzsh command detected...\n");
+                                        //Split cmd ('zsh')
+                                        let split: Vec<&str> = input.as_read.split("zsh").collect();
+                                        let cmd = split.iter().last().unwrap();
+                                        let cmd = format!(r#"zsh {}"#, cmd);
+                                        println!("zsh commadn:\n{:#?}", cmd);
+                                        //let output = terminal::shell::cmd(cmd.clone());
+                                        //let file_path = output.unwrap();
+                                        terminal::shell::spawn("zsh".to_string(), vec![]);
+                                        path_cache.switch_back();
+                                        self.run_list_read();
+                                    },
+                                    _ => {
+                                        let mut path_cache = command_assistors::PathCache::new(
+                                            self.list.relative_parent_dir_path.as_path()
+                                        );
+                                        path_cache.switch();
+                                        let output = terminal::shell::cmd(as_read.to_string()).unwrap();
+                                        println!("\nls-key custom command results:\n{}\n", output);
+                                        path_cache.switch_back();
+                                        self.run_list_read();
+                                    }
                                 }
                             }
-                            path_cache.switch_back();
-                            self.run_list_read();
-                        } else {
-                            let as_read = input.as_read.as_str();
-                            println!("\n\nInput: {}", as_read);
-                            match as_read {
-                                "w" => {
-                                     // Cd the parent shell into the directory viewed by ls-key.
-                                     let path = self.list.relative_parent_dir_path;
-                                     let path = path.to_str().unwrap();
-                                     let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                                     terminal::parent_shell::type_text(cmd, 0);
-                                },
-                                "q" => (),
-                                "fzf" => {
-                                    let mut path_cache = command_assistors::PathCache::new(
-                                        self.list.relative_parent_dir_path.as_path()
-                                    );
-                                    path_cache.switch();
-                                    let output = terminal::shell::cmd("fzf".to_string());
-                                    let file_path = output.unwrap();
-                                    println!("Path: \n\n{}", file_path);
-                                    terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                                    path_cache.switch_back();
-                                    self.run_list_read();
-                                },
-                                "vim" => {
-                                    let mut path_cache = command_assistors::PathCache::new(
-                                        self.list.relative_parent_dir_path.as_path()
-                                    );
-                                    path_cache.switch();
-                                    println!("\nvim command detected...\n");
-                                    //Split cmd ('vim')
-                                    let split: Vec<&str> = input.as_read.split("vim").collect();
-                                    let cmd = split.iter().last().unwrap();
-                                    let cmd = format!(r#"vim {}"#, cmd);
-                                    println!("vim commadn:\n{:#?}", cmd);
-                                    //let output = terminal::shell::cmd(cmd.clone());
-                                    //let file_path = output.unwrap();
-                                    terminal::shell::spawn("vim".to_string(), vec![]);
-                                    path_cache.switch_back();
-                                    self.run_list_read();
-                                },
-                                "zsh" => {
-                                    let mut path_cache = command_assistors::PathCache::new(
-                                        self.list.relative_parent_dir_path.as_path()
-                                    );
-                                    path_cache.switch();
-                                    println!("\nzsh command detected...\n");
-                                    //Split cmd ('zsh')
-                                    let split: Vec<&str> = input.as_read.split("zsh").collect();
-                                    let cmd = split.iter().last().unwrap();
-                                    let cmd = format!(r#"zsh {}"#, cmd);
-                                    println!("zsh commadn:\n{:#?}", cmd);
-                                    //let output = terminal::shell::cmd(cmd.clone());
-                                    //let file_path = output.unwrap();
-                                    terminal::shell::spawn("zsh".to_string(), vec![]);
-                                    path_cache.switch_back();
-                                    self.run_list_read();
+                        },
+                        CmdType::single_key => {
+                            let key: usize = input.cmd.unwrap().parse().unwrap();
+                            match key {
+                                0 => {
+                                     self.list.relative_parent_dir_path.pop();
+                                     let file_pathbuf = self.list.relative_parent_dir_path.clone();
+                                     self.list.relative_parent_dir_path.pop();
+                                     let list = self.list.clone().update(file_pathbuf);
+                                     self = self.update(list);
+                                     self.run_list_read();
                                 },
                                 _ => {
-                                    let mut path_cache = command_assistors::PathCache::new(
-                                        self.list.relative_parent_dir_path.as_path()
-                                    );
-                                    path_cache.switch();
-                                    let output = terminal::shell::cmd(as_read.to_string()).unwrap();
-                                    println!("\nls-key custom command results:\n{}\n", output);
-                                    path_cache.switch_back();
-                                    self.run_list_read();
-                                }
-                            }
-                        }
-                    } else if input.is_key == Some(true) {
-                        let key: usize = input.cmd.unwrap().parse().unwrap();
-                        match key {
-                            0 => {
-                                 self.list.relative_parent_dir_path.pop();
-                                 let file_pathbuf = self.list.relative_parent_dir_path.clone();
-                                 self.list.relative_parent_dir_path.pop();
-                                 let list = self.list.clone().update(file_pathbuf);
-                                 self = self.update(list);
-                                 self.run_list_read();
-                            },
-                            _ => {
-                                  let file_pathbuf = list.get_file_by_key(key).unwrap();
-                                  if metadata(file_pathbuf.clone()).unwrap().is_dir() {
-                                      let file_path =
-                                          file_pathbuf
-                                          .to_str().unwrap()
-                                          .to_string();
+                                      let file_pathbuf = list.get_file_by_key(key).unwrap();
+                                      if metadata(file_pathbuf.clone()).unwrap().is_dir() {
+                                          let file_path =
+                                              file_pathbuf
+                                              .to_str().unwrap()
+                                              .to_string();
 
-                                      let list = self.list.clone().update(file_pathbuf);
-                                      self = self.update(list);
-                                      self.run_list_read();
-                                  } else {
-                                      let file_path =
-                                          file_pathbuf
-                                          .to_str().unwrap()
-                                          .to_string();
-                                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                                      self.run_list_read();
-                                  }
+                                          let list = self.list.clone().update(file_pathbuf);
+                                          self = self.update(list);
+                                          self.run_list_read();
+                                      } else {
+                                          let file_path =
+                                              file_pathbuf
+                                              .to_str().unwrap()
+                                              .to_string();
+                                          terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                                          self.run_list_read();
+                                      }
+                                }
                             }
+                        },
+                        CmdType::multiple_keys => {
+                            println!("\n\nMultiple keys\n");
                         }
-                    } else {
-                        println!("Not a valid command.")
                     }
-
                     ()
                 } else {
                     ()
@@ -224,13 +228,18 @@ impl LsKey {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+enum CmdType {
+    single_key,
+    multiple_keys,
+    cmd,
+}
 #[derive(Debug, Clone, PartialEq, Default)]
 struct Input {
     cmd: Option<String>,
     args: Option<Vec<String>>,
-    is_key: Option<bool>,
-    are_all_keys: Option<bool>,
-    as_read: String
+    as_read: String,
+    cmd_type: Option<CmdType>
 }
 
 impl Input {
@@ -289,11 +298,22 @@ impl Input {
             false
         };
 
+        let cmd_type = if are_all_keys {
+            CmdType::multiple_keys
+        } else if let Some(k) = is_key {
+            if k {
+                CmdType::single_key
+            } else {
+                CmdType::cmd
+            }
+        } else {
+            CmdType::cmd
+        };
+
         self.cmd = cmd;
         self.args = args;
-        self.is_key = is_key;
-        self.are_all_keys = Some(are_all_keys);
         self.as_read = input;
+        self.cmd_type = Some(cmd_type);
 
         self
     }
@@ -343,7 +363,7 @@ mod tests {
     use std::process::Command;
     use std::env;
     use fixture::Fixture;
-    use super::{Input, LsKey};
+    use super::{Input, LsKey, CmdType};
 
 
     #[test]
@@ -353,8 +373,8 @@ mod tests {
         let input = input.parse("vim Cargo.toml".to_string());
 
         assert_eq!(
-           Some(false),
-           input.is_key
+           Some(CmdType::cmd),
+           input.cmd_type
         );
 
         assert_eq!(
@@ -375,8 +395,8 @@ mod tests {
         let input = input.parse("git clone https://github.com/7db9a/ls-key --depth 1".to_string());
 
         assert_eq!(
-           Some(false),
-           input.is_key
+           Some(CmdType::cmd),
+           input.cmd_type
         );
 
         //vec!["clone".to_string(), "https://github.com/7db9a/ls-key".to_string(), "--depth".to_string(), "1".to_string()]
@@ -404,8 +424,8 @@ mod tests {
         let input = input.parse("vim".to_string());
 
         assert_eq!(
-           Some(false),
-           input.is_key
+           Some(CmdType::cmd),
+           input.cmd_type
         );
 
         assert_eq!(
@@ -426,8 +446,8 @@ mod tests {
         let input = input.parse("33".to_string());
 
         assert_eq!(
-           Some(true),
-           input.is_key
+           Some(CmdType::single_key),
+           input.cmd_type
         );
 
         assert_eq!(
@@ -448,8 +468,8 @@ mod tests {
         let input = input.parse(" vim Cargo.toml".to_string());
 
         assert_eq!(
-           None,
-           input.is_key
+           Some(CmdType::cmd),
+           input.cmd_type
         );
 
         assert_eq!(
@@ -511,6 +531,7 @@ mod tests {
         let text_vec = vec![
              r#""$(printf '2 \n ')""#.to_string(),
              r#""$(printf ':q \n ')""#.to_string(),
+             r#""$(printf 'q \n ')""#.to_string(),
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
@@ -528,6 +549,7 @@ mod tests {
         let text_vec = vec![
              r#""$(printf '7 \n ')""#.to_string(),
              r#""$(printf ':q \n ')""#.to_string(),
+             r#""$(printf 'q \n ')""#.to_string(),
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
