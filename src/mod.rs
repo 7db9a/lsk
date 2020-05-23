@@ -73,6 +73,40 @@ impl LsKey {
             self.run_cmd(list);
     }
 
+    fn key_mode(mut self, list: List, input: Input) {
+        let key: usize = input.cmd.unwrap().parse().unwrap();
+        match key {
+            0 => {
+                 self.list.relative_parent_dir_path.pop();
+                 let file_pathbuf = self.list.relative_parent_dir_path.clone();
+                 self.list.relative_parent_dir_path.pop();
+                 let list = self.list.clone().update(file_pathbuf);
+                 self = self.update(list);
+                 self.run_list_read();
+            },
+            _ => {
+                  let file_pathbuf = list.get_file_by_key(key).unwrap();
+                  if metadata(file_pathbuf.clone()).unwrap().is_dir() {
+                      let file_path =
+                          file_pathbuf
+                          .to_str().unwrap()
+                          .to_string();
+
+                      let list = self.list.clone().update(file_pathbuf);
+                      self = self.update(list);
+                      self.run_list_read();
+                  } else {
+                      let file_path =
+                          file_pathbuf
+                          .to_str().unwrap()
+                          .to_string();
+                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                      self.run_list_read();
+                  }
+            }
+        }
+    }
+
     fn cmd_mode(mut self, list: List, input: Input) {
          let args = input.args;
          if let Some(a) = args {
@@ -186,37 +220,7 @@ impl LsKey {
                             self.cmd_mode(list, input);
                         },
                         CmdType::single_key => {
-                            let key: usize = input.cmd.unwrap().parse().unwrap();
-                            match key {
-                                0 => {
-                                     self.list.relative_parent_dir_path.pop();
-                                     let file_pathbuf = self.list.relative_parent_dir_path.clone();
-                                     self.list.relative_parent_dir_path.pop();
-                                     let list = self.list.clone().update(file_pathbuf);
-                                     self = self.update(list);
-                                     self.run_list_read();
-                                },
-                                _ => {
-                                      let file_pathbuf = list.get_file_by_key(key).unwrap();
-                                      if metadata(file_pathbuf.clone()).unwrap().is_dir() {
-                                          let file_path =
-                                              file_pathbuf
-                                              .to_str().unwrap()
-                                              .to_string();
-
-                                          let list = self.list.clone().update(file_pathbuf);
-                                          self = self.update(list);
-                                          self.run_list_read();
-                                      } else {
-                                          let file_path =
-                                              file_pathbuf
-                                              .to_str().unwrap()
-                                              .to_string();
-                                          terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                                          self.run_list_read();
-                                      }
-                                }
-                            }
+                            self.key_mode(list, input);
                         },
                         CmdType::multiple_keys => {
                             /*
