@@ -221,20 +221,6 @@ impl LsKey {
                                 * then type_text_spawn(text_vec);
                             */
 
-                            let as_read_vec: Option<Vec<String>> = if let Some(c) = input.cmd {
-                                 let mut  cmd_vec = vec![c.clone()];
-                                 let _args = input.args.clone();
-                                 if let Some(mut a) = _args {
-                                      cmd_vec.append(&mut a);
-                                      Some(cmd_vec)
-                                 }
-                                 else {
-                                     None
-                                 }
-                            } else {
-                                None
-                            };
-
                             let get_file = |key_string: String| {
                                  let key: usize = key_string.parse().unwrap();
                                  self.list.get_file_by_key(key).unwrap()
@@ -246,7 +232,7 @@ impl LsKey {
                                        format!(r#"{}={}"#, n, get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string())
                             };
 
-                            if let Some (r) = as_read_vec {
+                            if let Some (r) = input.args {
                                 let files_vec: Vec<&String> = vec![];
                                 let keys_vec: Vec<String> =
                                     r.iter()
@@ -328,14 +314,15 @@ impl Input {
 
 
         let are_all_keys = if let Some(c) = cmd.clone() {
-             let cmd_vec = vec![c.clone()];
-             let _args = args.clone();
-             if let Some(a) = _args {
-                  let as_read_iter = cmd_vec.iter().chain(a.iter());
-                  let as_read_vec = as_read_iter.collect();
-                  self.are_all_keys(as_read_vec)
-             }
-             else {
+             if c == "".to_string() {
+                 let _args = args.clone();
+                 if let Some(a) = _args {
+                      self.are_all_keys(a)
+                 }
+                 else {
+                     false
+                 }
+             } else {
                  false
              }
         } else {
@@ -373,7 +360,7 @@ impl Input {
         (Some(cmd), args)
      }
 
-     fn are_all_keys(&self, input: Vec<&String>) -> bool {
+     fn are_all_keys(&self, input: Vec<String>) -> bool {
         let is_num = |x: &str| {
             let res: Result<(usize), std::num::ParseIntError> = x.parse();
             match res {
