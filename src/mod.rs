@@ -73,6 +73,106 @@ impl LsKey {
             self.run_cmd(list);
     }
 
+    fn cmd_mode(mut self, list: List, input: Input) {
+         let args = input.args;
+         if let Some(a) = args {
+             let args = a;
+             // Unwrap is safe because is_key is not None and there are args.
+             let cmd = input.cmd.unwrap();
+             let mut path_cache = command_assistors::PathCache::new(
+                 self.list.relative_parent_dir_path.as_path()
+             );
+             path_cache.switch();
+             match cmd.as_str() {
+                 "fzf" => {
+                     println!("\nFzf command detected...\n");
+                     //Split cmd ('fzf')
+                     let split: Vec<&str> = input.as_read.split("fzf").collect();
+                     let cmd = split.iter().last().unwrap();
+                     let cmd = format!(r#"fzf {}"#, cmd);
+                     println!("fzf commadn:\n{:#?}", cmd);
+                     let output = terminal::shell::cmd(cmd.clone());
+                     let file_path = output.unwrap();
+                     terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                 }
+                 _ => {
+                      terminal::shell::spawn(cmd.to_string(), args);
+                 }
+             }
+             path_cache.switch_back();
+             self.run_list_read();
+         } else {
+             let as_read = input.as_read.as_str();
+             println!("\n\nInput: {}", as_read);
+             match as_read {
+                 "w" => {
+                      // Cd the parent shell into the directory viewed by ls-key.
+                      let path = self.list.relative_parent_dir_path;
+                      let path = path.to_str().unwrap();
+                      let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                      terminal::parent_shell::type_text(cmd, 0);
+                 },
+                 "q" => (),
+                 "fzf" => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.relative_parent_dir_path.as_path()
+                     );
+                     path_cache.switch();
+                     let output = terminal::shell::cmd("fzf".to_string());
+                     let file_path = output.unwrap();
+                     println!("Path: \n\n{}", file_path);
+                     terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                     path_cache.switch_back();
+                     self.run_list_read();
+                 },
+                 "vim" => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.relative_parent_dir_path.as_path()
+                     );
+                     path_cache.switch();
+                     println!("\nvim command detected...\n");
+                     //Split cmd ('vim')
+                     let split: Vec<&str> = input.as_read.split("vim").collect();
+                     let cmd = split.iter().last().unwrap();
+                     let cmd = format!(r#"vim {}"#, cmd);
+                     println!("vim commadn:\n{:#?}", cmd);
+                     //let output = terminal::shell::cmd(cmd.clone());
+                     //let file_path = output.unwrap();
+                     terminal::shell::spawn("vim".to_string(), vec![]);
+                     path_cache.switch_back();
+                     self.run_list_read();
+                 },
+                 "zsh" => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.relative_parent_dir_path.as_path()
+                     );
+                     path_cache.switch();
+                     println!("\nzsh command detected...\n");
+                     //Split cmd ('zsh')
+                     let split: Vec<&str> = input.as_read.split("zsh").collect();
+                     let cmd = split.iter().last().unwrap();
+                     let cmd = format!(r#"zsh {}"#, cmd);
+                     println!("zsh commadn:\n{:#?}", cmd);
+                     //let output = terminal::shell::cmd(cmd.clone());
+                     //let file_path = output.unwrap();
+                     terminal::shell::spawn("zsh".to_string(), vec![]);
+                     path_cache.switch_back();
+                     self.run_list_read();
+                 },
+                 _ => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.relative_parent_dir_path.as_path()
+                     );
+                     path_cache.switch();
+                     let output = terminal::shell::cmd(as_read.to_string()).unwrap();
+                     println!("\nls-key custom command results:\n{}\n", output);
+                     path_cache.switch_back();
+                     self.run_list_read();
+                 }
+             }
+        }
+    }
+
     fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>) {
         match input {
             Ok(t) =>  {
@@ -81,105 +181,9 @@ impl LsKey {
                     let input = input.parse(i);
                     println!("keytype: {:#?}", input.cmd_type);
                     // Safe to unwrap.
-                    match input.cmd_type.unwrap() {
+                    match input.clone().cmd_type.unwrap() {
                         CmdType::cmd => {
-                            let args = input.args;
-                            if let Some(a) = args {
-                                let args = a;
-                                // Unwrap is safe because is_key is not None and there are args.
-                                let cmd = input.cmd.unwrap();
-                                let mut path_cache = command_assistors::PathCache::new(
-                                    self.list.relative_parent_dir_path.as_path()
-                                );
-                                path_cache.switch();
-                                match cmd.as_str() {
-                                    "fzf" => {
-                                        println!("\nFzf command detected...\n");
-                                        //Split cmd ('fzf')
-                                        let split: Vec<&str> = input.as_read.split("fzf").collect();
-                                        let cmd = split.iter().last().unwrap();
-                                        let cmd = format!(r#"fzf {}"#, cmd);
-                                        println!("fzf commadn:\n{:#?}", cmd);
-                                        let output = terminal::shell::cmd(cmd.clone());
-                                        let file_path = output.unwrap();
-                                        terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                                    }
-                                    _ => {
-                                         terminal::shell::spawn(cmd.to_string(), args);
-                                    }
-                                }
-                                path_cache.switch_back();
-                                self.run_list_read();
-                            } else {
-                                let as_read = input.as_read.as_str();
-                                println!("\n\nInput: {}", as_read);
-                                match as_read {
-                                    "w" => {
-                                         // Cd the parent shell into the directory viewed by ls-key.
-                                         let path = self.list.relative_parent_dir_path;
-                                         let path = path.to_str().unwrap();
-                                         let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                                         terminal::parent_shell::type_text(cmd, 0);
-                                    },
-                                    "q" => (),
-                                    "fzf" => {
-                                        let mut path_cache = command_assistors::PathCache::new(
-                                            self.list.relative_parent_dir_path.as_path()
-                                        );
-                                        path_cache.switch();
-                                        let output = terminal::shell::cmd("fzf".to_string());
-                                        let file_path = output.unwrap();
-                                        println!("Path: \n\n{}", file_path);
-                                        terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                                        path_cache.switch_back();
-                                        self.run_list_read();
-                                    },
-                                    "vim" => {
-                                        let mut path_cache = command_assistors::PathCache::new(
-                                            self.list.relative_parent_dir_path.as_path()
-                                        );
-                                        path_cache.switch();
-                                        println!("\nvim command detected...\n");
-                                        //Split cmd ('vim')
-                                        let split: Vec<&str> = input.as_read.split("vim").collect();
-                                        let cmd = split.iter().last().unwrap();
-                                        let cmd = format!(r#"vim {}"#, cmd);
-                                        println!("vim commadn:\n{:#?}", cmd);
-                                        //let output = terminal::shell::cmd(cmd.clone());
-                                        //let file_path = output.unwrap();
-                                        terminal::shell::spawn("vim".to_string(), vec![]);
-                                        path_cache.switch_back();
-                                        self.run_list_read();
-                                    },
-                                    "zsh" => {
-                                        let mut path_cache = command_assistors::PathCache::new(
-                                            self.list.relative_parent_dir_path.as_path()
-                                        );
-                                        path_cache.switch();
-                                        println!("\nzsh command detected...\n");
-                                        //Split cmd ('zsh')
-                                        let split: Vec<&str> = input.as_read.split("zsh").collect();
-                                        let cmd = split.iter().last().unwrap();
-                                        let cmd = format!(r#"zsh {}"#, cmd);
-                                        println!("zsh commadn:\n{:#?}", cmd);
-                                        //let output = terminal::shell::cmd(cmd.clone());
-                                        //let file_path = output.unwrap();
-                                        terminal::shell::spawn("zsh".to_string(), vec![]);
-                                        path_cache.switch_back();
-                                        self.run_list_read();
-                                    },
-                                    _ => {
-                                        let mut path_cache = command_assistors::PathCache::new(
-                                            self.list.relative_parent_dir_path.as_path()
-                                        );
-                                        path_cache.switch();
-                                        let output = terminal::shell::cmd(as_read.to_string()).unwrap();
-                                        println!("\nls-key custom command results:\n{}\n", output);
-                                        path_cache.switch_back();
-                                        self.run_list_read();
-                                    }
-                                }
-                            }
+                            self.cmd_mode(list, input);
                         },
                         CmdType::single_key => {
                             let key: usize = input.cmd.unwrap().parse().unwrap();
