@@ -40,7 +40,7 @@ impl LsKey {
                    .list_skip_hidden()
                    .unwrap()
             };
-            
+
             self.list = list;
             self.clone()
     }
@@ -242,12 +242,19 @@ impl LsKey {
 
                             if let Some (r) = as_read_vec {
                                 let files_vec: Vec<&String> = vec![];
-                                let keys_iter: Vec<String> =
+                                let keys_vec: Vec<String> =
                                     r.iter()
                                         .map(|mut key|
                                             format!(r#"{}={}"#, key, get_file(key.to_string()).to_str().unwrap())
                                         ).collect();
-                                println!("\n\nMultiple keys: {:#?}", keys_iter);
+
+                                let command_string = keys_vec.join(" && ");
+                                let command_string = format!(r#""$(printf '{} \n ')""#, &command_string);
+                                terminal::parent_shell::type_text(
+                                    command_string,
+                                    //format!(r#""$(printf '1={} && 2={} \n ')""#, "README", "LICENSE"),
+                                    0
+                                );
                             } else {
                                 ()
                             }
