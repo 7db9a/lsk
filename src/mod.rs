@@ -316,19 +316,15 @@ impl Input {
     fn parse(mut self, input: String) -> Self {
         let (cmd, args) = self.parse_cmd(input.clone());
         let args_count = args.clone().iter().count();
-        let is_key = if args == None && cmd != None {
+        let is_key = if args == None {
             let key: Result<(usize), std::num::ParseIntError> = cmd.clone().unwrap().parse();
             match key {
                 Ok(_) => Some(true),
                 Err(_) => Some(false)
             }
-        } else if cmd == None {
-            None
         } else {
             Some(false)
         };
-
-
 
 
         let are_all_keys = if let Some(c) = cmd.clone() {
@@ -368,14 +364,13 @@ impl Input {
 
     fn parse_cmd(&self, input: String) -> (Option<String>, Option<Vec<String>>) {
         let mut input: Vec<String> = input.clone().split(" ").map(|s| s.to_string()).collect();
+        println!("input:\n{:#?}", input);
         let cmd = input.remove(0);
 
-        if cmd == "".to_string() {
-            (None, None)
-        } else {
-            let args = self.defang_args(input);
-            (Some(cmd), args)
-        }
+        println!("cmd:\n{:#?}", cmd);
+        let args = self.defang_args(input);
+        println!("defang args:\n{:#?}", args);
+        (Some(cmd), args)
      }
 
      fn are_all_keys(&self, input: Vec<&String>) -> bool {
@@ -521,7 +516,7 @@ mod tests {
         );
 
         assert_eq!(
-           None,
+           Some("".to_string()),
            input.cmd
         );
 
