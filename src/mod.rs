@@ -5,6 +5,12 @@ use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use list::List;
 use fixture::{command_assistors, Fixture};
+use termion::input::TermRead;
+use termion::event::Key;
+use termion::raw::IntoRawMode;
+use termion::terminal_size;
+use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
+use std::io::{Write, stdout, stdin};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
@@ -261,7 +267,6 @@ impl LsKey {
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
     fn run_cmd(mut self, list: List) {
-        let input = terminal::input_n_display::read();
         //{
         //    let stdin = stdin();
         //    let mut stdout = stdout().into_raw_mode().unwrap();
@@ -285,11 +290,13 @@ impl LsKey {
         //            Key::Char('q') => break,
         //            Key::Char(c) => {
         //                match c {
-        //                    ' ' => {
-        //                        println!("$")
-        //                    },
-        //                    'v' => println!("{}im", c),
-        //                    _ => println!("{}", c),
+        //                    //' ' => {
+        //                    //    println!("$")
+        //                    //},
+        //                    //'v' => println!("{}im", c),
+        //                    _ => {
+        //                        break
+        //                    }
         //                }
         //            }
         //            Key::Alt(c) => println!("^{}", c),
@@ -307,7 +314,9 @@ impl LsKey {
 
         //    write!(stdout, "{}", termion::cursor::Show).unwrap();
         //}
-        self.readline_mode(list, input);
+
+        let input = terminal::input_n_display::read();
+        self.readline_mode(list, input)
     }
 }
 
