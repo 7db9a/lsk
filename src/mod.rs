@@ -240,12 +240,18 @@ impl LsKey {
                                  self.list.get_file_by_key(key).unwrap()
                             };
 
+                            let mut n = 0;
+                            let mut format_cmd = |key: PathBuf| {
+                                        n +=1;
+                                       format!(r#"{}={}"#, n, get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string())
+                            };
+
                             if let Some (r) = as_read_vec {
                                 let files_vec: Vec<&String> = vec![];
                                 let keys_vec: Vec<String> =
                                     r.iter()
                                         .map(|mut key|
-                                            format!(r#"{}={}"#, key, get_file(key.to_string()).to_str().unwrap())
+                                             format_cmd(PathBuf::from(key))
                                         ).collect();
 
                                 let command_string = keys_vec.join(" && ");
