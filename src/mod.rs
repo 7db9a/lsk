@@ -234,19 +234,19 @@ impl LsKey {
 
                             if let Some (r) = input.args {
                                 let files_vec: Vec<&String> = vec![];
-                                let keys_vec: Vec<String> =
+                                let output_vec: Vec<std::process::Output> =
                                     r.iter()
                                         .map(|mut key|
                                              format_cmd(PathBuf::from(key))
+                                        ).map(|mut statement|
+                                            format!(r#""$(printf '{} \n ')""#, statement)
+                                        ).map(|mut cmd|
+                                            terminal::parent_shell::type_text(
+                                                cmd,
+                                                //format!(r#""$(printf '1={} && 2={} \n ')""#, "README", "LICENSE"),
+                                                0
+                                            )
                                         ).collect();
-
-                                let command_string = keys_vec.join(" && ");
-                                let command_string = format!(r#""$(printf '{} \n ')""#, &command_string);
-                                terminal::parent_shell::type_text(
-                                    command_string,
-                                    //format!(r#""$(printf '1={} && 2={} \n ')""#, "README", "LICENSE"),
-                                    0
-                                );
                             } else {
                                 ()
                             }
