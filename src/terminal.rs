@@ -41,6 +41,7 @@ pub mod parent_shell {
 }
 pub mod input_n_display {
     use std::path::{Path, PathBuf};
+    use std::convert::TryFrom;
     use termion::input::TermRead;
     use termion::event::Key;
     use termion::raw::IntoRawMode;
@@ -120,6 +121,16 @@ pub mod input_n_display {
                    termion::clear::CurrentLine)
                     .unwrap();
 
+            let input_len = input.iter().count();
+            let input_len = u16::try_from(input_len).ok().unwrap();
+            let input_string: String = input.iter().collect();
+            write!(stdout,
+                "{}{}{}", format!(r#""{}""#, input_string.as_str()),
+               //termion::clear::All,
+               termion::cursor::Goto(input_len, 1),
+               termion::cursor::Show,
+            ).unwrap();
+
             match c.unwrap() {
                 Key::Char('q') => break,
                 Key::Char(c) => {
@@ -131,13 +142,6 @@ pub mod input_n_display {
                         _ => {
                             println!("{}", c);
                             input.push(c);
-                           let input_string: String = input.iter().collect();
-                           write!(stdout,
-                               "{}{}{}", format!(r#""{}""#, input_string.as_str()),
-                              //termion::clear::All,
-                              termion::cursor::Goto(1, 1),
-                              termion::cursor::Hide
-                           ).unwrap();
                         }
                     }
                 }
@@ -150,13 +154,6 @@ pub mod input_n_display {
                 Key::Down => println!("↓"),
                 Key::Backspace => {
                     input.pop();
-                    let input_string: String = input.iter().collect();
-                    write!(stdout,
-                        "{}{}{}{}", format!(r#""{}""#, input_string.as_str()),
-                       termion::clear::All,
-                       termion::cursor::Goto(1, 1),
-                       termion::cursor::Hide
-                    ).unwrap();
                 },
                 _ => {}
             }
