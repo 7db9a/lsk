@@ -46,7 +46,10 @@ pub mod input_n_display {
     use termion::raw::IntoRawMode;
     use termion::terminal_size;
     use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
-    use std::io::{Write, stdout, stdin};
+    use std::io::{Read, Write, stdout, stdin};
+    use termion::async_stdin;
+    use std::thread;
+    use std::time::Duration;
 
     pub fn read() -> Result<(Option<String>), std::io::Error> {
         let stdout = stdout();
@@ -63,6 +66,38 @@ pub mod input_n_display {
     // (columns/width, lines/height)
     pub fn size() -> (u16, u16) {
         terminal_size().unwrap()
+    }
+
+    pub fn read_char_async() {
+        let stdout = stdout();
+        let mut stdout = stdout.lock().into_raw_mode().unwrap();
+        let mut stdin = async_stdin().bytes();
+
+        write!(stdout,
+               "{}{}",
+               termion::clear::All,
+               termion::cursor::Goto(1, 1))
+                .unwrap();
+
+        loop {
+            write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
+
+            let b = stdin.next();
+            write!(stdout, "\r{:?}    <- This demonstrates the async read input char. Between each update a 100 ms. is waited, simply to demonstrate the async fashion. \n\r", b).unwrap();
+            if let Some(Ok(b'q')) = b {
+                break;
+            }
+
+            stdout.flush().unwrap();
+
+            thread::sleep(Duration::from_millis(50));
+            stdout.write_all(b"# ").unwrap();
+            stdout.flush().unwrap();
+            thread::sleep(Duration::from_millis(50));
+            stdout.write_all(b"\r #").unwrap();
+            write!(stdout, "{}", termion::cursor::Goto(1, 1)).unwrap();
+            stdout.flush().unwrap();
+        }
     }
 
     pub fn read_char() {
@@ -88,10 +123,10 @@ pub mod input_n_display {
                 Key::Char('q') => break,
                 Key::Char(c) => {
                     match c {
-                        ' ' => {
-                            println!("$")
-                        },
-                        'v' => println!("{}im", c),
+                        //' ' => {
+                        //    println!("$")
+                        //},
+                        //'v' => println!("{}im", c),
                         _ => println!("{}", c),
                     }
                 }
@@ -264,7 +299,7 @@ mod tests {
     use std::thread;
 
     //#[test]
-    #[ignore] // Need a spawn in a spawn.
+    //#[ignore] // Need a spawn in a spawn.
     //fn xdotool_type_text() {
     //    println!("");
     //    println!("");
@@ -278,16 +313,29 @@ mod tests {
     //}
 
     #[test]
-    #[ignore]//host
+    #[ignore]//play
     fn termion_key() {
 	    let test_spawn = thread::spawn(move || {
             super::input_n_display::read_char()
 	    });
 
-        let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
 
         test_spawn.join();
-        spawn.join();
+        //spawn.join();
+    }
+
+    #[test]
+    #[ignore]//play
+    fn termion_async_key() {
+	    let test_spawn = thread::spawn(move || {
+            super::input_n_display::read_char_async()
+	    });
+
+        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+
+        test_spawn.join();
+        //spawn.join();
     }
 
     #[test]
