@@ -101,6 +101,7 @@ pub mod input_n_display {
     }
 
     pub fn read_process_chars() {
+        let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let mut stdout = stdout().into_raw_mode().unwrap();
 
@@ -127,7 +128,10 @@ pub mod input_n_display {
                         //    println!("$")
                         //},
                         //'v' => println!("{}im", c),
-                        _ => println!("{}", c),
+                        _ => {
+                            println!("{}", c);
+                            input.push(c);
+                        }
                     }
                 }
                 Key::Alt(c) => println!("^{}", c),
@@ -141,6 +145,9 @@ pub mod input_n_display {
                 _ => {}
             }
             stdout.flush().unwrap();
+
+            let input_string: String = input.iter().collect();
+            println!("{}", input_string);
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
@@ -359,10 +366,10 @@ mod tests {
     //}
 
     #[test]
-    #[ignore]//play
+    //#[ignore]//play
     fn termion_read_process_chars() {
 	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::read_char()
+            super::input_n_display::read_process_chars()
 	    });
 
         //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
