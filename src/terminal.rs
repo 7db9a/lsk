@@ -131,6 +131,13 @@ pub mod input_n_display {
                         _ => {
                             println!("{}", c);
                             input.push(c);
+                           let input_string: String = input.iter().collect();
+                           write!(stdout,
+                               "{}{}{}", format!(r#""{}""#, input_string.as_str()),
+                              //termion::clear::All,
+                              termion::cursor::Goto(1, 1),
+                              termion::cursor::Hide
+                           ).unwrap();
                         }
                     }
                 }
@@ -141,13 +148,19 @@ pub mod input_n_display {
                 Key::Right => println!("→"),
                 Key::Up => println!("↑"),
                 Key::Down => println!("↓"),
-                Key::Backspace => println!("×"),
+                Key::Backspace => {
+                    input.pop();
+                    let input_string: String = input.iter().collect();
+                    write!(stdout,
+                        "{}{}{}{}", format!(r#""{}""#, input_string.as_str()),
+                       termion::clear::All,
+                       termion::cursor::Goto(1, 1),
+                       termion::cursor::Hide
+                    ).unwrap();
+                },
                 _ => {}
             }
             stdout.flush().unwrap();
-
-            let input_string: String = input.iter().collect();
-            println!("{}", input_string);
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
