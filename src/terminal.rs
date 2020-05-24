@@ -141,6 +141,22 @@ pub mod input_n_display {
             }
             let input_len = input.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
+            let _first = input.iter().nth(0);
+            if let Some(mut first) = _first {
+                let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
+                if key.is_ok() {
+                    first = &'r';
+                } else {
+                    first = &'f'
+                }
+
+                match first {
+                    'f' => println!("fuzzy-widdle mode detected..."),
+                    'r' => println!("return file mode detected..."),
+                     _ => println!("impossible to reach?")
+                }
+            }
+
             let input_string: String = input.iter().collect();
             write!(stdout,
                 "{}{}{}{}", format!(r#"{}"#, input_string.as_str()),
