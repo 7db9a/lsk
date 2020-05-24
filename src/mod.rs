@@ -73,6 +73,38 @@ impl LsKey {
             self.run_cmd(list);
     }
 
+    fn return_file_by_key_mode(mut self, list: List, input: Input) {
+        let get_file = |key_string: String| {
+             let key: usize = key_string.parse().unwrap();
+             self.list.get_file_by_key(key).unwrap()
+        };
+
+        let mut n = 0;
+        let mut format_cmd = |key: PathBuf| {
+                    n +=1;
+                   format!(r#"{}={}"#, n, get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string())
+        };
+
+        if let Some (r) = input.args {
+            let files_vec: Vec<&String> = vec![];
+            let output_vec: Vec<std::process::Output> =
+                r.iter()
+                    .map(|mut key|
+                         format_cmd(PathBuf::from(key))
+                    ).map(|mut statement|
+                        format!(r#""$(printf '{} \n ')""#, statement)
+                    ).map(|mut cmd|
+                        terminal::parent_shell::type_text(
+                            cmd,
+                            //format!(r#""$(printf '1={} && 2={} \n ')""#, "README", "LICENSE"),
+                            0
+                        )
+                    ).collect();
+        } else {
+            ()
+        }
+    }
+
     fn key_mode(mut self, list: List, input: Input) {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
@@ -228,36 +260,7 @@ impl LsKey {
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
                                 * then type_text_spawn(text_vec);
                             */
-
-                            let get_file = |key_string: String| {
-                                 let key: usize = key_string.parse().unwrap();
-                                 self.list.get_file_by_key(key).unwrap()
-                            };
-
-                            let mut n = 0;
-                            let mut format_cmd = |key: PathBuf| {
-                                        n +=1;
-                                       format!(r#"{}={}"#, n, get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string())
-                            };
-
-                            if let Some (r) = input.args {
-                                let files_vec: Vec<&String> = vec![];
-                                let output_vec: Vec<std::process::Output> =
-                                    r.iter()
-                                        .map(|mut key|
-                                             format_cmd(PathBuf::from(key))
-                                        ).map(|mut statement|
-                                            format!(r#""$(printf '{} \n ')""#, statement)
-                                        ).map(|mut cmd|
-                                            terminal::parent_shell::type_text(
-                                                cmd,
-                                                //format!(r#""$(printf '1={} && 2={} \n ')""#, "README", "LICENSE"),
-                                                0
-                                            )
-                                        ).collect();
-                            } else {
-                                ()
-                            }
+                            self.return_file_by_key_mode(list, input);
                         }
                     }
                     ()
