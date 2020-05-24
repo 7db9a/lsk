@@ -147,13 +147,16 @@ pub mod input_n_display {
                 if key.is_ok() {
                     first = &'r';
                 } else {
-                    first = &'f'
+                    if first != &'$' {
+                         first = &'f';
+                    }
                 }
 
                 match first {
                     'f' => println!("fuzzy-widdle mode detected..."),
                     'r' => println!("return file mode detected..."),
-                     _ => println!("impossible to reach?")
+                     '$' => println!("command mode detected..."),
+                     _ => println!("invalid mode detected...")
                 }
             }
 
