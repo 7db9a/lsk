@@ -101,12 +101,13 @@ pub mod input_n_display {
         }
     }
 
-    pub fn read_process_chars() {
+    pub fn read_process_chars() -> Option<String> {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
         let mut stdin = stdin.lock();
+        let mut result: Option<String> =  None;
 
         write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
         //write!(stdout,
@@ -151,6 +152,7 @@ pub mod input_n_display {
                 Key::Alt(c) => println!("^{}", c),
                 Key::Ctrl(c) => println!("*{}", c),
                 Key::Esc => println!("ESC"),
+                Key::Esc => println!("ESC"),
                 Key::Left => println!("←"),
                 Key::Right => println!("→"),
                 Key::Up => println!("↑"),
@@ -178,17 +180,23 @@ pub mod input_n_display {
                 }
 
                 match first {
-                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string),
-                    'r' => write(b"return file mode detected...", &mut stdout, input_string),
-                    '$' => write(b"command mode detected... ", &mut stdout, input_string),
-                    _ => write(b"invalid mode detected...", &mut stdout, input_string),
+                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone()),
+                    'r' => write(b"return file mode detected...", &mut stdout, input_string.clone()),
+                    '$' => write(b"command mode detected... ", &mut stdout, input_string.clone()),
+                    _ => write(b"invalid mode detected...", &mut stdout, input_string.clone()),
                 };
             }
 
             stdout.flush().unwrap();
+
+            if input.iter().last() == Some(&'\n') {
+                result = Some(input_string);
+                break
+            }
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
+        result
     }
 
     pub fn read_char() {
