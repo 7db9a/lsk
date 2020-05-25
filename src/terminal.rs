@@ -49,6 +49,7 @@ pub mod input_n_display {
     use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
     use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
     use termion::async_stdin;
+    use termion::screen::AlternateScreen;
     use std::thread;
     use std::time::Duration;
 
@@ -67,6 +68,15 @@ pub mod input_n_display {
     // (columns/width, lines/height)
     pub fn size() -> (u16, u16) {
         terminal_size().unwrap()
+    }
+
+    pub fn alternate_screen() {
+        {
+            let mut screen = AlternateScreen::from(stdout());
+            write!(screen, "Writing to alternat(iv)e screen!").unwrap();
+            screen.flush().unwrap();
+        }
+        println!("Writing to main screen again.");
     }
 
     pub fn read_char_async() {
@@ -419,6 +429,19 @@ mod tests {
 	    let test_spawn = thread::spawn(move || {
             let result = super::input_n_display::read_process_chars();
             assert_eq!(result, Some("lift off!".to_string()));
+	    });
+
+        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+
+        test_spawn.join();
+        //spawn.join();
+    }
+
+    #[test]
+    //#[ignore]//play
+    fn termion_alternate_screen() {
+	    let test_spawn = thread::spawn(move || {
+            super::input_n_display::alternate_screen()
 	    });
 
         //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
