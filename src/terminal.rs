@@ -116,10 +116,10 @@ pub mod input_n_display {
         //stdout.flush().unwrap();
 
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
-            stdout.write_all(some_stuff).unwrap();
+            //stdout.write_all(some_stuff).unwrap();
             //stdout.flush().unwrap();
             write!(stdout,"{}", std::str::from_utf8(&some_stuff).unwrap()).unwrap();
-            write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
+            //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
             write!(stdout,
                 "{}{}{}{}", format!("{}", input_string.as_str()
                 ),
