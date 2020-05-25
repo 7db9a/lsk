@@ -7,10 +7,14 @@ use list::List;
 use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
 use termion::event::Key;
-use termion::raw::IntoRawMode;
 use termion::terminal_size;
 use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
-use std::io::{Write, stdout, stdin};
+
+use std::convert::TryFrom;
+use termion::raw::{IntoRawMode, RawTerminal};
+use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
+use termion::async_stdin;
+use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
@@ -283,13 +287,8 @@ impl LsKey {
         //let input = terminal::input_n_display::read();
 
         loop {
-           let input = terminal::input_n_display::read_process_chars();
-           if let Some(x) = input {
-                self.clone().readline_mode(list.clone(), Ok(Some(x)));
-           } else {
-
-           }
-           let few_ms = std::time::Duration::from_millis(100);
+           self.clone().read_process_chars(list.clone());
+           let few_ms = std::time::Duration::from_millis(500);
            std::thread::sleep(few_ms);
         }
     }
@@ -385,7 +384,7 @@ impl LsKey {
                 input.pop();
                 let input_string: String = input.iter().collect();
                 result = Some(input_string);
-                self.clone().readline_mode(list.clone(), Ok(Some(x)));
+                self.clone().readline_mode(list.clone(), Ok(result));
             }
         }
 
