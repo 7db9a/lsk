@@ -245,36 +245,36 @@ impl LsKey {
         }
     }
 
-    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>) {
-        match input {
-            Ok(t) =>  {
-                if let Some(i) = t {
-                    let input = Input::new();
-                    let input = input.parse(i);
-                    println!("keytype: {:#?}", input.cmd_type);
-                    // Safe to unwrap.
-                    match input.clone().cmd_type.unwrap() {
-                        CmdType::cmd => {
-                            self.cmd_mode(list, input);
-                        },
-                        CmdType::single_key => {
-                            self.key_mode(list, input);
-                        },
-                        CmdType::multiple_keys => {
-                            /*
-                                * get_file_by_key for each key
-                                * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
-                                * then type_text_spawn(text_vec);
-                            */
-                            self.return_file_by_key_mode(list, input);
-                        }
+    fn readline_mode(mut self, list: List, mut input: Vec<char>) {
+        let first = input.iter().nth(0);
+        match first {
+            Some(_) => {
+                // get rid of newline, which also prevents read_process_char from re-passing an already complete command.
+                input.pop();
+                let t: String = input.iter().collect();
+                let input = Input::new();
+                let input = input.parse(t);
+                println!("keytype: {:#?}", input.cmd_type);
+                // Safe to unwrap.
+                match input.clone().cmd_type.unwrap() {
+                    CmdType::cmd => {
+                        self.cmd_mode(list, input);
+                    },
+                    CmdType::single_key => {
+                        self.key_mode(list, input);
+                    },
+                    CmdType::multiple_keys => {
+                        /*
+                            * get_file_by_key for each key
+                            * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
+                            * then type_text_spawn(text_vec);
+                        */
+                        self.return_file_by_key_mode(list, input);
                     }
-                    ()
-                } else {
-                    ()
                 }
+                ()
             },
-            Err(_) => ()
+            None => ()
         }
     }
 
@@ -283,22 +283,28 @@ impl LsKey {
     // ls-key. If the non-built in command doesn't return output and enters
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
-    fn run_cmd(mut self, list: List) {
-        //let input = terminal::input_n_display::read();
+   fn run_cmd(mut self, list: List) {
+       //let input = terminal::input_n_display::read();
+       let mut input: Vec<char> = vec![];
+       let mut is_complete = false;
+       let res  = self.clone().read_process_chars(input, list.clone(), is_complete);
+       loop {
+          input = res.clone().0;
+          is_complete = res.1;
+          if !is_complete {
+              self.clone().readline_mode(list.clone(), input.clone());
+          }
+          //break;
+          let few_ms = std::time::Duration::from_millis(500);
+          std::thread::sleep(few_ms);
+       }
+   }
 
-        loop {
-           self.clone().read_process_chars(list.clone());
-           let few_ms = std::time::Duration::from_millis(500);
-           std::thread::sleep(few_ms);
-        }
-    }
-
-   fn read_process_chars(mut self, list: List) {
-        let mut input: Vec<char> = vec![];
+   fn read_process_chars(mut self, mut input: Vec<char>, list: List, mut is_complete: bool) -> (Vec<char>, bool) {
         let mut stdin = async_stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
-        let mut result: Option<String> =  None;
+        let input_string: String = input.iter().collect();
 
         write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
         //write!(stdout,
@@ -307,6 +313,7 @@ impl LsKey {
         //   termion::cursor::Goto(1, 1),
         //).unwrap();
         //stdout.flush().unwrap();
+
 
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
             //stdout.write_all(some_stuff).unwrap();
@@ -325,6 +332,8 @@ impl LsKey {
                termion::cursor::Hide,
             ).unwrap();
         }
+
+        write(b"fuzzy", &mut stdout, input_string.clone());
 
         for c in stdin.keys() {
             match c.unwrap() {
@@ -381,14 +390,14 @@ impl LsKey {
             stdout.flush().unwrap();
 
             if input.iter().last() == Some(&'\n') {
-                input.pop();
-                let input_string: String = input.iter().collect();
-                result = Some(input_string);
-                self.clone().readline_mode(list.clone(), Ok(result));
+                //let input_string: String = input.iter().collect();
+                is_complete = true;
             }
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
+
+        (input, is_complete)
     }
 }
 
