@@ -118,7 +118,8 @@ pub mod input_n_display {
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
             stdout.write_all(some_stuff).unwrap();
             //stdout.flush().unwrap();
-            stdout.write_all(b"\n").unwrap();
+            write!(stdout,"{}", std::str::from_utf8(&some_stuff).unwrap()).unwrap();
+            write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
             write!(stdout,
                 "{}{}{}{}", format!("{}", input_string.as_str()
                 ),
@@ -174,7 +175,7 @@ pub mod input_n_display {
                     'r' => write(b"return file mode detected...", &mut stdout, input_string),
                     '$' => write(b"command mode detected...", &mut stdout, input_string),
                     _ => write(b"invalid mode detected...", &mut stdout, input_string),
-                }
+                };
             }
         }
 
