@@ -108,6 +108,7 @@ pub mod input_n_display {
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
         let mut stdin = stdin.lock();
 
+        write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
         //write!(stdout,
         //    "{}{}",
         //   termion::clear::All,
@@ -118,16 +119,19 @@ pub mod input_n_display {
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
             //stdout.write_all(some_stuff).unwrap();
             //stdout.flush().unwrap();
-            write!(stdout,"{}", std::str::from_utf8(&some_stuff).unwrap()).unwrap();
+            write!(
+                stdout,
+                "{}\n\r",std::str::from_utf8(&some_stuff).unwrap(),
+
+            ).unwrap();
             //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
             write!(stdout,
                 "{}{}{}{}", format!("{}", input_string.as_str()
                 ),
                termion::clear::AfterCursor,
-               termion::cursor::Goto(1, 2),
+               termion::cursor::Goto(1, 1),
                termion::cursor::Hide,
             ).unwrap();
-            stdout.flush().unwrap();
         }
 
         for c in stdin.keys() {
@@ -177,6 +181,8 @@ pub mod input_n_display {
                     _ => write(b"invalid mode detected...", &mut stdout, input_string),
                 };
             }
+
+            stdout.flush().unwrap();
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
