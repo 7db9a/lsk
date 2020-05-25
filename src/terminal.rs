@@ -44,10 +44,10 @@ pub mod input_n_display {
     use std::convert::TryFrom;
     use termion::input::TermRead;
     use termion::event::Key;
-    use termion::raw::IntoRawMode;
+    use termion::raw::{IntoRawMode, RawTerminal};
     use termion::terminal_size;
     use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
-    use std::io::{Read, Write, stdout, stdin};
+    use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
     use termion::async_stdin;
     use std::thread;
     use std::time::Duration;
@@ -104,14 +104,30 @@ pub mod input_n_display {
     pub fn read_process_chars() {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
-        let mut stdout = stdout().into_raw_mode().unwrap();
+        let stdout = stdout();
+        let mut stdout = stdout.lock().into_raw_mode().unwrap();
+        let mut stdin = stdin.lock();
 
-        write!(stdout,
-            "{}{}",
-           termion::clear::All,
-           termion::cursor::Goto(1, 1),
-        ).unwrap();
-        stdout.flush().unwrap();
+        //write!(stdout,
+        //    "{}{}",
+        //   termion::clear::All,
+        //   termion::cursor::Goto(1, 1),
+        //).unwrap();
+        //stdout.flush().unwrap();
+
+        fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
+            stdout.write_all(some_stuff).unwrap();
+            //stdout.flush().unwrap();
+            stdout.write_all(b"\n").unwrap();
+            write!(stdout,
+                "{}{}{}{}", format!("{}", input_string.as_str()
+                ),
+               termion::clear::AfterCursor,
+               termion::cursor::Goto(1, 2),
+               termion::cursor::Hide,
+            ).unwrap();
+            stdout.flush().unwrap();
+        }
 
         for c in stdin.keys() {
             match c.unwrap() {
@@ -139,6 +155,7 @@ pub mod input_n_display {
                 },
                 _ => {}
             }
+            let input_string: String = input.iter().collect();
             let input_len = input.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
@@ -153,21 +170,12 @@ pub mod input_n_display {
                 }
 
                 match first {
-                    'f' => println!("fuzzy-widdle mode detected..."),
-                    'r' => println!("return file mode detected..."),
-                     '$' => println!("command mode detected..."),
-                     _ => println!("invalid mode detected...")
+                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string),
+                    'r' => write(b"return file mode detected...", &mut stdout, input_string),
+                    '$' => write(b"command mode detected...", &mut stdout, input_string),
+                    _ => write(b"invalid mode detected...", &mut stdout, input_string),
                 }
             }
-
-            let input_string: String = input.iter().collect();
-            write!(stdout,
-                "{}{}{}{}", format!(r#"{}"#, input_string.as_str()),
-               termion::clear::AfterCursor,
-               termion::cursor::Goto(1, 1),
-               termion::cursor::Hide,
-            ).unwrap();
-            stdout.flush().unwrap();
         }
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
