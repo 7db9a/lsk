@@ -190,6 +190,8 @@ pub mod input_n_display {
             stdout.flush().unwrap();
 
             if input.iter().last() == Some(&'\n') {
+                input.pop();
+                let input_string: String = input.iter().collect();
                 result = Some(input_string);
                 break
             }
@@ -415,7 +417,8 @@ mod tests {
     //#[ignore]//play
     fn termion_read_process_chars() {
 	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::read_process_chars()
+            let result = super::input_n_display::read_process_chars();
+            assert_eq!(result, Some("lift off!".to_string()));
 	    });
 
         //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
