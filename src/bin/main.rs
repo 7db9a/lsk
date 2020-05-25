@@ -110,8 +110,6 @@ fn default_action(c: &Context) {
     };
 
     if c.bool_flag("all") {
-        println!("all, {:?}", c.args);
-        println!("path, {:?}", path);
         if path != "" {
             let ls_key = LsKey::new(path, true);
             ls_key.run_list_read()
@@ -120,8 +118,6 @@ fn default_action(c: &Context) {
             ls_key.run_list_read()
         }
     } else {
-        println!("regular, {:?}", c.args);
-        println!("path, {:?}", path);
         if path != "" {
             let ls_key = LsKey::new(path, false);
             ls_key.run_list_read()

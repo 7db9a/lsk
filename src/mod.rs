@@ -63,11 +63,13 @@ impl LsKey {
                 let width = r.1;
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
-                     println!("{}", d);
+                     println!("\n\n{}", d);
                 } else {
+                    println!("\n\n");
                     list::print_list_with_keys(list.clone());
                 }
             } else {
+                println!("\n\n");
                 list::print_list_with_keys(list.clone());
             }
             self.run_cmd(list);
