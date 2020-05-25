@@ -287,12 +287,17 @@ impl LsKey {
        //let input = terminal::input_n_display::read();
        let mut input: Vec<char> = vec![];
        let mut is_complete = false;
-       let res  = self.clone().read_process_chars(input, list.clone(), is_complete);
+       let mut n = 0;
+       let res  = self.clone().read_process_chars(input, list.clone(), is_complete, n);
        loop {
-          input = res.clone().0;
+          let res = res.clone();
+          input = res.0;
           is_complete = res.1;
+          n = res.2;
           if !is_complete {
               self.clone().readline_mode(list.clone(), input.clone());
+          } else {
+              println!("true");
           }
           //break;
           let few_ms = std::time::Duration::from_millis(500);
@@ -300,7 +305,7 @@ impl LsKey {
        }
    }
 
-   fn read_process_chars(mut self, mut input: Vec<char>, list: List, mut is_complete: bool) -> (Vec<char>, bool) {
+   fn read_process_chars(mut self, mut input: Vec<char>, list: List, mut is_complete: bool, mut n: usize) -> (Vec<char>, bool, usize) {
         let mut stdin = async_stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
@@ -313,7 +318,6 @@ impl LsKey {
         //   termion::cursor::Goto(1, 1),
         //).unwrap();
         //stdout.flush().unwrap();
-
 
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
             //stdout.write_all(some_stuff).unwrap();
@@ -334,7 +338,8 @@ impl LsKey {
         }
 
         write(b"fuzzy", &mut stdout, input_string.clone());
-
+        n += 1;
+        println!("here: {}", n);
         for c in stdin.keys() {
             match c.unwrap() {
                 Key::Char('q') => break,
@@ -365,7 +370,6 @@ impl LsKey {
                 },
                 _ => {}
             }
-            let input_string: String = input.iter().collect();
             let input_len = input.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
@@ -397,7 +401,7 @@ impl LsKey {
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
 
-        (input, is_complete)
+        (input, is_complete, n)
     }
 }
 
