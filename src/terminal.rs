@@ -156,7 +156,10 @@ pub mod input_n_display {
                 Key::Up => println!("↑"),
                 Key::Down => println!("↓"),
                 Key::Backspace => {
-                    input.pop();
+                    if let Some(x) = input.pop() {
+                    } else {
+                        write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
+                    }
                 },
                 _ => {}
             }
@@ -177,7 +180,7 @@ pub mod input_n_display {
                 match first {
                     'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string),
                     'r' => write(b"return file mode detected...", &mut stdout, input_string),
-                    '$' => write(b"command mode detected...", &mut stdout, input_string),
+                    '$' => write(b"command mode detected... ", &mut stdout, input_string),
                     _ => write(b"invalid mode detected...", &mut stdout, input_string),
                 };
             }
