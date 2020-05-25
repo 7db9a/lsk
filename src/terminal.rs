@@ -113,10 +113,9 @@ pub mod input_n_display {
 
     pub fn read_process_chars() -> Option<String> {
         let mut input: Vec<char> = vec![];
-        let stdin = stdin();
+        let mut stdin = async_stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
-        let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
 
         write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
