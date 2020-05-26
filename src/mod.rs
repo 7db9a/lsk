@@ -21,6 +21,7 @@ use std::time::Duration;
 pub struct LsKey {
     list: List,
     all: bool,
+    display: Option<String>,
 }
 
 impl LsKey {
@@ -37,7 +38,8 @@ impl LsKey {
 
             LsKey {
                 list,
-                all
+                all,
+                display: None,
             }
     }
 
@@ -56,19 +58,21 @@ impl LsKey {
             self.clone()
     }
 
-    pub fn run_list_read(self) {
+   pub fn run_list_read(mut self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
             //let res = terminal::input_n_display::grid(entries_keyed);
             let res = terminal::input_n_display::grid(entries_keyed);
+            let mut show = "".to_string();
             if let Some(r) = res {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
                      println!("\n\n{}", d);
+                     self.display = Some(d.to_string());
                 } else {
                     println!("\n\n");
                     list::print_list_with_keys(list.clone());
