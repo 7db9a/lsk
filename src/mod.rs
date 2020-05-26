@@ -292,14 +292,6 @@ impl LsKey {
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
 
-        write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
-        //write!(stdout,
-        //    "{}{}",
-        //   termion::clear::All,
-        //   termion::cursor::Goto(1, 1),
-        //).unwrap();
-        //stdout.flush().unwrap();
-
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)) {
             //stdout.write_all(some_stuff).unwrap();
             //stdout.flush().unwrap();
