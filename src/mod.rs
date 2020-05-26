@@ -312,7 +312,7 @@ impl LsKey {
             ).unwrap();
             //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
             write!(stdout,
-                "{}{}{}{}", format!("\n\r{}", input_string.as_str()
+                "{}{}{}{}", format!("{}", input_string.as_str()
                 ),
                termion::clear::AfterCursor,
                termion::cursor::Goto(locate.0, (locate.1 + 1)),
@@ -345,7 +345,7 @@ impl LsKey {
                 Key::Backspace => {
                     if let Some(x) = input.pop() {
                     } else {
-                        write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
+                        write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
                     }
                 },
                 _ => {}
@@ -364,7 +364,7 @@ impl LsKey {
                     }
                 }
 
-                let place = (0, 2);
+                let place = (0, 1);
 
                 match first {
                     'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
