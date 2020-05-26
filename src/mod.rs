@@ -286,11 +286,11 @@ impl LsKey {
     // understanding.
     fn run_cmd(mut self, list: List) {
         //let input = terminal::input_n_display::read();
-        let input = self.clone().read_process_chars();
+        let input = self.clone().read_process_chars(&list);
         self.readline_mode(list, Ok(input))
     }
 
-    fn read_process_chars(mut self) -> Option<String> {
+    fn read_process_chars(mut self, list: &List) -> Option<String> {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
