@@ -246,7 +246,7 @@ impl LsKey {
         }
     }
 
-    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>) {
+    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>) -> String {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -277,6 +277,8 @@ impl LsKey {
             },
             Err(_) => ()
         }
+
+        "".to_string()
     }
 
     // If you want to return the output of a commands, see fzf example below.
@@ -287,7 +289,7 @@ impl LsKey {
     fn run_cmd(mut self, list: List) {
         //let input = terminal::input_n_display::read();
         let input = self.clone().read_process_chars(&list);
-        self.readline_mode(list, Ok(input))
+        let file_display: String = self.readline_mode(list, Ok(input));
     }
 
     fn read_process_chars(mut self, list: &List) -> Option<String> {
