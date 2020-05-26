@@ -364,7 +364,7 @@ impl LsKey {
                     }
                 }
 
-                let place = (1, 2);
+                let place = (0, 2);
 
                 match first {
                     'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
