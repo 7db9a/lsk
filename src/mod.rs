@@ -292,6 +292,22 @@ impl LsKey {
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
 
+        let show = self.display.clone();
+        write!(
+            stdout,
+            "{}",
+            termion::clear::All
+        ).unwrap();
+
+        if let Some(x) = show {
+            if x.0 == self.list.relative_parent_dir_path {
+                let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                write(b"", &mut stdout, display.to_string(), (0, 3));
+            }
+        }
+
+        stdout.flush().unwrap();
+
         fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)) {
             //stdout.write_all(some_stuff).unwrap();
             //stdout.flush().unwrap();
