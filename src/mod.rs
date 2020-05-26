@@ -21,7 +21,7 @@ use std::time::Duration;
 pub struct LsKey {
     list: List,
     all: bool,
-    display: Option<String>,
+    display: Option<(PathBuf, String)>
 }
 
 impl LsKey {
@@ -72,14 +72,14 @@ impl LsKey {
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
                      //println!("\n\n{}", d);
-                     self.display = Some(d.to_string());
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
                 } else {
-                    println!("\n\n");
-                    list::print_list_with_keys(list.clone());
+                    //println!("\n\n");
+                    //list::print_list_with_keys(list.clone());
                 }
             } else {
-                println!("\n\n");
-                list::print_list_with_keys(list.clone());
+                //println!("\n\n");
+                //list::print_list_with_keys(list.clone());
             }
             self.run_cmd(list);
     }
@@ -162,12 +162,10 @@ impl LsKey {
              path_cache.switch();
              match cmd.as_str() {
                  "fzf" => {
-                     println!("\nFzf command detected...\n");
                      //Split cmd ('fzf')
                      let split: Vec<&str> = input.as_read.split("fzf").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"fzf {}"#, cmd);
-                     println!("fzf commadn:\n{:#?}", cmd);
                      let output = terminal::shell::cmd(cmd.clone());
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
@@ -180,7 +178,6 @@ impl LsKey {
              self.run_list_read();
          } else {
              let as_read = input.as_read.as_str();
-             println!("\n\nInput: {}", as_read);
              match as_read {
                  "w" => {
                       // Cd the parent shell into the directory viewed by ls-key.
@@ -197,7 +194,6 @@ impl LsKey {
                      path_cache.switch();
                      let output = terminal::shell::cmd("fzf".to_string());
                      let file_path = output.unwrap();
-                     println!("Path: \n\n{}", file_path);
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
                      self.run_list_read();
@@ -207,12 +203,10 @@ impl LsKey {
                          self.list.relative_parent_dir_path.as_path()
                      );
                      path_cache.switch();
-                     println!("\nvim command detected...\n");
                      //Split cmd ('vim')
                      let split: Vec<&str> = input.as_read.split("vim").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"vim {}"#, cmd);
-                     println!("vim commadn:\n{:#?}", cmd);
                      //let output = terminal::shell::cmd(cmd.clone());
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![]);
@@ -224,12 +218,10 @@ impl LsKey {
                          self.list.relative_parent_dir_path.as_path()
                      );
                      path_cache.switch();
-                     println!("\nzsh command detected...\n");
                      //Split cmd ('zsh')
                      let split: Vec<&str> = input.as_read.split("zsh").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"zsh {}"#, cmd);
-                     println!("zsh commadn:\n{:#?}", cmd);
                      //let output = terminal::shell::cmd(cmd.clone());
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("zsh".to_string(), vec![]);
@@ -242,7 +234,6 @@ impl LsKey {
                      );
                      path_cache.switch();
                      let output = terminal::shell::cmd(as_read.to_string()).unwrap();
-                     println!("\nls-key custom command results:\n{}\n", output);
                      path_cache.switch_back();
                      self.run_list_read();
                  }
@@ -256,7 +247,6 @@ impl LsKey {
                 if let Some(i) = t {
                     let input = Input::new();
                     let input = input.parse(i);
-                    println!("keytype: {:#?}", input.cmd_type);
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
                         CmdType::cmd => {
@@ -385,7 +375,9 @@ impl LsKey {
             let show = self.display.clone();
 
             if let Some(x) = show {
-                 write(b"\n\r", &mut stdout, x, (1, 1));
+                if x.0 == self.list.relative_parent_dir_path {
+                    write(b"\n\r", &mut stdout, x.1, (1, 1));
+                }
             }
 
             stdout.flush().unwrap();
@@ -398,7 +390,7 @@ impl LsKey {
             }
         }
 
-        write!(stdout, "{}", termion::cursor::Show).unwrap();
+        //write!(stdout, "{}", termion::cursor::Show).unwrap();
         result
     }
 }
@@ -492,12 +484,9 @@ impl Input {
 
     fn parse_cmd(&self, input: String) -> (Option<String>, Option<Vec<String>>) {
         let mut input: Vec<String> = input.clone().split(" ").map(|s| s.to_string()).collect();
-        println!("input:\n{:#?}", input);
         let cmd = input.remove(0);
 
-        println!("cmd:\n{:#?}", cmd);
         let args = self.defang_args(input);
-        println!("defang args:\n{:#?}", args);
         (Some(cmd), args)
      }
 
