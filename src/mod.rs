@@ -297,7 +297,7 @@ impl LsKey {
             //stdout.flush().unwrap();
             write!(
                 stdout,
-                "{}{}{}: ",std::str::from_utf8(&some_stuff).unwrap(),
+                "{}{}{}",std::str::from_utf8(&some_stuff).unwrap(),
                 termion::cursor::Goto(locate.0, locate.1),
                 termion::cursor::Hide,
 
