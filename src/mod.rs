@@ -310,7 +310,7 @@ impl LsKey {
         //).unwrap();
         //stdout.flush().unwrap();
 
-        fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
+        fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)) {
             //stdout.write_all(some_stuff).unwrap();
             //stdout.flush().unwrap();
             write!(
@@ -323,7 +323,7 @@ impl LsKey {
                 "{}{}{}{}", format!("{}", input_string.as_str()
                 ),
                termion::clear::AfterCursor,
-               termion::cursor::Goto(1, 1),
+               termion::cursor::Goto(locate.0, locate.1),
                termion::cursor::Hide,
             ).unwrap();
         }
@@ -372,12 +372,20 @@ impl LsKey {
                     }
                 }
 
+                let place = (1, 1);
+
                 match first {
-                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone()),
-                    'r' => write(b"return file mode detected...", &mut stdout, input_string.clone()),
-                    '$' => write(b"command mode detected... ", &mut stdout, input_string.clone()),
-                    _ => write(b"invalid mode detected...", &mut stdout, input_string.clone()),
+                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
+                    'r' => write(b"return file mode detected...", &mut stdout, input_string.clone(), place),
+                    '$' => write(b"command mode detected... ", &mut stdout, input_string.clone(), place),
+                    _ => write(b"invalid mode detected...", &mut stdout, input_string.clone(), place),
                 };
+            }
+
+            let show = self.display.clone();
+
+            if let Some(x) = show {
+                 write(b"", &mut stdout, x, (15, 1));
             }
 
             stdout.flush().unwrap();
