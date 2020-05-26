@@ -7,10 +7,15 @@ use list::List;
 use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
 use termion::event::Key;
-use termion::raw::IntoRawMode;
+use termion::raw::{IntoRawMode, RawTerminal};
 use termion::terminal_size;
 use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
-use std::io::{Write, stdout, stdin};
+use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
+use std::convert::TryFrom;
+use termion::async_stdin;
+use termion::screen::AlternateScreen;
+use std::thread;
+use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
@@ -281,8 +286,108 @@ impl LsKey {
     // understanding.
     fn run_cmd(mut self, list: List) {
         //let input = terminal::input_n_display::read();
-        let input = terminal::input_n_display::read_process_chars();
+        let input = self.clone().read_process_chars();
         self.readline_mode(list, Ok(input))
+    }
+
+    fn read_process_chars(mut self) -> Option<String> {
+        let mut input: Vec<char> = vec![];
+        let stdin = stdin();
+        let stdout = stdout();
+        let mut stdout = stdout.lock().into_raw_mode().unwrap();
+        let mut stdin = stdin.lock();
+        let mut result: Option<String> =  None;
+
+        write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
+        //write!(stdout,
+        //    "{}{}",
+        //   termion::clear::All,
+        //   termion::cursor::Goto(1, 1),
+        //).unwrap();
+        //stdout.flush().unwrap();
+
+        fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String) {
+            //stdout.write_all(some_stuff).unwrap();
+            //stdout.flush().unwrap();
+            write!(
+                stdout,
+                "{}\n\r",std::str::from_utf8(&some_stuff).unwrap(),
+
+            ).unwrap();
+            //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
+            write!(stdout,
+                "{}{}{}{}", format!("{}", input_string.as_str()
+                ),
+               termion::clear::AfterCursor,
+               termion::cursor::Goto(1, 1),
+               termion::cursor::Hide,
+            ).unwrap();
+        }
+
+        for c in stdin.keys() {
+            match c.unwrap() {
+                Key::Char('q') => break,
+                Key::Char(c) => {
+                    match c {
+                        //' ' => {
+                        //    println!("$")
+                        //},
+                        //'v' => println!("{}im", c),
+                        _ => {
+                            input.push(c);
+                        }
+                    }
+                }
+                Key::Alt(c) => println!("^{}", c),
+                Key::Ctrl(c) => println!("*{}", c),
+                Key::Esc => println!("ESC"),
+                Key::Esc => println!("ESC"),
+                Key::Left => println!("←"),
+                Key::Right => println!("→"),
+                Key::Up => println!("↑"),
+                Key::Down => println!("↓"),
+                Key::Backspace => {
+                    if let Some(x) = input.pop() {
+                    } else {
+                        write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
+                    }
+                },
+                _ => {}
+            }
+            let input_string: String = input.iter().collect();
+            let input_len = input.iter().count();
+            let input_len = u16::try_from(input_len).ok().unwrap();
+            let _first = input.iter().nth(0);
+            if let Some(mut first) = _first {
+                let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
+                if key.is_ok() {
+                    first = &'r';
+                } else {
+                    if first != &'$' {
+                         first = &'f';
+                    }
+                }
+
+                match first {
+                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone()),
+                    'r' => write(b"return file mode detected...", &mut stdout, input_string.clone()),
+                    '$' => write(b"command mode detected... ", &mut stdout, input_string.clone()),
+                    _ => write(b"invalid mode detected...", &mut stdout, input_string.clone()),
+                };
+            }
+
+            stdout.flush().unwrap();
+
+            if input.iter().last() == Some(&'\n') {
+                input.pop();
+                let input_string: String = input.iter().collect();
+                result = Some(input_string);
+                break
+            }
+        }
+
+        write!(stdout, "{}", termion::cursor::Show).unwrap();
+        result
     }
 }
 
