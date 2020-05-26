@@ -7,15 +7,21 @@ use list::List;
 use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
 use termion::event::Key;
-use termion::raw::IntoRawMode;
+use termion::raw::{IntoRawMode, RawTerminal};
 use termion::terminal_size;
 use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
-use std::io::{Write, stdout, stdin};
+use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
+use std::convert::TryFrom;
+use termion::async_stdin;
+use termion::screen::AlternateScreen;
+use std::thread;
+use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
     list: List,
     all: bool,
+    display: Option<(PathBuf, String)>
 }
 
 impl LsKey {
@@ -32,7 +38,8 @@ impl LsKey {
 
             LsKey {
                 list,
-                all
+                all,
+                display: None,
             }
     }
 
@@ -51,26 +58,28 @@ impl LsKey {
             self.clone()
     }
 
-    pub fn run_list_read(self) {
+   pub fn run_list_read(mut self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
             //let res = terminal::input_n_display::grid(entries_keyed);
             let res = terminal::input_n_display::grid(entries_keyed);
+            let mut show = "".to_string();
             if let Some(r) = res {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
-                     println!("\n\n{}", d);
+                     //println!("\n\n{}", d);
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
                 } else {
-                    println!("\n\n");
-                    list::print_list_with_keys(list.clone());
+                    //println!("\n\n");
+                    //list::print_list_with_keys(list.clone());
                 }
             } else {
-                println!("\n\n");
-                list::print_list_with_keys(list.clone());
+                //println!("\n\n");
+                //list::print_list_with_keys(list.clone());
             }
             self.run_cmd(list);
     }
@@ -153,12 +162,10 @@ impl LsKey {
              path_cache.switch();
              match cmd.as_str() {
                  "fzf" => {
-                     println!("\nFzf command detected...\n");
                      //Split cmd ('fzf')
                      let split: Vec<&str> = input.as_read.split("fzf").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"fzf {}"#, cmd);
-                     println!("fzf commadn:\n{:#?}", cmd);
                      let output = terminal::shell::cmd(cmd.clone());
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
@@ -171,7 +178,6 @@ impl LsKey {
              self.run_list_read();
          } else {
              let as_read = input.as_read.as_str();
-             println!("\n\nInput: {}", as_read);
              match as_read {
                  "w" => {
                       // Cd the parent shell into the directory viewed by ls-key.
@@ -188,7 +194,6 @@ impl LsKey {
                      path_cache.switch();
                      let output = terminal::shell::cmd("fzf".to_string());
                      let file_path = output.unwrap();
-                     println!("Path: \n\n{}", file_path);
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
                      self.run_list_read();
@@ -198,12 +203,10 @@ impl LsKey {
                          self.list.relative_parent_dir_path.as_path()
                      );
                      path_cache.switch();
-                     println!("\nvim command detected...\n");
                      //Split cmd ('vim')
                      let split: Vec<&str> = input.as_read.split("vim").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"vim {}"#, cmd);
-                     println!("vim commadn:\n{:#?}", cmd);
                      //let output = terminal::shell::cmd(cmd.clone());
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![]);
@@ -215,12 +218,10 @@ impl LsKey {
                          self.list.relative_parent_dir_path.as_path()
                      );
                      path_cache.switch();
-                     println!("\nzsh command detected...\n");
                      //Split cmd ('zsh')
                      let split: Vec<&str> = input.as_read.split("zsh").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"zsh {}"#, cmd);
-                     println!("zsh commadn:\n{:#?}", cmd);
                      //let output = terminal::shell::cmd(cmd.clone());
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("zsh".to_string(), vec![]);
@@ -233,7 +234,6 @@ impl LsKey {
                      );
                      path_cache.switch();
                      let output = terminal::shell::cmd(as_read.to_string()).unwrap();
-                     println!("\nls-key custom command results:\n{}\n", output);
                      path_cache.switch_back();
                      self.run_list_read();
                  }
@@ -247,7 +247,6 @@ impl LsKey {
                 if let Some(i) = t {
                     let input = Input::new();
                     let input = input.parse(i);
-                    println!("keytype: {:#?}", input.cmd_type);
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
                         CmdType::cmd => {
@@ -281,8 +280,129 @@ impl LsKey {
     // understanding.
     fn run_cmd(mut self, list: List) {
         //let input = terminal::input_n_display::read();
-        let input = terminal::input_n_display::read_process_chars();
-        self.readline_mode(list, Ok(input))
+        let input = self.clone().read_process_chars(&list);
+        self.readline_mode(list, Ok(input));
+    }
+
+    fn read_process_chars(mut self, list: &List) -> Option<String> {
+        let mut input: Vec<char> = vec![];
+        let stdin = stdin();
+        let stdout = stdout();
+        let mut stdout = stdout.lock().into_raw_mode().unwrap();
+        let mut stdin = stdin.lock();
+        let mut result: Option<String> =  None;
+
+        let show = self.display.clone();
+        write!(
+            stdout,
+            "{}",
+            termion::clear::All
+        ).unwrap();
+
+        if let Some(x) = show {
+            if x.0 == self.list.relative_parent_dir_path {
+                let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                write(b"", &mut stdout, display.to_string(), (0, 3));
+            }
+        }
+
+        stdout.flush().unwrap();
+
+        fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)) {
+            //stdout.write_all(some_stuff).unwrap();
+            //stdout.flush().unwrap();
+            write!(
+                stdout,
+                "{}{}{}",std::str::from_utf8(&some_stuff).unwrap(),
+                termion::cursor::Goto(locate.0, locate.1),
+                termion::cursor::Hide,
+
+            ).unwrap();
+            //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
+            write!(stdout,
+                "{}{}{}{}", format!("{}", input_string.as_str()
+                ),
+               termion::clear::AfterCursor,
+               termion::cursor::Goto(locate.0, (locate.1 + 1)),
+               termion::cursor::Hide,
+            ).unwrap();
+        }
+
+        for c in stdin.keys() {
+            match c.unwrap() {
+                Key::Char('q') => break,
+                Key::Char(c) => {
+                    match c {
+                        //' ' => {
+                        //    println!("$")
+                        //},
+                        //'v' => println!("{}im", c),
+                        _ => {
+                            input.push(c);
+                        }
+                    }
+                }
+                Key::Alt(c) => println!("^{}", c),
+                Key::Ctrl(c) => println!("*{}", c),
+                Key::Esc => println!("ESC"),
+                Key::Esc => println!("ESC"),
+                Key::Left => println!("←"),
+                Key::Right => println!("→"),
+                Key::Up => println!("↑"),
+                Key::Down => println!("↓"),
+                Key::Backspace => {
+                    if let Some(x) = input.pop() {
+                    } else {
+                        write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
+                    }
+                },
+                _ => {}
+            }
+            let input_string: String = input.iter().collect();
+            let input_len = input.iter().count();
+            let input_len = u16::try_from(input_len).ok().unwrap();
+            let _first = input.iter().nth(0);
+            if let Some(mut first) = _first {
+                let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
+                if key.is_ok() {
+                    first = &'r';
+                } else {
+                    if first != &'$' {
+                         first = &'f';
+                    }
+                }
+
+                let place = (0, 1);
+
+                match first {
+                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
+                    'r' => write(b"return file mode detected...", &mut stdout, input_string.clone(), place),
+                    '$' => write(b"command mode detected... ", &mut stdout, input_string.clone(), place),
+                    _ => write(b"invalid mode detected...", &mut stdout, input_string.clone(), place),
+                };
+            }
+
+            let show = self.display.clone();
+
+            if let Some(x) = show {
+                if x.0 == self.list.relative_parent_dir_path {
+                    let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                    write(b"", &mut stdout, display.to_string(), (0, 3));
+                }
+            }
+
+            stdout.flush().unwrap();
+
+            if input.iter().last() == Some(&'\n') {
+                input.pop();
+                let input_string: String = input.iter().collect();
+                result = Some(input_string);
+                break
+            }
+        }
+
+        //write!(stdout, "{}", termion::cursor::Show).unwrap();
+        result
     }
 }
 
@@ -375,12 +495,9 @@ impl Input {
 
     fn parse_cmd(&self, input: String) -> (Option<String>, Option<Vec<String>>) {
         let mut input: Vec<String> = input.clone().split(" ").map(|s| s.to_string()).collect();
-        println!("input:\n{:#?}", input);
         let cmd = input.remove(0);
 
-        println!("cmd:\n{:#?}", cmd);
         let args = self.defang_args(input);
-        println!("defang args:\n{:#?}", args);
         (Some(cmd), args)
      }
 
