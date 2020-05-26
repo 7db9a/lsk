@@ -71,7 +71,7 @@ impl LsKey {
                 let width = r.1;
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
-                     println!("\n\n{}", d);
+                     //println!("\n\n{}", d);
                      self.display = Some(d.to_string());
                 } else {
                     println!("\n\n");
@@ -372,7 +372,7 @@ impl LsKey {
                     }
                 }
 
-                let place = (1, 1);
+                let place = (1, 3);
 
                 match first {
                     'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
@@ -385,7 +385,7 @@ impl LsKey {
             let show = self.display.clone();
 
             if let Some(x) = show {
-                 write(b"", &mut stdout, x, (15, 1));
+                 write(b"\n\r", &mut stdout, x, (1, 1));
             }
 
             stdout.flush().unwrap();
