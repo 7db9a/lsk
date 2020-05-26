@@ -305,15 +305,17 @@ impl LsKey {
             //stdout.flush().unwrap();
             write!(
                 stdout,
-                "\n\r{}: ",std::str::from_utf8(&some_stuff).unwrap(),
+                "{}{}{}: ",std::str::from_utf8(&some_stuff).unwrap(),
+                termion::cursor::Goto(locate.0, locate.1),
+                termion::cursor::Hide,
 
             ).unwrap();
             //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
             write!(stdout,
-                "{}{}{}{}", format!("{}", input_string.as_str()
+                "{}{}{}{}", format!("\n\r{}", input_string.as_str()
                 ),
                termion::clear::AfterCursor,
-               termion::cursor::Goto(locate.0, locate.1),
+               termion::cursor::Goto(locate.0, (locate.1 + 1)),
                termion::cursor::Hide,
             ).unwrap();
         }
@@ -343,7 +345,7 @@ impl LsKey {
                 Key::Backspace => {
                     if let Some(x) = input.pop() {
                     } else {
-                        write!(stdout, "{}{}", termion::cursor::Goto(1, 3), termion::clear::AfterCursor).unwrap();
+                        write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
                     }
                 },
                 _ => {}
@@ -362,7 +364,7 @@ impl LsKey {
                     }
                 }
 
-                let place = (1, 3);
+                let place = (1, 2);
 
                 match first {
                     'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
