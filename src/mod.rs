@@ -379,7 +379,7 @@ impl LsKey {
             if let Some(x) = show {
                 if x.0 == self.list.relative_parent_dir_path {
                     let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                    write(b"\n\r", &mut stdout, display.to_string(), (1, 3));
+                    write(b"\n\r", &mut stdout, display.to_string(), (0, 3));
                 }
             }
 
