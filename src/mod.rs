@@ -305,7 +305,7 @@ impl LsKey {
             //stdout.flush().unwrap();
             write!(
                 stdout,
-                "{}\n\r",std::str::from_utf8(&some_stuff).unwrap(),
+                "\n\r{}: ",std::str::from_utf8(&some_stuff).unwrap(),
 
             ).unwrap();
             //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
@@ -343,7 +343,7 @@ impl LsKey {
                 Key::Backspace => {
                     if let Some(x) = input.pop() {
                     } else {
-                        write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
+                        write!(stdout, "{}{}", termion::cursor::Goto(1, 3), termion::clear::AfterCursor).unwrap();
                     }
                 },
                 _ => {}
@@ -377,7 +377,7 @@ impl LsKey {
             if let Some(x) = show {
                 if x.0 == self.list.relative_parent_dir_path {
                     let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                    write(b"\n\r", &mut stdout, display.to_string(), (1, 1));
+                    write(b"\n\r", &mut stdout, display.to_string(), (1, 3));
                 }
             }
 
