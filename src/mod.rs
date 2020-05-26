@@ -376,7 +376,8 @@ impl LsKey {
 
             if let Some(x) = show {
                 if x.0 == self.list.relative_parent_dir_path {
-                    write(b"\n\r", &mut stdout, x.1, (1, 1));
+                    let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                    write(b"\n\r", &mut stdout, display.to_string(), (1, 1));
                 }
             }
 
