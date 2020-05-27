@@ -1,5 +1,6 @@
 pub mod list;
 pub mod terminal;
+pub mod fuzzy;
 
 use std::path::{Path, PathBuf};
 use std::fs::metadata;
