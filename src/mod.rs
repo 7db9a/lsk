@@ -74,6 +74,8 @@ impl LsKey {
                      //println!("\n\n{}", d);
                      self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
                 } else {
+                    let display = grid.fit_into_columns(1);
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
                     //println!("\n\n");
                     //list::print_list_with_keys(list.clone());
                 }
@@ -295,7 +297,7 @@ impl LsKey {
         let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
             write!(
                 stdout,
-                "{}{}{}",std::str::from_utf8(&some_stuff).unwrap(),
+                "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
                 termion::cursor::Goto(locate.0, locate.1),
                 termion::cursor::Hide,
 
