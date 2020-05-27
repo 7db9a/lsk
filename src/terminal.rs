@@ -423,7 +423,7 @@ mod tests {
     //    spawn.join();
     //}
 
-    #[test]
+    //#[test]
     //#[ignore]//play
     fn termion_read_process_chars() {
 	    let test_spawn = thread::spawn(move || {
@@ -437,7 +437,7 @@ mod tests {
         //spawn.join();
     }
 
-    #[test]
+    //#[test]
     //#[ignore]//play
     fn termion_alternate_screen() {
 	    let test_spawn = thread::spawn(move || {
@@ -463,7 +463,7 @@ mod tests {
         //spawn.join();
     }
 
-    #[test]
+    //#[test]
     #[ignore]//play
     fn termion_async_key() {
 	    let test_spawn = thread::spawn(move || {
