@@ -279,7 +279,6 @@ impl LsKey {
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
     fn run_cmd(mut self, list: List) {
-        //let input = terminal::input_n_display::read();
         let input = self.clone().read_process_chars(&list);
         self.readline_mode(list, Ok(input));
     }
@@ -292,6 +291,27 @@ impl LsKey {
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
 
+
+        let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
+            write!(
+                stdout,
+                "{}{}{}",std::str::from_utf8(&some_stuff).unwrap(),
+                termion::cursor::Goto(locate.0, locate.1),
+                termion::cursor::Hide,
+
+            ).unwrap();
+            stdout.flush().unwrap();
+
+            write!(stdout,
+                "{}{}{}{}", format!("{}", input_string.as_str()
+                ),
+               termion::clear::AfterCursor,
+               termion::cursor::Goto((locate.0), (locate.1 + 1)),
+               termion::cursor::Hide,
+            ).unwrap();
+            stdout.flush().unwrap();
+        };
+
         let show = self.display.clone();
         write!(
             stdout,
@@ -301,32 +321,21 @@ impl LsKey {
 
         if let Some(x) = show {
             if x.0 == self.list.relative_parent_dir_path {
+                //into_raw_mode requires carriage returns.
                 let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                write(b"", &mut stdout, display.to_string(), (0, 3));
+                write_it(b"", &mut stdout, display.to_string(), (0, 3));
+
+                stdout.flush().unwrap();
+                write!(
+                    stdout,
+                    "{}",
+                    termion::cursor::Goto(0, 3),
+                ).unwrap();
+                stdout.flush().unwrap();
             }
         }
 
         stdout.flush().unwrap();
-
-        fn write(some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)) {
-            //stdout.write_all(some_stuff).unwrap();
-            //stdout.flush().unwrap();
-            write!(
-                stdout,
-                "{}{}{}",std::str::from_utf8(&some_stuff).unwrap(),
-                termion::cursor::Goto(locate.0, locate.1),
-                termion::cursor::Hide,
-
-            ).unwrap();
-            //write!(stdout, "{}", termion::clear::CurrentLine).unwrap();
-            write!(stdout,
-                "{}{}{}{}", format!("{}", input_string.as_str()
-                ),
-               termion::clear::AfterCursor,
-               termion::cursor::Goto(locate.0, (locate.1 + 1)),
-               termion::cursor::Hide,
-            ).unwrap();
-        }
 
         for c in stdin.keys() {
             match c.unwrap() {
@@ -352,8 +361,9 @@ impl LsKey {
                 Key::Down => println!("↓"),
                 Key::Backspace => {
                     if let Some(x) = input.pop() {
-                    } else {
-                        write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
+                        if input.iter().count() == 0 {
+                            write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
+                        }
                     }
                 },
                 _ => {}
@@ -375,10 +385,10 @@ impl LsKey {
                 let place = (0, 1);
 
                 match first {
-                    'f' => write(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
-                    'r' => write(b"return file mode detected...", &mut stdout, input_string.clone(), place),
-                    '$' => write(b"command mode detected... ", &mut stdout, input_string.clone(), place),
-                    _ => write(b"invalid mode detected...", &mut stdout, input_string.clone(), place),
+                    'f' => write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
+                    'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
+                    '$' => write_it(b"command mode detected...     ", &mut stdout, input_string.clone(), place),
+                    _ =>   write_it(b"invalid mode detected...     ", &mut stdout, input_string.clone(), place),
                 };
             }
 
@@ -387,11 +397,16 @@ impl LsKey {
             if let Some(x) = show {
                 if x.0 == self.list.relative_parent_dir_path {
                     let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                    write(b"", &mut stdout, display.to_string(), (0, 3));
+                    write_it(b"", &mut stdout, display.to_string(), (0, 3));
+
+                    write!(
+                        stdout,
+                        "{}",
+                        termion::cursor::Goto(0, 3),
+                    ).unwrap();
+                    stdout.flush().unwrap();
                 }
             }
-
-            stdout.flush().unwrap();
 
             if input.iter().last() == Some(&'\n') {
                 input.pop();
