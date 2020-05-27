@@ -22,6 +22,8 @@ use std::time::Duration;
 pub struct LsKey {
     list: List,
     all: bool,
+    input: Option<String>,
+    fuzzy_list: Option<List>,
     display: Option<(PathBuf, String)>
 }
 
@@ -40,10 +42,52 @@ impl LsKey {
             LsKey {
                 list,
                 all,
+                input: None,
+                fuzzy_list: None,
                 display: None,
             }
     }
 
+    fn fuzzy_score(mut self, input: String) -> fuzzy::demo::Scores {
+        let files = self.list.files.clone();
+        let dirs = self.list.dirs.clone();
+        let input = input.as_str();
+
+        let score_list = |file: PathBuf| {
+            (
+             file.clone(),
+             fuzzy::demo::score(file.to_str().unwrap(), input)
+            )
+        };
+
+        let files_score: Vec<fuzzy::demo::Score> =
+           files.iter()
+               .map(|file| fuzzy::demo::Score::Files(score_list(file.to_path_buf())))
+               .collect();
+
+        let dirs_score: Vec<fuzzy::demo::Score> =
+           dirs.iter()
+               .map(|dir| fuzzy::demo::Score::Dirs(score_list(dir.to_path_buf())))
+               .collect();
+           //list.map(|x
+
+        let files = dirs_score;
+        let dirs = files_score;
+
+        fuzzy::demo::Scores {
+            files,
+            dirs
+        }
+    }
+
+    fn fuzzy_rank(mut self, scores: fuzzy::demo::Scores) {//-> fuzzy::demo::Scores {
+
+    }
+
+    pub fn fuzzy_update(mut self, input: String) -> Self {
+        self.clone().fuzzy_score(input);
+        self.clone()
+    }
     pub fn update(mut self, list: List) -> Self {
             let list = if self.all {
                    list
@@ -388,7 +432,12 @@ impl LsKey {
                 let place = (0, 1);
 
                 match first {
-                    'f' => write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place),
+                    'f' => {
+                        write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
+
+                        self.clone().fuzzy_update(input_string);
+
+                    },
                     'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
                     '$' => write_it(b"command mode detected...     ", &mut stdout, input_string.clone(), place),
                     _ =>   write_it(b"invalid mode detected...     ", &mut stdout, input_string.clone(), place),
