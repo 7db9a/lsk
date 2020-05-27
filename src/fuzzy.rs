@@ -16,11 +16,13 @@ mod tests {
     #[ignore]//docker
     fn score() {
         let res = super::demo::score("abc", "abx");
-        assert_eq!(res, None)
-        //super::demo::score("abcycz", "abc")
-        //super::demo::score("abcycz", "xyz")
-        //assert_eq!(indices, [0, 2, 4]);
-        //assert_eq!(score, 70);
+        assert_eq!(res, None);
+        let (score, indices) = super::demo::score("axbycz", "xyz").unwrap();
+        assert_eq!(indices, [1, 3, 5]);
+        assert_eq!(score, 39);
+        let (score, indices) = super::demo::score("axbycz", "abc").unwrap();
+        assert_eq!(indices, [0, 2, 4]);
+        assert_eq!(score, 55);
     }
 
     //#[ignore]//host
