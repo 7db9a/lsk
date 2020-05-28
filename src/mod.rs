@@ -434,14 +434,21 @@ impl LsKey {
     // understanding.
     fn run_cmd(mut self, list: List) {
         let old_list = list.clone();
-        let (some_list, input, is_fuzzed) = self.clone().read_process_chars(&list);
-        if let Some(list) = some_list {
-            let new_list = list.clone();
-            self.clone().readline_mode(list, Ok(input), is_fuzzed);
+        let mut execute = false;
+        while !execute {
+           let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(list.clone());
+           execute = _execute;
+
+           if execute {
+               if let Some(list) = some_list {
+                   let new_list = list.clone();
+                   self.clone().readline_mode(list, Ok(input), is_fuzzed);
+               }
+           }
         }
     }
 
-    fn read_process_chars(mut self, list: &List) -> (Option<list::List>, Option<String>, bool) {
+    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool) {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
@@ -450,7 +457,9 @@ impl LsKey {
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
         let mut the_list: Option<list::List> = None;
+        let original_list = list;
         let original_display = self.clone().display;
+        let mut execute = true;
 
 
         let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
@@ -531,8 +540,9 @@ impl LsKey {
                     if let Some(x) = input.pop() {
                         if input.iter().count() == 0 {
                             //write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
+                            execute = false;
+                            break;
 
-                            self.display = original_display.clone();
                             //let show = original_display.clone();
                             //write!(
                             //    stdout,
@@ -656,8 +666,10 @@ impl LsKey {
             the_list = Some(self.list);
         }
 
+
+
         //write!(stdout, "{}", termion::cursor::Show).unwrap();
-        (the_list, result, is_fuzzed)
+        (the_list, result, is_fuzzed, execute)
     }
 }
 
