@@ -72,18 +72,21 @@ mod tests {
         let file_a = "xayb";
         let file_b = "xyazabc";
         let file_c = "xyza";
+        let file_d = "afd";
         let dir_a = "dirxyzabc";
         let dir_b = "dirxzabc";
 
         let res_a = super::demo::score(file_a, guess);
         let res_b = super::demo::score(file_b, guess);
         let res_c = super::demo::score(file_c, guess);
+        let res_d = super::demo::score(file_d, guess);
 
         let mut scores = super::demo::Scores {
             files: vec![
                      super::demo::Score::Files((PathBuf::from(file_a), res_a.clone())),
                      super::demo::Score::Files((PathBuf::from(file_b), res_b.clone())),
                      super::demo::Score::Files((PathBuf::from(file_c), res_c.clone())),
+                     super::demo::Score::Files((PathBuf::from(file_d), res_d.clone())),
                  ],
 
             dirs: vec![
@@ -108,7 +111,7 @@ mod tests {
 
         assert_eq!(
              scores.files.iter().count(),
-             3
+             4
         );
 
         assert_eq!(

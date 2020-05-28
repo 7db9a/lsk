@@ -280,10 +280,10 @@ pub mod input_n_display {
                 grid.add(Cell::from(s.as_str()));
         }
 
-        let stdout = stdout();
-        let mut stdout = stdout.lock();
-        let stdin = stdin();
-        let mut stdin = stdin.lock();
+        //let stdout = stdout();
+        //let mut stdout = stdout.lock();
+        //let stdin = stdin();
+        //let mut stdin = stdin.lock();
 
         let res = terminal_size();
         match res {

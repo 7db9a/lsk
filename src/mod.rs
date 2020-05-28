@@ -71,8 +71,8 @@ impl LsKey {
                .collect();
            //list.map(|x
 
-        let files = dirs_score;
-        let dirs = files_score;
+        let files = files_score;
+        let dirs = dirs_score;
 
         fuzzy::demo::Scores {
             files,
@@ -80,14 +80,74 @@ impl LsKey {
         }
     }
 
-    fn fuzzy_rank(mut self, scores: fuzzy::demo::Scores) {//-> fuzzy::demo::Scores {
+    fn fuzzy_rank(mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
+        scores.files.sort_by(|a, b| fuzzy::demo::order(a, b));
+        scores.dirs.sort_by(|a, b| fuzzy::demo::order(a, b));
 
+        scores
+    }
+
+    // Filter out no-scores.
+    fn fuzzy_filter(mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
+         let mut files_vec: Vec<fuzzy::demo::Score> = vec![];
+         let mut dirs_vec: Vec<fuzzy::demo::Score> = vec![];
+         for score in scores.files.iter() {
+             let path = score.score().0;
+             let score = score.score().1;
+
+             let thing = (path, score.clone());
+
+             if score.is_some() {
+                  files_vec.push(fuzzy::demo::Score::Files(thing));
+             }
+         }
+
+         for score in scores.dirs.iter() {
+             let path = score.score().0;
+             let score = score.score().1;
+
+             let thing = (path, score.clone());
+
+             if score.is_some() {
+                  dirs_vec.push(fuzzy::demo::Score::Dirs(thing));
+             }
+         }
+
+         fuzzy::demo::Scores {
+             files: files_vec,
+             dirs: dirs_vec
+         }
     }
 
     pub fn fuzzy_update(mut self, input: String) -> Self {
-        self.clone().fuzzy_score(input);
+        let scores = self.clone().fuzzy_score(input);
+        let scores = self.clone().fuzzy_rank(scores);
+        let scores = self.clone().fuzzy_filter(scores);
+        let list = self.clone().scores_to_list(scores);
+        let res =  self.clone().fuzzy_update_list_read(list.clone());
+        //self.list = list;
+        self.display = res;
+
         self.clone()
     }
+
+    pub fn scores_to_list(mut self, mut scores: fuzzy::demo::Scores) -> list::List {
+        let files_list: Vec<PathBuf> = scores.files.iter().map(|score|
+            score.score().0
+        ).collect();
+        let dirs_list: Vec<PathBuf> = scores.dirs.iter().map(|score|
+            score.score().0
+        ).collect();
+
+        let pre_fuzzy = self.list.clone();
+
+        self.list.files = files_list;
+        self.list.dirs = dirs_list;
+
+        //assert_ne!(pre_fuzzy, self.list);
+        self.list.clone()
+    }
+
     pub fn update(mut self, list: List) -> Self {
             let list = if self.all {
                    list
@@ -105,7 +165,7 @@ impl LsKey {
 
    pub fn run_list_read(mut self) {
             let list = self.list.clone();
-            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone());
+            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
             //let res = terminal::input_n_display::grid(entries_keyed);
@@ -129,6 +189,42 @@ impl LsKey {
                 //list::print_list_with_keys(list.clone());
             }
             self.run_cmd(list);
+    }
+
+   pub fn fuzzy_update_list_read(mut self, list: List) -> Option<(PathBuf, String)> {
+            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), false);
+
+            let entries_keyed: Vec<String> = list::key_entries(entries);
+            //let res = terminal::input_n_display::grid(entries_keyed);
+            //println!("{:#?}", entries_keyed);
+            let res = terminal::input_n_display::grid(entries_keyed); // stops here!
+            //println!("\n....made it!\n");
+            let mut show = "".to_string();
+            if let Some(r) = res {
+                let grid = r.0;
+                let width = r.1;
+                let display = grid.fit_into_width(width);
+                if let Some(d) = display {
+                     //println!("\n\n{}", d);
+                     //println!("\nmade it!\n");
+                     let old_display = self.display.clone();
+                     //self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
+                     //assert_eq!(self.display, Some((PathBuf::from(""), "".to_string())));
+                     //assert_ne!(old_display, self.display);
+                     return Some((self.list.relative_parent_dir_path.clone(), d.to_string()))
+                     //println!("{:#?}", self.display);
+                } else {
+                    let display = grid.fit_into_columns(1);
+                    //self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                    //println!("\n\n");
+                    //list::print_list_with_keys(list.clone());
+                     return Some((self.list.relative_parent_dir_path.clone(), display.to_string()))
+                }
+            } else {
+                //println!("\n\n");
+                //list::print_list_with_keys(list.clone());
+                self.display.clone()
+            }
     }
 
     fn return_file_by_key_mode(mut self, list: List, input: Input) {
@@ -385,6 +481,13 @@ impl LsKey {
         stdout.flush().unwrap();
 
         for c in stdin.keys() {
+            write!(
+                stdout,
+                "{}",
+                termion::clear::All
+            ).unwrap();
+            stdout.flush().unwrap();
+
             match c.unwrap() {
                 Key::Char('q') => break,
                 Key::Char(c) => {
@@ -419,6 +522,7 @@ impl LsKey {
             let input_len = input.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
+
             if let Some(mut first) = _first {
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
@@ -433,10 +537,26 @@ impl LsKey {
 
                 match first {
                     'f' => {
+                        let _show = self.display.clone();
                         write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
+                        let ls_key = self.fuzzy_update(input_string);
+                        self = ls_key;
+                        //let _show = self.clone().fuzzy_update_list_read();
+                        //let _show = self.display.clone();
+                        //assert_ne!(_show, self.display);
+                        //if let Some(x) = _show {
+                        //    if x.0 == self.list.relative_parent_dir_path {
+                        //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                        //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
 
-                        self.clone().fuzzy_update(input_string);
-
+                        //        write!(
+                        //            stdout,
+                        //            "{}",
+                        //            termion::cursor::Goto(0, 3),
+                        //        ).unwrap();
+                        //        stdout.flush().unwrap();
+                        //    }
+                        //}
                     },
                     'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
                     '$' => write_it(b"command mode detected...     ", &mut stdout, input_string.clone(), place),
@@ -444,7 +564,7 @@ impl LsKey {
                 };
             }
 
-            let show = self.display.clone();
+            let show = self.clone().display.clone();
 
             if let Some(x) = show {
                 if x.0 == self.list.relative_parent_dir_path {
