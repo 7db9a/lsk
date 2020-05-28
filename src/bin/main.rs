@@ -52,7 +52,7 @@ fn get_file_by_key_action(c: &Context) {
         .unwrap();
 
     let key: usize = key.parse().expect("The key must parseable into an integer.");
-    let res = list.get_file_by_key(key);
+    let res = list.get_file_by_key(key, true);
     if let Some(x) = res {
        println!("{}", x.to_str().unwrap());
     }

@@ -48,15 +48,25 @@ impl LsKey {
             }
     }
 
-    fn fuzzy_score(mut self, input: String) -> fuzzy::demo::Scores {
+    fn fuzzy_score(mut self, mut input: String) -> fuzzy::demo::Scores {
         let files = self.list.files.clone();
         let dirs = self.list.dirs.clone();
-        let input = input.as_str();
 
+        let mut input_vec_str: Vec<&str> = input.split(" ").collect();
+        //let mut input_vec: Vec<String> = vec![];
+        //for x in input_vec_str.iter() {
+        //     input_vec.push(x.to_string())
+        //
+        //}
+
+        if input_vec_str.iter().count() > 1{
+            input_vec_str.pop();
+            input = input_vec_str.into_iter().collect();
+        }
         let score_list = |file: PathBuf| {
             (
              file.clone(),
-             fuzzy::demo::score(file.to_str().unwrap(), input)
+             fuzzy::demo::score(file.to_str().unwrap(), &input)
             )
         };
 
@@ -127,6 +137,7 @@ impl LsKey {
         let res =  self.clone().fuzzy_update_list_read(list.clone());
         //self.list = list;
         self.display = res;
+        self.fuzzy_list = Some(list);
 
         self.clone()
     }
@@ -227,10 +238,10 @@ impl LsKey {
             }
     }
 
-    fn return_file_by_key_mode(mut self, list: List, input: Input) {
+    fn return_file_by_key_mode(mut self, list: List, input: Input, is_fuzzed: bool) {
         let get_file = |key_string: String| {
              let key: usize = key_string.parse().unwrap();
-             self.list.get_file_by_key(key).unwrap()
+             self.list.get_file_by_key(key, !is_fuzzed).unwrap()
         };
 
         let mut n = 0;
@@ -259,7 +270,7 @@ impl LsKey {
         }
     }
 
-    fn key_mode(mut self, list: List, input: Input) {
+    fn key_mode(mut self, list: List, input: Input, is_fuzzed: bool) {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
             0 => {
@@ -271,7 +282,7 @@ impl LsKey {
                  self.run_list_read();
             },
             _ => {
-                  let file_pathbuf = list.get_file_by_key(key).unwrap();
+                  let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
                   if metadata(file_pathbuf.clone()).unwrap().is_dir() {
                       let file_path =
                           file_pathbuf
@@ -384,7 +395,7 @@ impl LsKey {
         }
     }
 
-    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>) {
+    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -396,7 +407,7 @@ impl LsKey {
                             self.cmd_mode(list, input);
                         },
                         CmdType::single_key => {
-                            self.key_mode(list, input);
+                            self.key_mode(list, input, is_fuzzed);
                         },
                         CmdType::multiple_keys => {
                             /*
@@ -404,7 +415,7 @@ impl LsKey {
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
                                 * then type_text_spawn(text_vec);
                             */
-                            self.return_file_by_key_mode(list, input);
+                            self.return_file_by_key_mode(list, input, is_fuzzed);
                         }
                     }
                     ()
@@ -422,17 +433,24 @@ impl LsKey {
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
     fn run_cmd(mut self, list: List) {
-        let input = self.clone().read_process_chars(&list);
-        self.readline_mode(list, Ok(input));
+        let old_list = list.clone();
+        let (some_list, input, is_fuzzed) = self.clone().read_process_chars(&list);
+        if let Some(list) = some_list {
+            let new_list = list.clone();
+            self.clone().readline_mode(list, Ok(input), is_fuzzed);
+        }
     }
 
-    fn read_process_chars(mut self, list: &List) -> Option<String> {
+    fn read_process_chars(mut self, list: &List) -> (Option<list::List>, Option<String>, bool) {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
+        let mut is_fuzzed = false;
+        let mut the_list: Option<list::List> = None;
+        let original_display = self.clone().display;
 
 
         let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
@@ -512,16 +530,39 @@ impl LsKey {
                 Key::Backspace => {
                     if let Some(x) = input.pop() {
                         if input.iter().count() == 0 {
-                            write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
+                            //write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
+
+                            self.display = original_display.clone();
+                            //let show = original_display.clone();
+                            //write!(
+                            //    stdout,
+                            //    "{}",
+                            //    termion::clear::All
+                            //).unwrap();
+
+                            //if let Some(x) = show {
+                            //    if x.0 == self.list.relative_parent_dir_path {
+                            //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                            //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
+
+                            //        write!(
+                            //            stdout,
+                            //            "{}",
+                            //            termion::cursor::Goto(0, 3),
+                            //        ).unwrap();
+                            //        stdout.flush().unwrap();
+                            //    }
+                            //}
                         }
                     }
                 },
                 _ => {}
             }
-            let input_string: String = input.iter().collect();
+            let mut input_string: String = input.iter().collect();
             let input_len = input.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
+            let last = input.iter().last();
 
             if let Some(mut first) = _first {
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
@@ -539,8 +580,31 @@ impl LsKey {
                     'f' => {
                         let _show = self.display.clone();
                         write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
-                        let ls_key = self.fuzzy_update(input_string);
-                        self = ls_key;
+                        let some_keys = parse_keys(input_string.as_str());
+
+                        if let Some(keys) = some_keys {
+                            let fuzzy_list = self.fuzzy_list.clone();
+                            if let Some(x) = fuzzy_list {
+                                //self.list = x.clone();
+                                input_string = keys;
+                                input = input_string.chars().collect();
+                                the_list = Some(x);
+                                // clear input and drop in the parsed key.
+                            }
+                        } else {
+                            //if last == ' ' {
+                            //     let _input = input.clone();
+                            //     _input.pop();
+                            //     let mut _input_string: String = _input.iter().collect();
+                            //     let ls_key = self.fuzzy_update(_input_string);
+                            //     self = ls_key;
+                            //} else (
+                                let ls_key = self.fuzzy_update(input_string);
+                                self = ls_key;
+                            //}
+                        }
+
+                        is_fuzzed = true;
                         //let _show = self.clone().fuzzy_update_list_read();
                         //let _show = self.display.clone();
                         //assert_ne!(_show, self.display);
@@ -588,8 +652,12 @@ impl LsKey {
             }
         }
 
+        if the_list.is_none() {
+            the_list = Some(self.list);
+        }
+
         //write!(stdout, "{}", termion::cursor::Show).unwrap();
-        result
+        (the_list, result, is_fuzzed)
     }
 }
 
@@ -712,6 +780,53 @@ impl Input {
             false
         }
      }
+}
+
+fn parse_keys(input: &str) -> Option<String> {
+    let x = input;
+    let mut y: Vec<&str> = x.split(" ").collect();
+    let mut count = y.iter().count();
+
+    let some = if count > 1 {
+    let z = y.iter().nth(0).unwrap();
+    //let index = |z: &str| -> usize {
+    //     y.iter().position(|x| x == &z).unwrap()
+    //};
+    y.remove(0);
+
+    let mut n = 0;
+    let single_key: bool;
+    if count == 2 {
+        single_key = true;
+    } else {
+        single_key = false;
+    }
+    loop {
+        y.insert(n, " ");
+        count = count - 1;
+        n = n + 2;
+        if count == 1 {
+            break
+        }
+    }
+
+    if single_key {
+       y.remove(0);
+    }
+
+    let z: String = y.into_iter().collect();
+
+    if z == "".to_string() {
+        None
+    } else {
+        Some(z)
+    }
+
+    } else {
+        None
+    };
+
+    some
 }
 
 #[cfg(test)]

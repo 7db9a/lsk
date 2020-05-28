@@ -71,8 +71,8 @@ impl List {
         self
     }
 
-    pub fn get_file_by_key(&self, key: usize) -> Option<PathBuf> {
-        let all_files = order_and_sort_list(self.clone(), true);
+    pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
+        let all_files = order_and_sort_list(self.clone(), sort);
         let all_files = all_files.iter();
         let mut done = false;
 
@@ -282,9 +282,9 @@ mod tests {
             .list_skip_hidden()
             .unwrap();
 
-        let file_path_1 = list.get_file_by_key(1).unwrap();
-        let file_path_2 = list.get_file_by_key(2).unwrap();
-        let file_path_3 = list.get_file_by_key(3);
+        let file_path_1 = list.get_file_by_key(1, true).unwrap();
+        let file_path_2 = list.get_file_by_key(2, true).unwrap();
+        let file_path_3 = list.get_file_by_key(3, true);
 
         assert_eq!(
             true,
@@ -323,11 +323,11 @@ mod tests {
             .list_include_hidden()
             .unwrap();
 
-        let file_path_1 = list.get_file_by_key(1).unwrap();
-        let file_path_2 = list.get_file_by_key(2).unwrap();
-        let file_path_3 = list.get_file_by_key(3).unwrap();
-        let file_path_4 = list.get_file_by_key(4).unwrap();
-        let file_path_5 = list.get_file_by_key(5);
+        let file_path_1 = list.get_file_by_key(1, true).unwrap();
+        let file_path_2 = list.get_file_by_key(2, true).unwrap();
+        let file_path_3 = list.get_file_by_key(3, true).unwrap();
+        let file_path_4 = list.get_file_by_key(4, true).unwrap();
+        let file_path_5 = list.get_file_by_key(5, true);
 
         //assert_eq!(
         //    true,
