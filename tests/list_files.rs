@@ -3,7 +3,7 @@ use std::fs::metadata;
 use std::path::{Path, PathBuf};
 use fixture::Fixture;
 use fixture::command_assistors;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 // Linux's top level files and directories. The files have not content.
 fn build_files(path: &str) {
@@ -394,6 +394,59 @@ fn list_enter_into_fuzzed_dir() {
         assert_ne!(list_original, list_up_level);
 }
 
+
+#[test]
+#[ignore]//play
+fn test_cmd_in_different_dir() {
+        let path = "/tmpt/lsk_tests/";
+        build_files(path);
+        let path_path = Path::new(path).to_path_buf();
+        let mut path_cache = command_assistors::PathCache::new(&path_path);
+
+        // Changing directories.
+        path_cache.switch();
+
+        //let cmd = "vim";
+        //let args = [""];
+        //std::process::Command::new(cmd)
+        //    .args(&args)
+        //    .spawn()
+        //    .expect("failed to execute shell process.")
+        //    .wait()
+        //    .expect("unrecoverable failure to execute shell process.");
+
+        let cmd = "fzf";
+        let child = std::process::Command::new(cmd)
+            //.args(&args)
+            .stdout(Stdio::piped())
+            .spawn()
+            //.expect("failed to execute shell process.")
+            //.wait()
+            .expect("unrecoverable failure to execute shell process.");
+
+        let output = child
+            .wait_with_output()
+            .expect("failed to wait on child");
+
+        path_cache.switch_back();
+
+        assert_files(path);
+
+        assert_eq!(true, Path::new(path).exists());
+
+        fixture::Fixture::new()
+            .add_dirpath(path.to_string())
+            .teardown(true);
+
+        assert_eq!(false, Path::new(path).exists());
+
+        let output: &str  = std::str::from_utf8(&output.stdout).unwrap();
+
+        assert_eq!(
+            output,
+            "usr/default_cpio_list\n"
+        );
+}
 //let list =
 //     List {
 //         files: ["COPYING", "Kconfig", "Makefile", "MAINTAINERS", "Kbuild", "CREDITS", "README"],
