@@ -516,7 +516,7 @@ impl LsKey {
             stdout.flush().unwrap();
 
             match c.unwrap() {
-                Key::Char('q') => break,
+                //Key::Char('q') => break,
                 Key::Char(c) => {
                     match c {
                         //' ' => {
