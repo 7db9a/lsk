@@ -285,41 +285,42 @@ mod cli {
         fixture.teardown(true);
     }
 
-    //#[test]
-    //fn print_list_skip_hidden() {
-    //    let path = "/tmp/lsk_tests/";
+    #[test]
+    #[ignore]//docker
+    fn print_list_skip_hidden() {
+        let path = "/tmp/lsk_tests/";
 
-    //    let mut fixture = Fixture::new()
-    //        .add_dirpath(path.to_string())
-    //        .add_dirpath(path.to_string() + "a-dir")
-    //        .add_dirpath(path.to_string() + ".a-hidden-dir")
-    //        .add_file(path.to_string() + "a-file")
-    //        .add_file(path.to_string() + "a-dir/a-file")
-    //        .add_file(path.to_string() + "a-dir/b-file")
-    //        .add_file(path.to_string() + ".a-hidden-dir/a-file")
-    //        .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
-    //        .add_file(path.to_string() + ".a-hidden-file")
-    //        .build();
+        let mut fixture = Fixture::new()
+            .add_dirpath(path.to_string())
+            .add_dirpath(path.to_string() + "a-dir")
+            .add_dirpath(path.to_string() + ".a-hidden-dir")
+            .add_file(path.to_string() + "a-file")
+            .add_file(path.to_string() + "a-dir/a-file")
+            .add_file(path.to_string() + "a-dir/b-file")
+            .add_file(path.to_string() + ".a-hidden-dir/a-file")
+            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
+            .add_file(path.to_string() + ".a-hidden-file")
+            .build();
 
-    //    let path_path = Path::new(path).to_path_buf();
-    //    let mut path_cache = command_assistors::PathCache::new(&path_path);
+        let path_path = Path::new(path).to_path_buf();
+        let mut path_cache = command_assistors::PathCache::new(&path_path);
 
-    //    // Changing directories.
-    //    path_cache.switch();
+        // Changing directories.
+        path_cache.switch();
 
-    //    path_cache.switch_back();
+        path_cache.switch_back();
 
-    //    assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-    //    assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-    //    assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-    //    assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
-    //    assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
-    //    assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
-    //    assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
-    //    assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
-    //    assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-    //    assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
+        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
+        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
+        assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
 
-    //    fixture.teardown(true);
-    //}
+        fixture.teardown(true);
+    }
 }

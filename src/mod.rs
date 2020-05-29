@@ -20,11 +20,11 @@ use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
-    list: List,
-    all: bool,
-    input: Option<String>,
-    fuzzy_list: Option<List>,
-    display: Option<(PathBuf, String)>
+    pub list: List,
+    pub all: bool,
+    pub input: Option<String>,
+    pub fuzzy_list: Option<List>,
+    pub display: Option<(PathBuf, String)>
 }
 
 impl LsKey {
@@ -270,7 +270,7 @@ impl LsKey {
         }
     }
 
-    fn key_mode(mut self, list: List, input: Input, is_fuzzed: bool) {
+    pub fn key_mode(mut self, list: List, input: Input, is_fuzzed: bool) {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
             0 => {
@@ -674,21 +674,21 @@ impl LsKey {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum CmdType {
+pub enum CmdType {
     single_key,
     multiple_keys,
     cmd,
 }
 #[derive(Debug, Clone, PartialEq, Default)]
-struct Input {
-    cmd: Option<String>,
-    args: Option<Vec<String>>,
-    as_read: String,
-    cmd_type: Option<CmdType>
+pub struct Input {
+    pub cmd: Option<String>,
+    pub args: Option<Vec<String>>,
+    pub as_read: String,
+    pub cmd_type: Option<CmdType>
 }
 
 impl Input {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let input: Input = Default::default();
 
         input
@@ -710,7 +710,7 @@ impl Input {
         }
     }
 
-    fn parse(mut self, input: String) -> Self {
+    pub fn parse(mut self, input: String) -> Self {
         let (cmd, args) = self.parse_cmd(input.clone());
         let args_count = args.clone().iter().count();
         let is_key = if args == None {
