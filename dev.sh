@@ -56,22 +56,22 @@ cp-lsk-extend() {
 run-test() {
     if [ "$1" = "rust-lib" ]; then
         cargo-bin-build
-        lsk-extend-cargo-bin-build
-        cp-lsk-extend
+        #lsk-extend-cargo-bin-build
+        #cp-lsk-extend
         rust-lib-test $2
     fi
 
     if [ "$1" = "rust-bin" ]; then
         cargo-bin-build
-        lsk-extend-cargo-bin-build
-        cp-lsk-extend
+        #lsk-extend-cargo-bin-build
+        #cp-lsk-extend
         rust-bin-test $2
     fi
 
     if [ "$1" = "" ]; then
         cargo-bin-build
-        lsk-extend-cargo-bin-build
-        cp-lsk-extend
+        #lsk-extend-cargo-bin-build
+        #cp-lsk-extend
         rust-lib-test
         rust-bin-test
     fi
