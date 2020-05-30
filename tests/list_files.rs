@@ -88,6 +88,7 @@ fn assert_files(path: &str) {
 }
 
 #[test]
+#[ignore]//docker
 fn test_build_files() {
         let path = "/tmp/lsk_tests/";
         build_files(path);
@@ -111,6 +112,7 @@ fn test_build_files() {
 }
 
 #[test]
+#[ignore]//docker
 fn list() {
         let path = "/tmp/lsk_tests/";
         let list_all = false;
@@ -136,6 +138,7 @@ fn list() {
 }
 
 #[test]
+#[ignore]//docker
 fn fuzzy_list() {
         let input = "cr";
         let path = "/tmp/lsk_tests/";
@@ -201,6 +204,7 @@ fn fuzzy_list() {
 }
 
 #[test]
+#[ignore]//docker
 fn list_go_up_one_level() {
         let input = "cr";
         fixture::Fixture::new()
@@ -263,6 +267,7 @@ fn list_go_up_one_level() {
 }
 
 #[test]
+#[ignore]//docker
 fn list_enter_into_dir() {
         fixture::Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
@@ -332,6 +337,7 @@ fn list_enter_into_dir() {
 }
 
 #[test]
+#[ignore]//docker
 fn list_enter_into_fuzzed_dir() {
         let input = "cr";
         fixture::Fixture::new()
