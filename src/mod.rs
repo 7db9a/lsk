@@ -415,7 +415,7 @@ impl LsKey {
         }
     }
 
-    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
+    fn key_related_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -460,7 +460,7 @@ impl LsKey {
            if execute {
                if let Some(list) = some_list {
                    let new_list = list.clone();
-                   self.clone().readline_mode(list, Ok(input), is_fuzzed);
+                   self.clone().key_related_mode(list, Ok(input), is_fuzzed);
                }
            }
         }
