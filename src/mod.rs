@@ -574,13 +574,21 @@ impl LsKey {
             let _first = input.iter().nth(0);
             let last = input.iter().last();
 
+            let place = (0, 1);
             if let Some(mut first) = _first {
+                write!(stdout,
+                    "{}{}{}{}", format!("{}", input_string.as_str()
+                    ),
+                   termion::clear::AfterCursor,
+                   termion::cursor::Goto((place.0), (place.1 + 1)),
+                   termion::cursor::Hide,
+                ).unwrap();
+                stdout.flush().unwrap();
+
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
                     first = &'r';
                 }
-
-                let place = (0, 1);
 
                 let some_mode = mode_parse(input_string.clone());
 
@@ -776,11 +784,12 @@ pub enum Mode {
 pub fn mode_parse(mut input: String) -> Option<Mode> {
     if input.len() > 2 {
          let mode: String = input.drain(..2).collect();
-         let fuzzy = String::from("f");
-         let cmd = String::from("c");
+         let mode = mode.as_str();
+         let fuzzy = "f ";
+         let cmd = "c ";
          match mode {
-             fuzzy => Some(Mode::Fuzzy(input.clone())),
-             cmd => Some(Mode::Cmd(input.clone())),
+             "f " => Some(Mode::Fuzzy(input.clone())),
+             "c " => Some(Mode::Cmd(input.clone())),
              _ => None
          }
     } else {
@@ -1039,7 +1048,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//docker
+    //#[ignore]//docker
     fn test_mode_parse() {
        let input_single = "f something".to_string();
        let some_fuzzy_search_single = mode_parse(input_single.clone());
@@ -1052,6 +1061,9 @@ mod tests {
 
        let input_lack_more = "f".to_string();
        let some_fuzzy_search_lack_more = mode_parse(input_lack_more.clone());
+
+       let input_wrong = "d something".to_string();
+       let some_fuzzy_search_wrong = mode_parse(input_wrong.clone());
 
        assert_eq!(
            some_fuzzy_search_lack,
@@ -1071,6 +1083,12 @@ mod tests {
        assert_eq!(
            some_fuzzy_search_multi,
            Some(Mode::Fuzzy("something and more".to_string()))
+
+       );
+
+       assert_eq!(
+           some_fuzzy_search_wrong,
+           None
        );
     }
 }
