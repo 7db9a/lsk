@@ -360,13 +360,6 @@ impl LsKey {
          } else {
              let as_read = input.as_read.as_str();
              match as_read {
-                 "w" => {
-                      // Cd the parent shell into the directory viewed by ls-key.
-                      let path = self.list.relative_parent_dir_path;
-                      let path = path.to_str().unwrap();
-                      let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                      terminal::parent_shell::type_text(cmd, 0);
-                 },
                  "q" => (),
                  "fzf" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -616,6 +609,7 @@ impl LsKey {
                 }
 
                 let some_mode = mode_parse(input_string.clone());
+                //println!("{:?}", last);
 
                 if let Some(mode) = some_mode {
                     match mode {
@@ -642,6 +636,18 @@ impl LsKey {
                                  }
                              }
 
+                        },
+                        Mode::Work => {
+                            let few_ms = std::time::Duration::from_millis(2000);
+                             if last == Some(&'\n') {
+                                 let path = self.list.relative_parent_dir_path.clone();
+                                 let path = path.to_str().unwrap();
+                                 let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                                 terminal::parent_shell::type_text(cmd, 0);
+                                 break
+                            } else {
+
+                            }
                         },
                         Mode::Fuzzy(fuzzy_mode_input) => {
                             let _show = self.display.clone();
@@ -827,11 +833,13 @@ impl Input {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Mode {
     Fuzzy(String),
-    Cmd(String)
+    Cmd(String),
+    Work,
 }
 
 pub fn mode_parse(mut input: String) -> Option<Mode> {
-    if input.len() > 2 {
+    let len = input.len();
+    let mode = if len > 2 {
          let mode: String = input.drain(..2).collect();
          let mode = mode.as_str();
          let fuzzy = "f ";
@@ -841,9 +849,18 @@ pub fn mode_parse(mut input: String) -> Option<Mode> {
              "c " => Some(Mode::Cmd(input.clone())),
              _ => None
          }
+    } else if len == 2 {
+         let mode: String = input.drain(..1).collect();
+         let mode = mode.as_str();
+         match mode {
+             "w" => Some(Mode::Work),
+             _ => None
+         }
     } else {
         None
-    }
+    };
+
+    mode
 }
 
 fn parse_keys(input: &str) -> Option<String> {
