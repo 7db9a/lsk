@@ -174,6 +174,33 @@ impl LsKey {
             self.clone()
     }
 
+   pub fn run_list_read_beta(mut self) {
+            let list = self.list.clone();
+            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
+
+            let entries_keyed: Vec<String> = list::key_entries(entries);
+            //let res = terminal::input_n_display::grid(entries_keyed);
+            let res = terminal::input_n_display::grid(entries_keyed);
+            let mut show = "".to_string();
+            if let Some(r) = res {
+                let grid = r.0;
+                let width = r.1;
+                let display = grid.fit_into_width(width);
+                if let Some(d) = display {
+                     //println!("\n\n{}", d);
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
+                } else {
+                    let display = grid.fit_into_columns(1);
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                    //println!("\n\n");
+                    //list::print_list_with_keys(list.clone());
+                }
+            } else {
+                //println!("\n\n");
+                //list::print_list_with_keys(list.clone());
+            }
+    }
+
    pub fn run_list_read(mut self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
@@ -304,7 +331,7 @@ impl LsKey {
         }
     }
 
-    fn cmd_mode(mut self, list: List, input: Input) {
+    fn cmd_mode(mut self, input: Input) {
          let args = input.args;
          if let Some(a) = args {
              let args = a;
@@ -329,7 +356,7 @@ impl LsKey {
                  }
              }
              path_cache.switch_back();
-             self.run_list_read();
+             //self.run_list_read();
          } else {
              let as_read = input.as_read.as_str();
              match as_read {
@@ -350,7 +377,7 @@ impl LsKey {
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  },
                  "vim" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -365,7 +392,7 @@ impl LsKey {
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![]);
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  },
                  "zsh" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -380,7 +407,7 @@ impl LsKey {
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("zsh".to_string(), vec![]);
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  },
                  _ => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -389,7 +416,7 @@ impl LsKey {
                      path_cache.switch();
                      let output = terminal::shell::cmd(as_read.to_string()).unwrap();
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  }
              }
         }
@@ -403,9 +430,6 @@ impl LsKey {
                     let input = input.parse(i);
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
-                        CmdType::cmd => {
-                            self.cmd_mode(list, input);
-                        },
                         CmdType::single_key => {
                             self.key_mode(list, input, is_fuzzed);
                         },
@@ -416,7 +440,8 @@ impl LsKey {
                                 * then type_text_spawn(text_vec);
                             */
                             self.return_file_by_key_mode(list, input, is_fuzzed);
-                        }
+                        },
+                        _ => {}
                     }
                     ()
                 } else {
@@ -601,8 +626,16 @@ impl LsKey {
                                  let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
                                  match cmd_mode {
                                      Mode::Cmd(cmd_mode_input) => {
-                                         result = Some(cmd_mode_input);
-                                         execute = true;
+                                         let input = Input::new();
+                                         let input = input.parse(cmd_mode_input);
+
+                                         match input.clone().cmd_type.unwrap() {
+                                             CmdType::cmd => {
+                                                 self.clone().cmd_mode(input);
+                                                 self.clone().run_list_read_beta();
+                                             },
+                                             _ => {}
+                                         }
                                          break
                                      }
                                      _ => { }
