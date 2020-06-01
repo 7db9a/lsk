@@ -594,6 +594,15 @@ impl LsKey {
 
                 if let Some(mode) = some_mode {
                     match mode {
+                        Mode::Cmd(cmd_mode_input) => {
+                             if last == Some(&'\n') {
+                                 input.pop();
+                                 result = Some(cmd_mode_input);
+                                 execute = true;
+                                 break
+                             }
+
+                        },
                         Mode::Fuzzy(fuzzy_mode_input) => {
                             let _show = self.display.clone();
                             let some_keys = parse_keys(fuzzy_mode_input.as_str());
