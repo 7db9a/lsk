@@ -578,59 +578,61 @@ impl LsKey {
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
                     first = &'r';
-                } else {
-                    if first != &'$' {
-                         first = &'f';
-                    }
                 }
 
                 let place = (0, 1);
 
                 match first {
                     'f' => {
-                        let _show = self.display.clone();
-                        write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
-                        let some_keys = parse_keys(input_string.as_str());
 
-                        if let Some(keys) = some_keys {
-                            let fuzzy_list = self.fuzzy_list.clone();
-                            if let Some(x) = fuzzy_list {
-                                //self.list = x.clone();
-                                input_string = keys;
-                                input = input_string.chars().collect();
-                                the_list = Some(x);
-                                // clear input and drop in the parsed key.
+                        let some_fuzzy_mode_input = fuzzy_mode_parse(input_string.clone());
+
+                        if let Some(fuzzy_mode_input) = some_fuzzy_mode_input {
+                            let _show = self.display.clone();
+                            write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
+                            let some_keys = parse_keys(fuzzy_mode_input.as_str());
+
+                            if let Some(keys) = some_keys {
+                                let fuzzy_list = self.fuzzy_list.clone();
+                                if let Some(x) = fuzzy_list {
+                                    //self.list = x.clone();
+                                    input_string = keys;
+                                    input = input_string.chars().collect();
+                                    the_list = Some(x);
+                                    // clear input and drop in the parsed key.
+                                }
+                            } else {
+                                //if last == ' ' {
+                                //     let _input = input.clone();
+                                //     _input.pop();
+                                //     let mut _input_string: String = _input.iter().collect();
+                                //     let ls_key = self.fuzzy_update(_input_string);
+                                //     self = ls_key;
+                                //} else (
+                                    let ls_key = self.fuzzy_update(fuzzy_mode_input);
+                                    self = ls_key;
+                                //}
                             }
-                        } else {
-                            //if last == ' ' {
-                            //     let _input = input.clone();
-                            //     _input.pop();
-                            //     let mut _input_string: String = _input.iter().collect();
-                            //     let ls_key = self.fuzzy_update(_input_string);
-                            //     self = ls_key;
-                            //} else (
-                                let ls_key = self.fuzzy_update(input_string);
-                                self = ls_key;
+
+                            is_fuzzed = true;
+                            //let _show = self.clone().fuzzy_update_list_read();
+                            //let _show = self.display.clone();
+                            //assert_ne!(_show, self.display);
+                            //if let Some(x) = _show {
+                            //    if x.0 == self.list.relative_parent_dir_path {
+                            //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                            //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
+
+                            //        write!(
+                            //            stdout,
+                            //            "{}",
+                            //            termion::cursor::Goto(0, 3),
+                            //        ).unwrap();
+                            //        stdout.flush().unwrap();
+                            //    }
                             //}
+
                         }
-
-                        is_fuzzed = true;
-                        //let _show = self.clone().fuzzy_update_list_read();
-                        //let _show = self.display.clone();
-                        //assert_ne!(_show, self.display);
-                        //if let Some(x) = _show {
-                        //    if x.0 == self.list.relative_parent_dir_path {
-                        //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                        //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
-
-                        //        write!(
-                        //            stdout,
-                        //            "{}",
-                        //            termion::cursor::Goto(0, 3),
-                        //        ).unwrap();
-                        //        stdout.flush().unwrap();
-                        //    }
-                        //}
                     },
                     'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
                     '$' => write_it(b"command mode detected...     ", &mut stdout, input_string.clone(), place),
@@ -792,6 +794,70 @@ impl Input {
             false
         }
      }
+}
+
+pub fn fuzzy_mode_parse(mut input: String) -> Option<String> {
+    fn parse_cmd(input: String) -> (Option<String>, Option<Vec<String>>) {
+        let mut input: Vec<String> = input.clone().split(" ").map(|s| s.to_string()).collect();
+        let cmd = input.remove(0);
+
+        let args = defang_args(input);
+        (Some(cmd), args)
+     }
+
+
+    fn defang_args(args: Vec<String>) -> Option<Vec<String>> {
+        let count = args.clone().iter().count();
+        let empty_item = args.clone().iter().any(|x| *x == "".to_string());
+        let is_valid = if empty_item && count <= 1 {
+            false
+        } else {
+            true
+        };
+
+        if is_valid && count != 0 {
+            Some(args)
+        } else {
+            None
+        }
+    }
+
+    //fn validate_fuzzy_cmd_mode(x: String) -> Option<String> {
+    //    let y = x.drain(..2);
+    //    if y == "f ".to_string() {
+    //    }
+
+    //}
+
+    if input.len() > 2 {
+         let mode: String = input.drain(..2).collect();
+         if mode == "f " {
+             Some(input)
+         } else {
+             None
+         }
+    } else {
+        None
+    }
+    //if let Some(m) = mode.clone() {
+    //     if m == "f".to_string() {
+    //         if let Some(mut s) = search_term {
+    //             if s.iter().count() > 1 {
+    //                 input.replace_range(..2, ""); // drain 'f<space>' in 'f<space> <something>').
+    //                 Some(input)
+    //             } else {
+    //                 None
+    //             }
+    //         } else {
+    //             None
+    //         }
+    //     } else {
+    //         None
+    //     }
+    //} else {
+    //    None
+    //}
+
 }
 
 fn parse_keys(input: &str) -> Option<String> {
