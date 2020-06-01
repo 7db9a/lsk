@@ -597,9 +597,16 @@ impl LsKey {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
                                  input.pop();
-                                 result = Some(cmd_mode_input);
-                                 execute = true;
-                                 break
+                                 input_string = input.iter().collect();
+                                 let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
+                                 match cmd_mode {
+                                     Mode::Cmd(cmd_mode_input) => {
+                                         result = Some(cmd_mode_input);
+                                         execute = true;
+                                         break
+                                     }
+                                     _ => { }
+                                 }
                              }
 
                         },
