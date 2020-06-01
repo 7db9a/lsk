@@ -1048,7 +1048,7 @@ mod tests {
     }
 
     #[test]
-    //#[ignore]//docker
+    #[ignore]//docker
     fn test_mode_parse() {
        let input_single = "f something".to_string();
        let some_fuzzy_search_single = mode_parse(input_single.clone());
