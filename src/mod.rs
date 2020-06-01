@@ -1071,7 +1071,7 @@ mod tests {
        let input_lack = "f ".to_string();
        let some_fuzzy_search_lack = fuzzy_mode_parse(input_lack.clone());
 
-       let input_lack_more = "f ".to_string();
+       let input_lack_more = "f".to_string();
        let some_fuzzy_search_lack_more = fuzzy_mode_parse(input_lack_more.clone());
 
        assert_eq!(
