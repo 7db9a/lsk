@@ -585,11 +585,11 @@ impl LsKey {
                 match first {
                     'f' => {
 
+                         write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
                         let some_fuzzy_mode_input = fuzzy_mode_parse(input_string.clone());
 
                         if let Some(fuzzy_mode_input) = some_fuzzy_mode_input {
                             let _show = self.display.clone();
-                            write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
                             let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
                             if let Some(keys) = some_keys {
