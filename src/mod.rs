@@ -867,7 +867,7 @@ mod tests {
 
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse() {
         let input = Input::new();
         let input = input.parse("vim Cargo.toml".to_string());
@@ -889,7 +889,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_long() {
         let input = Input::new();
         let input = input.parse("git clone https://github.com/7db9a/ls-key --depth 1".to_string());
@@ -918,7 +918,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_single_cmd() {
         let input = Input::new();
         let input = input.parse("vim".to_string());
@@ -940,7 +940,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_key() {
         let input = Input::new();
         let input = input.parse("33".to_string());
@@ -962,7 +962,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_bad() {
         let input = Input::new();
         let input = input.parse(" vim Cargo.toml".to_string());
@@ -984,7 +984,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_cmd() {
         let input = Input::new();
         let (cmd, args) = input.parse_cmd("vim Cargo.toml".to_string());
