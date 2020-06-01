@@ -797,38 +797,6 @@ impl Input {
 }
 
 pub fn fuzzy_mode_parse(mut input: String) -> Option<String> {
-    fn parse_cmd(input: String) -> (Option<String>, Option<Vec<String>>) {
-        let mut input: Vec<String> = input.clone().split(" ").map(|s| s.to_string()).collect();
-        let cmd = input.remove(0);
-
-        let args = defang_args(input);
-        (Some(cmd), args)
-     }
-
-
-    fn defang_args(args: Vec<String>) -> Option<Vec<String>> {
-        let count = args.clone().iter().count();
-        let empty_item = args.clone().iter().any(|x| *x == "".to_string());
-        let is_valid = if empty_item && count <= 1 {
-            false
-        } else {
-            true
-        };
-
-        if is_valid && count != 0 {
-            Some(args)
-        } else {
-            None
-        }
-    }
-
-    //fn validate_fuzzy_cmd_mode(x: String) -> Option<String> {
-    //    let y = x.drain(..2);
-    //    if y == "f ".to_string() {
-    //    }
-
-    //}
-
     if input.len() > 2 {
          let mode: String = input.drain(..2).collect();
          if mode == "f " {
@@ -839,25 +807,6 @@ pub fn fuzzy_mode_parse(mut input: String) -> Option<String> {
     } else {
         None
     }
-    //if let Some(m) = mode.clone() {
-    //     if m == "f".to_string() {
-    //         if let Some(mut s) = search_term {
-    //             if s.iter().count() > 1 {
-    //                 input.replace_range(..2, ""); // drain 'f<space>' in 'f<space> <something>').
-    //                 Some(input)
-    //             } else {
-    //                 None
-    //             }
-    //         } else {
-    //             None
-    //         }
-    //     } else {
-    //         None
-    //     }
-    //} else {
-    //    None
-    //}
-
 }
 
 fn parse_keys(input: &str) -> Option<String> {
@@ -914,7 +863,7 @@ mod tests {
     use std::process::Command;
     use std::env;
     use fixture::Fixture;
-    use super::{Input, LsKey, CmdType};
+    use super::{Input, LsKey, CmdType, fuzzy_mode_parse};
 
 
     #[test]
@@ -1108,5 +1057,41 @@ mod tests {
         ls_key.run_list_read();
         spawn.join();
         //spawn_quite.join();
+    }
+
+    #[test]
+    #[ignore]//docker
+    fn test_fuzzy_mode_parse() {
+       let input_single = "f something".to_string();
+       let some_fuzzy_search_single = fuzzy_mode_parse(input_single.clone());
+
+       let input_multi = "f something and more".to_string();
+       let some_fuzzy_search_multi = fuzzy_mode_parse(input_multi.clone());
+
+       let input_lack = "f ".to_string();
+       let some_fuzzy_search_lack = fuzzy_mode_parse(input_lack.clone());
+
+       let input_lack_more = "f ".to_string();
+       let some_fuzzy_search_lack_more = fuzzy_mode_parse(input_lack_more.clone());
+
+       assert_eq!(
+           some_fuzzy_search_lack,
+           None
+       );
+
+       assert_eq!(
+           some_fuzzy_search_lack_more,
+           None
+       );
+
+       assert_eq!(
+           some_fuzzy_search_single,
+           Some("something".to_string())
+       );
+
+       assert_eq!(
+           some_fuzzy_search_multi,
+           Some("something and more".to_string())
+       );
     }
 }
