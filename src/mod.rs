@@ -785,10 +785,12 @@ pub enum Mode {
 pub fn mode_parse(mut input: String) -> Option<Mode> {
     if input.len() > 2 {
          let mode: String = input.drain(..2).collect();
-         if mode == "f " {
-             Some(Mode::Fuzzy(input.clone()))
-         } else {
-             None
+         let fuzzy = String::from("f");
+         let cmd = String::from("c");
+         match mode {
+             fuzzy => Some(Mode::Fuzzy(input.clone())),
+             cmd => Some(Mode::Cmd(input.clone())),
+             _ => None
          }
     } else {
         None
