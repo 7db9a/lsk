@@ -582,42 +582,33 @@ impl LsKey {
 
                 let place = (0, 1);
 
-                match first {
-                    'f' => {
+                let some_mode = mode_parse(input_string.clone());
 
-                         write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
-                        let some_mode = mode_parse(input_string.clone());
+                if let Some(mode) = some_mode {
+                    match mode {
+                        Mode::Fuzzy(fuzzy_mode_input) => {
+                            let _show = self.display.clone();
+                            let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
-                        if let Some(mode) = some_mode {
-                            match mode {
-                                Mode::Fuzzy(fuzzy_mode_input) => {
-                                    let _show = self.display.clone();
-                                    let some_keys = parse_keys(fuzzy_mode_input.as_str());
-
-                                    if let Some(keys) = some_keys {
-                                        let fuzzy_list = self.fuzzy_list.clone();
-                                        if let Some(x) = fuzzy_list {
-                                            //self.list = x.clone();
-                                            input_string = keys;
-                                            input = input_string.chars().collect();
-                                            the_list = Some(x);
-                                            // clear input and drop in the parsed key.
-                                        }
-                                    } else {
-                                        let ls_key = self.fuzzy_update(fuzzy_mode_input);
-                                        self = ls_key;
-                                    }
-
-                                    is_fuzzed = true;
-                                },
-                                _ => {}
+                            if let Some(keys) = some_keys {
+                                let fuzzy_list = self.fuzzy_list.clone();
+                                if let Some(x) = fuzzy_list {
+                                    //self.list = x.clone();
+                                    input_string = keys;
+                                    input = input_string.chars().collect();
+                                    the_list = Some(x);
+                                    // clear input and drop in the parsed key.
+                                }
+                            } else {
+                                let ls_key = self.fuzzy_update(fuzzy_mode_input);
+                                self = ls_key;
                             }
-                        }
-                    },
-                    'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
-                    '$' => write_it(b"command mode detected...     ", &mut stdout, input_string.clone(), place),
-                    _ =>   write_it(b"invalid mode detected...     ", &mut stdout, input_string.clone(), place),
-                };
+
+                            is_fuzzed = true;
+                        },
+                        _ => {}
+                    }
+                }
             }
 
             let show = self.clone().display.clone();
