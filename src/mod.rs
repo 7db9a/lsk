@@ -586,52 +586,32 @@ impl LsKey {
                     'f' => {
 
                          write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
-                        let some_fuzzy_mode_input = fuzzy_mode_parse(input_string.clone());
+                        let some_mode = mode_parse(input_string.clone());
 
-                        if let Some(fuzzy_mode_input) = some_fuzzy_mode_input {
-                            let _show = self.display.clone();
-                            let some_keys = parse_keys(fuzzy_mode_input.as_str());
+                        if let Some(mode) = some_mode {
+                            match mode {
+                                Mode::Fuzzy(fuzzy_mode_input) => {
+                                    let _show = self.display.clone();
+                                    let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
-                            if let Some(keys) = some_keys {
-                                let fuzzy_list = self.fuzzy_list.clone();
-                                if let Some(x) = fuzzy_list {
-                                    //self.list = x.clone();
-                                    input_string = keys;
-                                    input = input_string.chars().collect();
-                                    the_list = Some(x);
-                                    // clear input and drop in the parsed key.
-                                }
-                            } else {
-                                //if last == ' ' {
-                                //     let _input = input.clone();
-                                //     _input.pop();
-                                //     let mut _input_string: String = _input.iter().collect();
-                                //     let ls_key = self.fuzzy_update(_input_string);
-                                //     self = ls_key;
-                                //} else (
-                                    let ls_key = self.fuzzy_update(fuzzy_mode_input);
-                                    self = ls_key;
-                                //}
+                                    if let Some(keys) = some_keys {
+                                        let fuzzy_list = self.fuzzy_list.clone();
+                                        if let Some(x) = fuzzy_list {
+                                            //self.list = x.clone();
+                                            input_string = keys;
+                                            input = input_string.chars().collect();
+                                            the_list = Some(x);
+                                            // clear input and drop in the parsed key.
+                                        }
+                                    } else {
+                                        let ls_key = self.fuzzy_update(fuzzy_mode_input);
+                                        self = ls_key;
+                                    }
+
+                                    is_fuzzed = true;
+                                },
+                                _ => {}
                             }
-
-                            is_fuzzed = true;
-                            //let _show = self.clone().fuzzy_update_list_read();
-                            //let _show = self.display.clone();
-                            //assert_ne!(_show, self.display);
-                            //if let Some(x) = _show {
-                            //    if x.0 == self.list.relative_parent_dir_path {
-                            //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                            //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
-
-                            //        write!(
-                            //            stdout,
-                            //            "{}",
-                            //            termion::cursor::Goto(0, 3),
-                            //        ).unwrap();
-                            //        stdout.flush().unwrap();
-                            //    }
-                            //}
-
                         }
                     },
                     'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
@@ -796,11 +776,17 @@ impl Input {
      }
 }
 
-pub fn fuzzy_mode_parse(mut input: String) -> Option<String> {
+#[derive(Debug, Clone, PartialEq)]
+pub enum Mode {
+    Fuzzy(String),
+    Cmd(String)
+}
+
+pub fn mode_parse(mut input: String) -> Option<Mode> {
     if input.len() > 2 {
          let mode: String = input.drain(..2).collect();
          if mode == "f " {
-             Some(input)
+             Some(Mode::Fuzzy(input.clone()))
          } else {
              None
          }
@@ -863,7 +849,7 @@ mod tests {
     use std::process::Command;
     use std::env;
     use fixture::Fixture;
-    use super::{Input, LsKey, CmdType, fuzzy_mode_parse};
+    use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
 
     #[test]
@@ -1060,19 +1046,19 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//docker
-    fn test_fuzzy_mode_parse() {
+    //#[ignore]//docker
+    fn test_mode_parse() {
        let input_single = "f something".to_string();
-       let some_fuzzy_search_single = fuzzy_mode_parse(input_single.clone());
+       let some_fuzzy_search_single = mode_parse(input_single.clone());
 
        let input_multi = "f something and more".to_string();
-       let some_fuzzy_search_multi = fuzzy_mode_parse(input_multi.clone());
+       let some_fuzzy_search_multi = mode_parse(input_multi.clone());
 
        let input_lack = "f ".to_string();
-       let some_fuzzy_search_lack = fuzzy_mode_parse(input_lack.clone());
+       let some_fuzzy_search_lack = mode_parse(input_lack.clone());
 
        let input_lack_more = "f".to_string();
-       let some_fuzzy_search_lack_more = fuzzy_mode_parse(input_lack_more.clone());
+       let some_fuzzy_search_lack_more = mode_parse(input_lack_more.clone());
 
        assert_eq!(
            some_fuzzy_search_lack,
@@ -1086,12 +1072,12 @@ mod tests {
 
        assert_eq!(
            some_fuzzy_search_single,
-           Some("something".to_string())
+           Some(Mode::Fuzzy("something".to_string()))
        );
 
        assert_eq!(
            some_fuzzy_search_multi,
-           Some("something and more".to_string())
+           Some(Mode::Fuzzy("something and more".to_string()))
        );
     }
 }
