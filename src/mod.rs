@@ -28,12 +28,12 @@ pub mod app {
         ls_key = ls_key.run_list_read();
         let mut list = ls_key.list.clone();
 
-        while ls_key.is_fuzzed {
-            ls_key = LsKey::new(path, all);
-            ls_key.list = list;
-            ls_key = ls_key.clone().run_list_read();
-            list = ls_key.list.clone();
-        }
+        //while ls_key.is_fuzzed {
+        //    ls_key = LsKey::new(path, all);
+        //    ls_key.list = list;
+        //    ls_key = ls_key.clone().run_list_read();
+        //    list = ls_key.list.clone();
+        //}
     }
 }
 
