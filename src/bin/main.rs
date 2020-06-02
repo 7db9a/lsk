@@ -4,7 +4,7 @@ extern crate ls_key;
 
 use std::path::{Path, PathBuf};
 use std::env;
-use ls_key::{LsKey, list};
+use ls_key::{LsKey, list, app};
 use list::{List, print_list_with_keys, is_dir, is_file};
 use seahorse::{App, Command, Context, Flag, FlagType};
 
@@ -111,19 +111,15 @@ fn default_action(c: &Context) {
 
     if c.bool_flag("all") {
         if path != "" {
-            let ls_key = LsKey::new(path, true);
-            ls_key.run_list_read()
+            app::run(path, true)
         } else {
-            let ls_key = LsKey::new(env::current_dir().unwrap(), true);
-            ls_key.run_list_read()
+            app::run(env::current_dir().unwrap(), true)
         }
     } else {
         if path != "" {
-            let ls_key = LsKey::new(path, false);
-            ls_key.run_list_read()
+            app::run(path, false)
         } else {
-            let ls_key = LsKey::new(env::current_dir().unwrap(), false);
-            ls_key.run_list_read()
+            app::run(env::current_dir().unwrap(), false)
         }
     }
 }

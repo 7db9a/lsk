@@ -18,13 +18,34 @@ use termion::screen::AlternateScreen;
 use std::thread;
 use std::time::Duration;
 
+pub mod app {
+    use super::LsKey;
+    use super::Path;
+
+    pub fn run<P: AsRef<Path>>(path: P, all: bool) /*-> LsKey*/ {
+        let path = path.as_ref();
+        let mut ls_key = LsKey::new(path, all);
+        ls_key = ls_key.run_list_read();
+        let mut list = ls_key.list.clone();
+
+        while ls_key.is_fuzzed {
+            ls_key = LsKey::new(path, all);
+            ls_key.list = list;
+            ls_key = ls_key.clone().run_list_read();
+            list = ls_key.list.clone();
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
     pub list: List,
     pub all: bool,
     pub input: Option<String>,
     pub fuzzy_list: Option<List>,
-    pub display: Option<(PathBuf, String)>
+    pub display: Option<(PathBuf, String)>,
+    pub halt: bool,
+    pub is_fuzzed: bool
 }
 
 impl LsKey {
@@ -45,6 +66,8 @@ impl LsKey {
                 input: None,
                 fuzzy_list: None,
                 display: None,
+                halt: true,
+                is_fuzzed: false
             }
     }
 
@@ -201,7 +224,7 @@ impl LsKey {
             }
     }
 
-   pub fn run_list_read(mut self) {
+   pub fn run_list_read(mut self) -> Self {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
 
@@ -226,7 +249,9 @@ impl LsKey {
                 //println!("\n\n");
                 //list::print_list_with_keys(list.clone());
             }
-            self.run_cmd(list);
+            self.clone().run_cmd();
+
+            self
     }
 
    pub fn fuzzy_update_list_read(mut self, list: List) -> Option<(PathBuf, String)> {
@@ -450,18 +475,23 @@ impl LsKey {
     // ls-key. If the non-built in command doesn't return output and enters
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
-    fn run_cmd(mut self, list: List) {
-        let old_list = list.clone();
+    fn run_cmd(mut self) {
+        //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(list.clone());
+           let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(self.list.clone());
            execute = _execute;
 
-           if execute {
-               if let Some(list) = some_list {
-                   let new_list = list.clone();
-                   self.clone().key_related_mode(list, Ok(input), is_fuzzed);
+           if let Some(list) = some_list {
+               if !self.is_fuzzed {
+                   if execute {
+                       let new_list = list.clone();
+                       self.clone().key_related_mode(list, Ok(input), is_fuzzed);
+                   }
+               } else {
+                   break
                }
+
            }
         }
     }
@@ -694,6 +724,7 @@ impl LsKey {
                 input.pop();
                 let input_string: String = input.iter().collect();
                 result = Some(input_string);
+                self.is_fuzzed = is_fuzzed;
                 break
             }
         }
