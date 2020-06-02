@@ -28,6 +28,11 @@ pub mod app {
         ls_key = ls_key.run_list_read();
         let mut list = ls_key.list.clone();
 
+        if ls_key.is_fuzzed {
+             let few_ms = std::time::Duration::from_millis(3000);
+             std::thread::sleep(few_ms);
+        }
+
         //while ls_key.is_fuzzed {
         //    ls_key = LsKey::new(path, all);
         //    ls_key.list = list;
@@ -249,9 +254,7 @@ impl LsKey {
                 //println!("\n\n");
                 //list::print_list_with_keys(list.clone());
             }
-            self.clone().run_cmd();
-
-            self
+            self.run_cmd()
     }
 
    pub fn fuzzy_update_list_read(mut self, list: List) -> Option<(PathBuf, String)> {
@@ -475,25 +478,26 @@ impl LsKey {
     // ls-key. If the non-built in command doesn't return output and enters
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
-    fn run_cmd(mut self) {
+    fn run_cmd(mut self) -> Self {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(self.list.clone());
+           let (some_list, input, _is_fuzzed, _execute) = self.clone().read_process_chars(self.list.clone());
            execute = _execute;
+           self.is_fuzzed = _is_fuzzed;
 
            if let Some(list) = some_list {
-               if !self.is_fuzzed {
-                   if execute {
-                       let new_list = list.clone();
-                       self.clone().key_related_mode(list, Ok(input), is_fuzzed);
-                   }
+               if execute {
+                   let new_list = list.clone();
+                   self.clone().key_related_mode(list, Ok(input), self.is_fuzzed);
                } else {
                    break
-               }
+                }
 
            }
         }
+
+        self
     }
 
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool) {
