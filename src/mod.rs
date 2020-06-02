@@ -174,6 +174,33 @@ impl LsKey {
             self.clone()
     }
 
+   pub fn run_list_read_beta(mut self) {
+            let list = self.list.clone();
+            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
+
+            let entries_keyed: Vec<String> = list::key_entries(entries);
+            //let res = terminal::input_n_display::grid(entries_keyed);
+            let res = terminal::input_n_display::grid(entries_keyed);
+            let mut show = "".to_string();
+            if let Some(r) = res {
+                let grid = r.0;
+                let width = r.1;
+                let display = grid.fit_into_width(width);
+                if let Some(d) = display {
+                     //println!("\n\n{}", d);
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
+                } else {
+                    let display = grid.fit_into_columns(1);
+                     self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                    //println!("\n\n");
+                    //list::print_list_with_keys(list.clone());
+                }
+            } else {
+                //println!("\n\n");
+                //list::print_list_with_keys(list.clone());
+            }
+    }
+
    pub fn run_list_read(mut self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
@@ -304,7 +331,7 @@ impl LsKey {
         }
     }
 
-    fn cmd_mode(mut self, list: List, input: Input) {
+    fn cmd_mode(mut self, input: Input) {
          let args = input.args;
          if let Some(a) = args {
              let args = a;
@@ -329,17 +356,10 @@ impl LsKey {
                  }
              }
              path_cache.switch_back();
-             self.run_list_read();
+             //self.run_list_read();
          } else {
              let as_read = input.as_read.as_str();
              match as_read {
-                 "w" => {
-                      // Cd the parent shell into the directory viewed by ls-key.
-                      let path = self.list.relative_parent_dir_path;
-                      let path = path.to_str().unwrap();
-                      let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                      terminal::parent_shell::type_text(cmd, 0);
-                 },
                  "q" => (),
                  "fzf" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -350,7 +370,7 @@ impl LsKey {
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  },
                  "vim" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -365,7 +385,7 @@ impl LsKey {
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![]);
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  },
                  "zsh" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -380,7 +400,7 @@ impl LsKey {
                      //let file_path = output.unwrap();
                      terminal::shell::spawn("zsh".to_string(), vec![]);
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  },
                  _ => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -389,13 +409,13 @@ impl LsKey {
                      path_cache.switch();
                      let output = terminal::shell::cmd(as_read.to_string()).unwrap();
                      path_cache.switch_back();
-                     self.run_list_read();
+                     //self.run_list_read();
                  }
              }
         }
     }
 
-    fn readline_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
+    fn key_related_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -403,9 +423,6 @@ impl LsKey {
                     let input = input.parse(i);
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
-                        CmdType::cmd => {
-                            self.cmd_mode(list, input);
-                        },
                         CmdType::single_key => {
                             self.key_mode(list, input, is_fuzzed);
                         },
@@ -416,7 +433,8 @@ impl LsKey {
                                 * then type_text_spawn(text_vec);
                             */
                             self.return_file_by_key_mode(list, input, is_fuzzed);
-                        }
+                        },
+                        _ => {}
                     }
                     ()
                 } else {
@@ -442,7 +460,7 @@ impl LsKey {
            if execute {
                if let Some(list) = some_list {
                    let new_list = list.clone();
-                   self.clone().readline_mode(list, Ok(input), is_fuzzed);
+                   self.clone().key_related_mode(list, Ok(input), is_fuzzed);
                }
            }
         }
@@ -574,68 +592,86 @@ impl LsKey {
             let _first = input.iter().nth(0);
             let last = input.iter().last();
 
+            let place = (0, 1);
             if let Some(mut first) = _first {
+                write!(stdout,
+                    "{}{}{}{}", format!("{}", input_string.as_str()
+                    ),
+                   termion::clear::AfterCursor,
+                   termion::cursor::Goto((place.0), (place.1 + 1)),
+                   termion::cursor::Hide,
+                ).unwrap();
+                stdout.flush().unwrap();
+
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
                     first = &'r';
-                } else {
-                    if first != &'$' {
-                         first = &'f';
-                    }
                 }
 
-                let place = (0, 1);
+                let some_mode = mode_parse(input_string.clone());
+                //println!("{:?}", last);
 
-                match first {
-                    'f' => {
-                        let _show = self.display.clone();
-                        write_it(b"fuzzy-widdle mode detected...", &mut stdout, input_string.clone(), place);
-                        let some_keys = parse_keys(input_string.as_str());
+                if let Some(mode) = some_mode {
+                    match mode {
+                        Mode::Cmd(cmd_mode_input) => {
+                             if last == Some(&'\n') {
+                                 input.pop();
+                                 input_string = input.iter().collect();
+                                 let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
+                                 match cmd_mode {
+                                     Mode::Cmd(cmd_mode_input) => {
+                                         let input = Input::new();
+                                         let input = input.parse(cmd_mode_input);
 
-                        if let Some(keys) = some_keys {
-                            let fuzzy_list = self.fuzzy_list.clone();
-                            if let Some(x) = fuzzy_list {
-                                //self.list = x.clone();
-                                input_string = keys;
-                                input = input_string.chars().collect();
-                                the_list = Some(x);
-                                // clear input and drop in the parsed key.
+                                         match input.clone().cmd_type.unwrap() {
+                                             CmdType::cmd => {
+                                                 self.clone().cmd_mode(input);
+                                                 self.clone().run_list_read_beta();
+                                             },
+                                             _ => {}
+                                         }
+                                         //break
+                                     }
+                                     _ => { }
+                                 }
+                             }
+
+                        },
+                        Mode::Work => {
+                            let few_ms = std::time::Duration::from_millis(2000);
+                             if last == Some(&'\n') {
+                                 let path = self.list.relative_parent_dir_path.clone();
+                                 let path = path.to_str().unwrap();
+                                 let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                                 terminal::parent_shell::type_text(cmd, 0);
+                                 break
+                            } else {
+
                             }
-                        } else {
-                            //if last == ' ' {
-                            //     let _input = input.clone();
-                            //     _input.pop();
-                            //     let mut _input_string: String = _input.iter().collect();
-                            //     let ls_key = self.fuzzy_update(_input_string);
-                            //     self = ls_key;
-                            //} else (
-                                let ls_key = self.fuzzy_update(input_string);
+                        },
+                        Mode::Fuzzy(fuzzy_mode_input) => {
+                            let _show = self.display.clone();
+                            let some_keys = parse_keys(fuzzy_mode_input.as_str());
+
+                            if let Some(keys) = some_keys {
+                                let fuzzy_list = self.fuzzy_list.clone();
+                                if let Some(x) = fuzzy_list {
+                                    //self.list = x.clone();
+                                    input_string = keys;
+                                    input = input_string.chars().collect();
+                                    the_list = Some(x);
+                                    // clear input and drop in the parsed key.
+                                }
+                            } else {
+                                let ls_key = self.fuzzy_update(fuzzy_mode_input);
                                 self = ls_key;
-                            //}
-                        }
+                            }
 
-                        is_fuzzed = true;
-                        //let _show = self.clone().fuzzy_update_list_read();
-                        //let _show = self.display.clone();
-                        //assert_ne!(_show, self.display);
-                        //if let Some(x) = _show {
-                        //    if x.0 == self.list.relative_parent_dir_path {
-                        //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                        //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
-
-                        //        write!(
-                        //            stdout,
-                        //            "{}",
-                        //            termion::cursor::Goto(0, 3),
-                        //        ).unwrap();
-                        //        stdout.flush().unwrap();
-                        //    }
-                        //}
-                    },
-                    'r' => write_it(b"return file mode detected... ", &mut stdout, input_string.clone(), place),
-                    '$' => write_it(b"command mode detected...     ", &mut stdout, input_string.clone(), place),
-                    _ =>   write_it(b"invalid mode detected...     ", &mut stdout, input_string.clone(), place),
-                };
+                            is_fuzzed = true;
+                        },
+                        _ => {}
+                    }
+                }
             }
 
             let show = self.clone().display.clone();
@@ -725,7 +761,7 @@ impl Input {
 
 
         let are_all_keys = if let Some(c) = cmd.clone() {
-             if c == "".to_string() {
+             if c == "r".to_string() {
                  let _args = args.clone();
                  if let Some(a) = _args {
                       self.are_all_keys(a)
@@ -794,6 +830,39 @@ impl Input {
      }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum Mode {
+    Fuzzy(String),
+    Cmd(String),
+    Work,
+}
+
+pub fn mode_parse(mut input: String) -> Option<Mode> {
+    let len = input.len();
+    let mode = if len > 2 {
+         let mode: String = input.drain(..2).collect();
+         let mode = mode.as_str();
+         let fuzzy = "f ";
+         let cmd = "c ";
+         match mode {
+             "f " => Some(Mode::Fuzzy(input.clone())),
+             "c " => Some(Mode::Cmd(input.clone())),
+             _ => None
+         }
+    } else if len == 2 {
+         let mode: String = input.drain(..1).collect();
+         let mode = mode.as_str();
+         match mode {
+             "w" => Some(Mode::Work),
+             _ => None
+         }
+    } else {
+        None
+    };
+
+    mode
+}
+
 fn parse_keys(input: &str) -> Option<String> {
     let x = input;
     let mut y: Vec<&str> = x.split(" ").collect();
@@ -848,11 +917,11 @@ mod tests {
     use std::process::Command;
     use std::env;
     use fixture::Fixture;
-    use super::{Input, LsKey, CmdType};
+    use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse() {
         let input = Input::new();
         let input = input.parse("vim Cargo.toml".to_string());
@@ -874,7 +943,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_long() {
         let input = Input::new();
         let input = input.parse("git clone https://github.com/7db9a/ls-key --depth 1".to_string());
@@ -903,7 +972,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_single_cmd() {
         let input = Input::new();
         let input = input.parse("vim".to_string());
@@ -925,7 +994,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_key() {
         let input = Input::new();
         let input = input.parse("33".to_string());
@@ -947,7 +1016,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_bad() {
         let input = Input::new();
         let input = input.parse(" vim Cargo.toml".to_string());
@@ -969,7 +1038,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
+    #[ignore]//docker
     fn parse_cmd() {
         let input = Input::new();
         let (cmd, args) = input.parse_cmd("vim Cargo.toml".to_string());
@@ -1042,5 +1111,50 @@ mod tests {
         ls_key.run_list_read();
         spawn.join();
         //spawn_quite.join();
+    }
+
+    #[test]
+    #[ignore]//docker
+    fn test_mode_parse() {
+       let input_single = "f something".to_string();
+       let some_fuzzy_search_single = mode_parse(input_single.clone());
+
+       let input_multi = "f something and more".to_string();
+       let some_fuzzy_search_multi = mode_parse(input_multi.clone());
+
+       let input_lack = "f ".to_string();
+       let some_fuzzy_search_lack = mode_parse(input_lack.clone());
+
+       let input_lack_more = "f".to_string();
+       let some_fuzzy_search_lack_more = mode_parse(input_lack_more.clone());
+
+       let input_wrong = "d something".to_string();
+       let some_fuzzy_search_wrong = mode_parse(input_wrong.clone());
+
+       assert_eq!(
+           some_fuzzy_search_lack,
+           None
+       );
+
+       assert_eq!(
+           some_fuzzy_search_lack_more,
+           None
+       );
+
+       assert_eq!(
+           some_fuzzy_search_single,
+           Some(Mode::Fuzzy("something".to_string()))
+       );
+
+       assert_eq!(
+           some_fuzzy_search_multi,
+           Some(Mode::Fuzzy("something and more".to_string()))
+
+       );
+
+       assert_eq!(
+           some_fuzzy_search_wrong,
+           None
+       );
     }
 }
