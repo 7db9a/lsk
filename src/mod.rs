@@ -249,7 +249,7 @@ impl LsKey {
                 //println!("\n\n");
                 //list::print_list_with_keys(list.clone());
             }
-            self.clone().run_cmd(list);
+            self.clone().run_cmd();
 
             self
     }
@@ -475,12 +475,11 @@ impl LsKey {
     // ls-key. If the non-built in command doesn't return output and enters
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
-    fn run_cmd(mut self, list: List) {
+    fn run_cmd(mut self) {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
-        let old_list = list.clone();
         let mut execute = false;
         while !execute {
-           let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(list.clone());
+           let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(self.list.clone());
            execute = _execute;
 
            if let Some(list) = some_list {
