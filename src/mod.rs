@@ -457,11 +457,15 @@ impl LsKey {
            let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(list.clone());
            execute = _execute;
 
-           if execute {
-               if let Some(list) = some_list {
-                   let new_list = list.clone();
-                   self.clone().key_related_mode(list, Ok(input), is_fuzzed);
+           if !is_fuzzed {
+               if execute {
+                   if let Some(list) = some_list {
+                       let new_list = list.clone();
+                       self.clone().key_related_mode(list, Ok(input), is_fuzzed);
+                   }
                }
+           } else {
+               break
            }
         }
     }
