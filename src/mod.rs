@@ -18,13 +18,28 @@ use termion::screen::AlternateScreen;
 use std::thread;
 use std::time::Duration;
 
+pub mod app {
+    //pub fn run<P: AsRef<Path>>(path: P, all: bool) -> LsKey {
+    //    let mut ls_key = LsKey::new(path, true);
+
+    //    while !ls_key.halt.clone() {
+    //        ls_key = ls_key.run_list_read();
+    //        if ls_key.fuzzed {
+    //            ls_key = ls_key.run_list_read();
+    //        }
+    //    }
+    //}
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LsKey {
     pub list: List,
     pub all: bool,
     pub input: Option<String>,
     pub fuzzy_list: Option<List>,
-    pub display: Option<(PathBuf, String)>
+    pub display: Option<(PathBuf, String)>,
+    pub halt: bool,
+    pub is_fuzzed: bool
 }
 
 impl LsKey {
@@ -45,6 +60,8 @@ impl LsKey {
                 input: None,
                 fuzzy_list: None,
                 display: None,
+                halt: false,
+                is_fuzzed: false
             }
     }
 
