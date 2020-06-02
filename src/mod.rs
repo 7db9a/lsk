@@ -23,17 +23,17 @@ pub mod app {
     use super::Path;
 
     pub fn run<P: AsRef<Path>>(path: P, all: bool) /*-> LsKey*/ {
-        let mut ls_key = LsKey::new(path, true);
-        ls_key.run_list_read();
+        let path = path.as_ref();
+        let mut ls_key = LsKey::new(path, all);
+        ls_key = ls_key.run_list_read();
+        let mut list = ls_key.list.clone();
 
-        //let mut ls_key = LsKey::new(path, true);
-
-        //while !ls_key.halt.clone() {
-        //    ls_key = ls_key.run_list_read();
-        //    if ls_key.fuzzed {
-        //        ls_key = ls_key.run_list_read();
-        //    }
-        //}
+        while ls_key.is_fuzzed {
+            ls_key = LsKey::new(path, all);
+            ls_key.list = list;
+            ls_key = ls_key.clone().run_list_read();
+            list = ls_key.list.clone();
+        }
     }
 }
 
@@ -66,7 +66,7 @@ impl LsKey {
                 input: None,
                 fuzzy_list: None,
                 display: None,
-                halt: false,
+                halt: true,
                 is_fuzzed: false
             }
     }
@@ -476,21 +476,23 @@ impl LsKey {
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
     fn run_cmd(mut self, list: List) {
+        //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let old_list = list.clone();
         let mut execute = false;
         while !execute {
            let (some_list, input, is_fuzzed, _execute) = self.clone().read_process_chars(list.clone());
            execute = _execute;
 
-           if !is_fuzzed {
-               if execute {
-                   if let Some(list) = some_list {
+           if let Some(list) = some_list {
+               if !self.is_fuzzed {
+                   if execute {
                        let new_list = list.clone();
                        self.clone().key_related_mode(list, Ok(input), is_fuzzed);
                    }
+               } else {
+                   break
                }
-           } else {
-               break
+
            }
         }
     }
@@ -723,6 +725,7 @@ impl LsKey {
                 input.pop();
                 let input_string: String = input.iter().collect();
                 result = Some(input_string);
+                self.is_fuzzed = is_fuzzed;
                 break
             }
         }
