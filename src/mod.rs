@@ -19,16 +19,22 @@ use std::thread;
 use std::time::Duration;
 
 pub mod app {
-    //pub fn run<P: AsRef<Path>>(path: P, all: bool) -> LsKey {
-    //    let mut ls_key = LsKey::new(path, true);
+    use super::LsKey;
+    use super::Path;
 
-    //    while !ls_key.halt.clone() {
-    //        ls_key = ls_key.run_list_read();
-    //        if ls_key.fuzzed {
-    //            ls_key = ls_key.run_list_read();
-    //        }
-    //    }
-    //}
+    pub fn run<P: AsRef<Path>>(path: P, all: bool) /*-> LsKey*/ {
+        let mut ls_key = LsKey::new(path, true);
+        ls_key.run_list_read();
+
+        //let mut ls_key = LsKey::new(path, true);
+
+        //while !ls_key.halt.clone() {
+        //    ls_key = ls_key.run_list_read();
+        //    if ls_key.fuzzed {
+        //        ls_key = ls_key.run_list_read();
+        //    }
+        //}
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
