@@ -761,7 +761,7 @@ impl Input {
 
 
         let are_all_keys = if let Some(c) = cmd.clone() {
-             if c == "".to_string() {
+             if c == "r".to_string() {
                  let _args = args.clone();
                  if let Some(a) = _args {
                       self.are_all_keys(a)
