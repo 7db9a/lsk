@@ -224,7 +224,7 @@ impl LsKey {
             }
     }
 
-   pub fn run_list_read(mut self) {
+   pub fn run_list_read(mut self) -> Self {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
 
@@ -249,7 +249,9 @@ impl LsKey {
                 //println!("\n\n");
                 //list::print_list_with_keys(list.clone());
             }
-            self.run_cmd(list);
+            self.clone().run_cmd(list);
+
+            self
     }
 
    pub fn fuzzy_update_list_read(mut self, list: List) -> Option<(PathBuf, String)> {
