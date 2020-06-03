@@ -1166,7 +1166,7 @@ mod tests {
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         let ls_key = super::LsKey::new(path, true);
-        ls_key.run_list_read();
+        ls_key.run_list_read(false);
         spawn.join();
         //spawn_quite.join();
     }
@@ -1184,7 +1184,7 @@ mod tests {
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
         let ls_key = super::LsKey::new(path, true);
-        ls_key.run_list_read();
+        ls_key.run_list_read(false);
         spawn.join();
         //spawn_quite.join();
     }
