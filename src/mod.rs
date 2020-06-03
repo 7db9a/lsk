@@ -48,6 +48,13 @@ pub mod app {
 
                 //assert_eq!(_list, fuzzy_list);
                 //ls_key.fuzzy_list = None;
+            } else if !ls_key.halt {
+                let few_ms = std::time::Duration::from_millis(1000);
+                let _list = ls_key.list;
+                std::thread::sleep(few_ms);
+                ls_key = LsKey::new(path, all);
+                ls_key.list = _list;
+                ls_key.display = display;
             }
             //ls_key.fuzzy_list = None;
             ls_key.is_fuzzed = false;
@@ -350,6 +357,7 @@ impl LsKey {
                  self.list.relative_parent_dir_path.pop();
                  let list = self.list.clone().update(file_pathbuf);
                  self = self.update(list);
+                 self.halt = false;
                  self.run_list_read();
             },
             _ => {
@@ -362,6 +370,7 @@ impl LsKey {
 
                       let list = self.list.clone().update(file_pathbuf);
                       self = self.update(list);
+                      self.halt = false;
                       self.run_list_read();
                   } else {
                       let file_path =
@@ -369,8 +378,10 @@ impl LsKey {
                           .to_str().unwrap()
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                      self.halt = false;
                       self.run_list_read();
                   }
+
             }
         }
     }
