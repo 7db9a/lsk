@@ -351,7 +351,7 @@ impl LsKey {
         }
     }
 
-    pub fn key_mode(mut self, list: List, input: Input, is_fuzzed: bool) {
+    pub fn key_mode(mut self, list: List, input: Input, is_fuzzed: bool) -> Self {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
             0 => {
@@ -361,7 +361,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self = self.update(list);
                  self.halt = false;
-                 self.run_list_read(is_fuzzed);
+                 self.clone().run_list_read(is_fuzzed)
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -374,7 +374,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self = self.update(list);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed);
+                      self.clone().run_list_read(is_fuzzed)
                   } else {
                       let file_path =
                           file_pathbuf
@@ -382,9 +382,8 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed);
+                      self.clone().run_list_read(is_fuzzed)
                   }
-
             }
         }
     }
@@ -473,7 +472,7 @@ impl LsKey {
         }
     }
 
-    fn key_related_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
+    fn key_related_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) -> Self {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -482,7 +481,7 @@ impl LsKey {
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
                         CmdType::single_key => {
-                            self.key_mode(list, input, is_fuzzed);
+                            self.key_mode(list, input, is_fuzzed)
                         },
                         CmdType::multiple_keys => {
                             /*
@@ -490,16 +489,16 @@ impl LsKey {
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
                                 * then type_text_spawn(text_vec);
                             */
-                            self.return_file_by_key_mode(list, input, is_fuzzed);
+                            self.clone().return_file_by_key_mode(list, input, is_fuzzed);
+                            self
                         },
-                        _ => {}
+                        _ => {self}
                     }
-                    ()
                 } else {
-                    ()
+                    (self)
                 }
             },
-            Err(_) => ()
+            Err(_) => (self)
         }
     }
 
@@ -519,7 +518,7 @@ impl LsKey {
                if let Some(list) = some_list {
                    if execute {
                        let new_list = list.clone();
-                       self.clone().key_related_mode(list, Ok(input), self.is_fuzzed);
+                       self = self.clone().key_related_mode(list, Ok(input), self.is_fuzzed);
                    } else {
                        break
                     }
