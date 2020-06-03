@@ -38,9 +38,7 @@ pub mod app {
             //ls_key.list = ls_key.fuzzy_list.unwrap(); //safe (I think)
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
-                let few_ms = std::time::Duration::from_millis(7000);
                 let _list = ls_key.list;
-                std::thread::sleep(few_ms);
                 ls_key = LsKey::new(path, all);
                 ls_key.list = fuzzy_list.clone();
 
@@ -49,17 +47,15 @@ pub mod app {
                 //assert_eq!(_list, fuzzy_list);
                 //ls_key.fuzzy_list = None;
             } else if !ls_key.halt {
-                let few_ms = std::time::Duration::from_millis(1000);
                 let _list = ls_key.list;
-                std::thread::sleep(few_ms);
                 ls_key = LsKey::new(path, all);
                 ls_key.list = _list;
                 ls_key.display = display;
             }
             //ls_key.fuzzy_list = None;
-            ls_key.is_fuzzed = false;
+            //ls_key.is_fuzzed = false;
             //ls_key.list = list;
-            ls_key = ls_key.clone().run_list_read(true);
+            ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
             list = ls_key.list.clone();
         }
     }
@@ -365,7 +361,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self = self.update(list);
                  self.halt = false;
-                 self.run_list_read(false);
+                 self.run_list_read(is_fuzzed);
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -378,7 +374,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self = self.update(list);
                       self.halt = false;
-                      self.run_list_read(false);
+                      self.run_list_read(is_fuzzed);
                   } else {
                       let file_path =
                           file_pathbuf
@@ -386,7 +382,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.run_list_read(false);
+                      self.run_list_read(is_fuzzed);
                   }
 
             }
@@ -517,12 +513,6 @@ impl LsKey {
         let mut execute = false;
         while !execute {
            let (some_list, input, _is_fuzzed, _execute, fuzzy_list, kill) = self.clone().read_process_chars(self.list.clone());
-           if kill {
-               self.fuzzy_list = None;
-               self.is_fuzzed = false;
-               self.kill = true;
-               execute = true;
-           } else {
                execute = _execute;
                self.is_fuzzed = _is_fuzzed;
                self.fuzzy_list = fuzzy_list;
@@ -535,7 +525,6 @@ impl LsKey {
                     }
 
                }
-           }
         }
 
         self
