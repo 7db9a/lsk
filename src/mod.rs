@@ -25,7 +25,7 @@ pub mod app {
     pub fn run<P: AsRef<Path>>(path: P, all: bool) /*-> LsKey*/ {
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all);
-        ls_key = ls_key.run_list_read();
+        ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
         let mut list = ls_key.list.clone();
 
         //if ls_key.is_fuzzed {
@@ -38,7 +38,7 @@ pub mod app {
             //ls_key.list = ls_key.fuzzy_list.unwrap(); //safe (I think)
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
-                let few_ms = std::time::Duration::from_millis(3000);
+                let few_ms = std::time::Duration::from_millis(7000);
                 let _list = ls_key.list;
                 std::thread::sleep(few_ms);
                 ls_key = LsKey::new(path, all);
@@ -59,7 +59,7 @@ pub mod app {
             //ls_key.fuzzy_list = None;
             ls_key.is_fuzzed = false;
             //ls_key.list = list;
-            ls_key = ls_key.clone().run_list_read();
+            ls_key = ls_key.clone().run_list_read(true);
             list = ls_key.list.clone();
         }
     }
@@ -73,7 +73,8 @@ pub struct LsKey {
     pub fuzzy_list: Option<List>,
     pub display: Option<(PathBuf, String)>,
     pub halt: bool,
-    pub is_fuzzed: bool
+    pub is_fuzzed: bool,
+    pub kill: bool
 }
 
 impl LsKey {
@@ -95,7 +96,8 @@ impl LsKey {
                 fuzzy_list: None,
                 display: None,
                 halt: true,
-                is_fuzzed: false
+                is_fuzzed: false,
+                kill: false
             }
     }
 
@@ -252,7 +254,7 @@ impl LsKey {
             }
     }
 
-   pub fn run_list_read(mut self) -> Self {
+   pub fn run_list_read(mut self, halt: bool) -> Self {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
 
@@ -277,7 +279,12 @@ impl LsKey {
                 //println!("\n\n");
                 //list::print_list_with_keys(list.clone());
             }
-            self.run_cmd()
+
+            if halt {
+                self
+            } else {
+                self.run_cmd()
+            }
     }
 
    pub fn fuzzy_update_list_read(mut self, list: List) -> Option<(PathBuf, String)> {
@@ -358,7 +365,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self = self.update(list);
                  self.halt = false;
-                 self.run_list_read();
+                 self.run_list_read(false);
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -371,7 +378,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self = self.update(list);
                       self.halt = false;
-                      self.run_list_read();
+                      self.run_list_read(false);
                   } else {
                       let file_path =
                           file_pathbuf
@@ -379,7 +386,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.run_list_read();
+                      self.run_list_read(false);
                   }
 
             }
@@ -509,25 +516,32 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.clone().read_process_chars(self.list.clone());
-           execute = _execute;
-           self.is_fuzzed = _is_fuzzed;
-           self.fuzzy_list = fuzzy_list;
-           if let Some(list) = some_list {
-               if execute {
-                   let new_list = list.clone();
-                   self.clone().key_related_mode(list, Ok(input), self.is_fuzzed);
-               } else {
-                   break
-                }
+           let (some_list, input, _is_fuzzed, _execute, fuzzy_list, kill) = self.clone().read_process_chars(self.list.clone());
+           if kill {
+               self.fuzzy_list = None;
+               self.is_fuzzed = false;
+               self.kill = true;
+               execute = true;
+           } else {
+               execute = _execute;
+               self.is_fuzzed = _is_fuzzed;
+               self.fuzzy_list = fuzzy_list;
+               if let Some(list) = some_list {
+                   if execute {
+                       let new_list = list.clone();
+                       self.clone().key_related_mode(list, Ok(input), self.is_fuzzed);
+                   } else {
+                       break
+                    }
 
+               }
            }
         }
 
         self
     }
 
-    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
+    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>, bool) {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
@@ -540,6 +554,7 @@ impl LsKey {
         let original_list = list;
         let original_display = self.clone().display;
         let mut execute = true;
+        let mut kill = false;
 
 
         let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
@@ -706,6 +721,9 @@ impl LsKey {
                                  let path = path.to_str().unwrap();
                                  let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
                                  terminal::parent_shell::type_text(cmd, 0);
+                                 kill = true;
+                                 self.is_fuzzed = false;
+                                 self.kill = true;
                                  break
                             } else {
 
@@ -775,7 +793,7 @@ impl LsKey {
 
 
         //write!(stdout, "{}", termion::cursor::Show).unwrap();
-        (the_list, result, is_fuzzed, execute, fuzzy_list)
+        (the_list, result, is_fuzzed, execute, fuzzy_list, kill)
     }
 }
 
