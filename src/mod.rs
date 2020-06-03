@@ -28,17 +28,33 @@ pub mod app {
         ls_key = ls_key.run_list_read();
         let mut list = ls_key.list.clone();
 
-        if ls_key.is_fuzzed {
-             let few_ms = std::time::Duration::from_millis(3000);
-             std::thread::sleep(few_ms);
-        }
-
-        //while ls_key.is_fuzzed {
-        //    ls_key = LsKey::new(path, all);
-        //    ls_key.list = list;
-        //    ls_key = ls_key.clone().run_list_read();
-        //    list = ls_key.list.clone();
+        //if ls_key.is_fuzzed {
+        //     let few_ms = std::time::Duration::from_millis(3000);
+        //     std::thread::sleep(few_ms);
         //}
+
+        while ls_key.is_fuzzed {
+            ls_key.list = list;
+            //ls_key.list = ls_key.fuzzy_list.unwrap(); //safe (I think)
+            let display = ls_key.display.clone();
+            if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
+                let few_ms = std::time::Duration::from_millis(3000);
+                let _list = ls_key.list;
+                std::thread::sleep(few_ms);
+                ls_key = LsKey::new(path, all);
+                ls_key.list = fuzzy_list.clone();
+
+                ls_key.display = display;
+
+                //assert_eq!(_list, fuzzy_list);
+                //ls_key.fuzzy_list = None;
+            }
+            //ls_key.fuzzy_list = None;
+            ls_key.is_fuzzed = false;
+            //ls_key.list = list;
+            ls_key = ls_key.clone().run_list_read();
+            list = ls_key.list.clone();
+        }
     }
 }
 
@@ -219,7 +235,7 @@ impl LsKey {
                      self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
                 } else {
                     let display = grid.fit_into_columns(1);
-                     self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                    self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
                     //println!("\n\n");
                     //list::print_list_with_keys(list.clone());
                 }
@@ -482,10 +498,10 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, _is_fuzzed, _execute) = self.clone().read_process_chars(self.list.clone());
+           let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.clone().read_process_chars(self.list.clone());
            execute = _execute;
            self.is_fuzzed = _is_fuzzed;
-
+           self.fuzzy_list = fuzzy_list;
            if let Some(list) = some_list {
                if execute {
                    let new_list = list.clone();
@@ -500,7 +516,7 @@ impl LsKey {
         self
     }
 
-    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool) {
+    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
@@ -509,6 +525,7 @@ impl LsKey {
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
         let mut the_list: Option<list::List> = None;
+        let mut fuzzy_list: Option<list::List> = None;
         let original_list = list;
         let original_display = self.clone().display;
         let mut execute = true;
@@ -688,17 +705,22 @@ impl LsKey {
                             let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
                             if let Some(keys) = some_keys {
-                                let fuzzy_list = self.fuzzy_list.clone();
-                                if let Some(x) = fuzzy_list {
+                                fuzzy_list = self.fuzzy_list.clone();
+                                if let Some(x) = fuzzy_list.clone() {
                                     //self.list = x.clone();
                                     input_string = keys;
                                     input = input_string.chars().collect();
-                                    the_list = Some(x);
+                                    the_list = Some(x.clone());
+                                    fuzzy_list = Some(x);
                                     // clear input and drop in the parsed key.
                                 }
                             } else {
-                                let ls_key = self.fuzzy_update(fuzzy_mode_input);
-                                self = ls_key;
+
+                                if input.iter().last() != Some(&'\n') {
+                                    let ls_key = self.fuzzy_update(fuzzy_mode_input);
+                                    self = ls_key.clone();
+                                    fuzzy_list = ls_key.fuzzy_list;
+                                }
                             }
 
                             is_fuzzed = true;
@@ -729,6 +751,8 @@ impl LsKey {
                 let input_string: String = input.iter().collect();
                 result = Some(input_string);
                 self.is_fuzzed = is_fuzzed;
+                if self.is_fuzzed {
+                }
                 break
             }
         }
@@ -740,7 +764,7 @@ impl LsKey {
 
 
         //write!(stdout, "{}", termion::cursor::Show).unwrap();
-        (the_list, result, is_fuzzed, execute)
+        (the_list, result, is_fuzzed, execute, fuzzy_list)
     }
 }
 
