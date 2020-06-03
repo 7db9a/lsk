@@ -624,8 +624,6 @@ impl LsKey {
                         if input.iter().count() == 0 {
                             //write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
                             execute = false;
-                            break;
-
                             //let show = original_display.clone();
                             //write!(
                             //    stdout,
