@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#sed -i 's/ignore\/\*macro_use\*\//macro_use/g' src/mod.rs #test! macro by default ignores.
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/mod.rs
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/terminal.rs
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/list.rs
