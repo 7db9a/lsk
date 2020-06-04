@@ -995,10 +995,10 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($name:ident: $input:expr, $input_fuzz:expr, $sub_path:expr) => {
+        ($name:ident: $input:expr, $input_fuzz:expr, $sub_path:expr, $ignore:ident) => {
 
             #[test]
-            #[ignore]//host-macro
+            #[$ignore]
             fn $name() {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
@@ -1051,8 +1051,8 @@ mod tests {
         };
     }
 
-    test!(test_macro: "$(printf '2\r')", "", "test_macro");
-    test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro");
+    test!(test_macro: "$(printf '2\r')", "", "test_macro", ignore);
+    test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore);
 
     #[test]
     #[ignore]//docker
