@@ -995,10 +995,12 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($name:ident: $input:expr) => {
+        ($name:ident: $input:expr, $input_fuzz:expr, $sub_path:expr) => {
+
             #[test]
+            #[ignore]//host-macro
             fn $name() {
-                let path = "/tmp/lsk_tests/";
+                let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
                 let mut fixture = Fixture::new()
                     .add_dirpath(path.to_string())
@@ -1012,7 +1014,7 @@ mod tests {
                     .add_file(path.to_string() + ".a-hidden-file")
                     .build();
 
-                let path_path = Path::new(path).to_path_buf();
+                let path_path = Path::new(path.clone().as_str()).to_path_buf();
                 let mut path_cache = command_assistors::PathCache::new(&path_path);
 
                 // Changing directories.
@@ -1024,33 +1026,33 @@ mod tests {
 
                 println!("");
                 let text_vec = vec![
-                     format!(r#""$(printf '{}\r')""#, $input),
+                     format!(r#""{}""#, $input_fuzz),
+                     format!(r#""{}""#, $input),
                      r#""$(printf ':q\r')""#.to_string(),
                      r#""$(printf 'q\r')""#.to_string(),
                 ];
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-                super::app::run(path, false);
+                super::app::run(path.clone(), false);
                 spawn.join();
 
-                path_cache.switch();
+                path_cache.switch_back();
 
-                assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-                assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
-                assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
-                assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
+                assert_eq!(true, metadata(path.clone() + "a-file" ).unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + "a-dir/a-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + "a-dir/b-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/a-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
 
                 fixture.teardown(true);
             }
         };
     }
 
-    #[test]
-    #[ignore]//host
-    test!(host_app_macro: "2");
+    test!(test_macro: "$(printf '2\r')", "", "test_macro");
+    test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro");
 
     #[test]
     #[ignore]//docker
