@@ -995,10 +995,10 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($name:ident: $input:expr, $input_fuzz:expr, $sub_path:expr, $ignore:ident) => {
+        ($name:ident: $input:expr, $input_fuzz:expr, $sub_path:expr, $test_macro:ident) => {
 
             #[test]
-            #[$ignore]
+            #[$test_macro]
             fn $name() {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
