@@ -1051,8 +1051,8 @@ mod tests {
         };
     }
 
-    test!(test_macro: "$(printf '2\r')", "", "test_macro", ignore);
-    test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore);
+    test!(test_macro: "$(printf '2\r')", "", "test_macro", ignore/*macro_use*/);
+    test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore/*macro_use*/);
 
     #[test]
     #[ignore]//docker
