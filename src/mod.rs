@@ -1281,4 +1281,55 @@ mod tests {
 
         fixture.teardown(true);
     }
+
+    #[test]
+    #[ignore]//host
+    fn host_run_app_list_all() {
+        let path = "/tmp/lsk_tests/";
+
+        let mut fixture = Fixture::new()
+            .add_dirpath(path.to_string())
+            .add_dirpath(path.to_string() + "a-dir")
+            .add_dirpath(path.to_string() + ".a-hidden-dir")
+            .add_file(path.to_string() + "a-file")
+            .add_file(path.to_string() + "a-dir/a-file")
+            .add_file(path.to_string() + "a-dir/b-file")
+            .add_file(path.to_string() + ".a-hidden-dir/a-file")
+            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
+            .add_file(path.to_string() + ".a-hidden-file")
+            .build();
+
+        let path_path = Path::new(path).to_path_buf();
+        let mut path_cache = command_assistors::PathCache::new(&path_path);
+
+        // Changing directories.
+        path_cache.switch();
+
+        let stuff = "You opened .a-hidden-file if you're reading this in a running test case.".to_string();
+        let mut file = std::fs::File::create(".a-hidden-file").unwrap();
+        file.write_all(stuff.as_bytes()).unwrap();
+
+        println!("");
+        let text_vec = vec![
+             r#""$(printf '2 \n ')""#.to_string(),
+             r#""$(printf ':q \n ')""#.to_string(),
+             r#""$(printf 'q \n ')""#.to_string(),
+        ];
+        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
+        super::app::run(path, true);
+        //spawn.join();
+
+        path_cache.switch();
+
+        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
+        assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
+        assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
+
+        fixture.teardown(true);
+    }
 }
