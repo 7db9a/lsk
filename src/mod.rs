@@ -1163,7 +1163,7 @@ mod tests {
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::app::run(path, true);
+        super::app::run(path, false);
         spawn.join();
         //spawn_quite.join();
     }
