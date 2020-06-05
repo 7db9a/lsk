@@ -1053,14 +1053,26 @@ mod tests {
     }
 
     test!(
-          test_macro,
+          macro_enter_file,
           200,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
           "",                //$input5
-          "test_macro",
+          "macro_enter_file",
+          ignore/*macro_use*/
+    );
+
+    test!(
+          macro_fuzzy_enter_file,
+          200,               //$delay in milleseconds
+          "$(printf 'f fi\r')",
+          "$(printf '1\r')",
+          "$(printf ':q\r')",
+          "$(printf 'q\r')",
+          "",
+          "macro_fuzzy_enter_file",
           ignore/*macro_use*/
     );
     //test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore/*macro_use*/);
