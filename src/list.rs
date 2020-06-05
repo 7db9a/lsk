@@ -59,14 +59,14 @@ impl List {
         let path = pathbuf.into_boxed_path();
         let depth_from_root_dir = path.iter().count();
 
-        if let Some(x) = self.clone().parent_dir {
-            let parent_dir_count = x.iter().count();
+        //if let Some(x) = self.clone().parent_dir {
+            let parent_dir_count = self.relative_parent_dir_path.clone().iter().count();
             if depth_from_root_dir < parent_dir_count {
                 self.parent_dir = Some(path.to_path_buf());
             }
-        } else {
-            self.parent_dir = Some(path.to_path_buf());
-        }
+        //} else {
+        //    self.parent_dir = Some(path.to_path_buf());
+        //}
 
         self
     }
