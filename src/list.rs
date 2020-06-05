@@ -8,7 +8,6 @@ pub struct List {
     pub files: Vec<PathBuf>,
     pub dirs: Vec<PathBuf>,
     pub relative_parent_dir_path: PathBuf,
-    pub parent_dir: Option<PathBuf>,
     pub path_history: Vec<PathBuf>
 }
 
@@ -23,7 +22,7 @@ impl List {
     // Update due to going into a new directory.
     pub fn update<P: AsRef<Path>>(mut self, path: P) -> Self {
         let old_path_history = self.path_history;
-        let old_parent_dir = self.parent_dir;
+        let old_parent_dir = Some(self.relative_parent_dir_path.clone());
         let old_relative_parent_dir_path = self.relative_parent_dir_path;
         let p = path.as_ref().to_str().unwrap();
         let np: String = basename(p, '/').into_owned();
@@ -59,14 +58,10 @@ impl List {
         let path = pathbuf.into_boxed_path();
         let depth_from_root_dir = path.iter().count();
 
-        //if let Some(x) = self.clone().parent_dir {
-            let parent_dir_count = self.relative_parent_dir_path.clone().iter().count();
-            if depth_from_root_dir < parent_dir_count {
-                self.parent_dir = Some(path.to_path_buf());
-            }
-        //} else {
-        //    self.parent_dir = Some(path.to_path_buf());
-        //}
+        let parent_dir_count = self.relative_parent_dir_path.clone().iter().count();
+        if depth_from_root_dir < parent_dir_count {
+            self.relative_parent_dir_path = path.to_path_buf();
+        }
 
         self
     }
@@ -103,7 +98,6 @@ impl List {
     fn skip(mut self, entry: &DirEntry) -> bool {
 
         //if is_parent_dir(entry) {
-        //    self.parent_dir = entry.path().to_path_buf();
         //    return true
         //}
         entry.file_name()
