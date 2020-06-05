@@ -996,17 +996,17 @@ mod tests {
 
     macro_rules! test {
         (
-            $list_all_bool: expr,
+            $list_all_bool: expr, // lk -a would be true
             $name:ident,
-            $test_file_path :expr,
-            $delay: expr,
+            $test_file_path :expr, // We write text to a file so we know it's it when it's opened in test.
+            $delay: expr, // Delay in each character typed.
             $input1: expr,
             $input2: expr,
             $input3: expr,
             $input4: expr,
             $input5: expr,
-            $sub_path: expr,
-            $test_macro: ident
+            $sub_path: expr, //We test all of this in a specific path. This'll create a sub-dir under that test-path.
+            $test_macro: ident //We want to ignore the tests when we want and run when we want.
         ) => {
 
             #[test]
@@ -1032,7 +1032,7 @@ mod tests {
                 // Changing directories.
                 path_cache.switch();
 
-                let stuff = "Using test macro, you opened a-file if you're reading this in a running test case.".to_string();
+                let stuff = format!(r#""Opening "{}" in test case "{}".""#, $test_file_path, $sub_path);
                 let mut file = std::fs::File::create($test_file_path).unwrap();
                 file.write_all(stuff.as_bytes()).unwrap();
 
