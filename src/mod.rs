@@ -995,7 +995,18 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($list_all_bool: expr, $name:ident, $delay:expr, $input1:expr, $input2:expr, $input3:expr, $input4:expr, $input5:expr, $sub_path:expr, $test_macro:ident) => {
+        (
+            $list_all_bool: expr,
+            $name:ident,
+            $delay:expr,
+            $input1:expr,
+            $input2:expr,
+            $input3:expr,
+            $input4:expr,
+            $input5:expr,
+            $sub_path:expr,
+            $test_macro:ident
+        ) => {
 
             #[test]
             #[$test_macro]
