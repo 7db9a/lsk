@@ -1018,6 +1018,11 @@ mod tests {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
                 let mut fixture = Fixture::new()
+                    .add_dirpath("/tmp/lsk_tests/boniface/".to_string())
+                    .add_dirpath("/tmp/lsk_tests/cariciollo/".to_string())
+                    .add_dirpath("/tmp/lsk_tests/peter/".to_string())
+                    .add_dirpath("/tmp/lsk_tests/marcillenus/".to_string())
+                    .add_dirpath("/tmp/lsk_tests/angela/".to_string())
                     .add_dirpath(path.to_string())
                     .add_dirpath(path.to_string() + "a-dir")
                     .add_dirpath(path.to_string() + ".a-hidden-dir")
@@ -1157,6 +1162,23 @@ mod tests {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
+          ignore/*macro_use*/
+    );
+
+    test!(
+         false,
+          macro_go_back_fuzzy_enter_back_into_dir,
+          "a-file",
+          500,               //inrease 200 => 500 ms to see better.
+          "$(printf '0\r')",
+          "$(printf 'f bf\r')",
+          "$(printf '2\r')",
+          "$(printf 'q\r')",
+          "",
+          "",
+          "",
+          "macro_go_back_fuzzy_enter_back_into_dir",
+          ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
           ignore/*macro_use*/
     );
 
