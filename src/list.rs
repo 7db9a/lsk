@@ -113,11 +113,8 @@ impl List {
     }
 
     fn full_entry_path(self, path: PathBuf) -> Option<PathBuf> {
-        if let Some(p) = self.parent_dir.clone() {
-            Some(p.join(path.as_path()))
-        } else {
-            None
-        }
+        let p = self.relative_parent_dir_path.clone();
+        Some(p.join(path.as_path()))
     }
 }
 
@@ -213,11 +210,9 @@ pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
         }
         if dirs.clone().count() > 0 {
             for entry in dirs.clone() {
-                if let Some(x) = list.parent_dir.clone() {
-                    let parent_file_name = file_or_dir_name(x);
-                    if Some(entry) != parent_file_name.as_ref() {
-                       all_files.push(entry.to_path_buf());
-                    }
+                let parent_file_name = file_or_dir_name(list.relative_parent_dir_path.clone());
+                if Some(entry) != parent_file_name.as_ref() {
+                   all_files.push(entry.to_path_buf());
                 }
             }
         }
