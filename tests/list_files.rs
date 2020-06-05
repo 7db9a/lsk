@@ -173,7 +173,6 @@ fn fuzzy_list() {
             //List {
             //     files: ["CREDITS"],
             //     dirs: ["security", "scripts", "crypto", "certs"],
-            //     relative_parent_dir_path: "/tmp/lsk_tests/",
             //     parent_dir: Some("/tmp/lsk_tests/"),
             //     path_history: ["/tmp/lsk_tests/"]
             //}
@@ -182,7 +181,7 @@ fn fuzzy_list() {
                  {\n    \
                      files: [\n        \"CREDITS\",\n    ],\n    \
                      dirs: [\n        \"security\",\n        \"scripts\",\n        \"crypto\",\n        \"certs\",\n    ],\n    \
-                     relative_parent_dir_path: \"/tmp/lsk_tests/\",\n    parent_dir: Some(\n        \"/tmp/lsk_tests/\",\n    ),\n    \
+                     parent_path: \"/tmp/lsk_tests/\",\n    \
                      path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n\
                  }"
             )
@@ -195,7 +194,7 @@ fn fuzzy_list() {
                  {\n    \
                      files: [\n        \"CREDITS\",\n    ],\n    \
                      dirs: [\n        \"security\",\n        \"scripts\",\n        \"crypto\",\n        \"certs\",\n    ],\n    \
-                     relative_parent_dir_path: \"/tmp/lsk_tests/\",\n    parent_dir: Some(\n        \"/tmp/lsk_tests/\",\n    ),\n    \
+                     parent_path: \"/tmp/lsk_tests/\",\n    \
                      path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n\
                  }"
             )
@@ -232,9 +231,9 @@ fn list_go_up_one_level() {
         //         cmd_type: Some(ls_key::CmdType::single_key)
         //    };
         //let input = ls_key::Input::new().parse(key.to_string());
-        ls_key.list.relative_parent_dir_path.pop();
-        let file_pathbuf = ls_key.list.relative_parent_dir_path.clone();
-        ls_key.list.relative_parent_dir_path.pop();
+        ls_key.list.parent_path.pop();
+        let file_pathbuf = ls_key.list.parent_path.clone();
+        ls_key.list.parent_path.pop();
         let list = ls_key.list.clone().update(file_pathbuf);
         ls_key = ls_key.update(list);
         let list_up_level = ls_key.list;
@@ -257,8 +256,7 @@ fn list_go_up_one_level() {
             "List {\n    \
                  files: [],\n    \
                  dirs: [\n        \"lsk_tests\",\n        \"list_enter_dir\",\n    ],\n    \
-                 relative_parent_dir_path: \"/tmp/lsk_tests\",\n    \
-                 parent_dir: Some(\n        \"/tmp/lsk_tests\",\n    ),\n    \
+                 parent_path: \"/tmp/lsk_tests\",\n    \
                  path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n\
             }"
         );
@@ -327,8 +325,7 @@ fn list_enter_into_dir() {
             "List {\n    \
                  files: [\n        \"Kconfig\",\n        \"gen_init_cpio.c\",\n        \"Makefile\",\n        \"initramfs_data.S\",\n        \"gen_initramfs.sh\",\n        \"default_cpio_list\",\n    ],\n    \
                  dirs: [\n        \"usr\",\n        \"include\",\n    ],\n    \
-                 relative_parent_dir_path: \"/tmp/lsk_tests/list_enter_dir/usr\",\n    \
-                 parent_dir: Some(\n        \"/tmp/lsk_tests/list_enter_dir/usr\",\n    ),\n    \
+                 parent_path: \"/tmp/lsk_tests/list_enter_dir/usr\",\n    \
                  path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests/list_enter_dir/usr\",\n    ],\n\
             }"
         );
@@ -367,9 +364,9 @@ fn list_enter_into_fuzzed_dir() {
         //         as_read: key.to_string(),
         //         cmd_type: Some(ls_key::CmdType::single_key)
         //    };
-        ls_key.list.relative_parent_dir_path.pop();
-        let file_pathbuf = ls_key.list.relative_parent_dir_path.clone();
-        ls_key.list.relative_parent_dir_path.pop();
+        ls_key.list.parent_path.pop();
+        let file_pathbuf = ls_key.list.parent_path.clone();
+        ls_key.list.parent_path.pop();
         let list = ls_key.list.clone().update(file_pathbuf);
         ls_key = ls_key.update(list);
         let list_up_level = ls_key.list;
@@ -391,8 +388,7 @@ fn list_enter_into_fuzzed_dir() {
             "List {\n    \
                  files: [],\n    \
                  dirs: [\n        \"lsk_tests\",\n        \"list_enter_dir\",\n    ],\n    \
-                 relative_parent_dir_path: \"/tmp/lsk_tests\",\n    \
-                 parent_dir: Some(\n        \"/tmp/lsk_tests\",\n    ),\n    \
+                 parent_path: \"/tmp/lsk_tests\",\n    \
                  path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n\
             }"
         );
@@ -457,7 +453,7 @@ fn test_cmd_in_different_dir() {
 //     List {
 //         files: ["COPYING", "Kconfig", "Makefile", "MAINTAINERS", "Kbuild", "CREDITS", "README"],
 //         dirs: ["lsk_tests", "sound", "certs", "kernel", "include", "samples", "Documentation", "drivers", "fs", "block", "net", "arch", "crypto", "mm", "scripts", "tools", "init", "LICENSES", "virt", "ipc", "security", "lib", "usr"],
-//         relative_parent_dir_path: "/tmp/lsk_tests/",
+//         parent_path: "/tmp/lsk_tests/",
 //         parent_dir: Some("/tmp/lsk_tests/"),
 //         path_history: ["/tmp/lsk_tests/"]
 //    };

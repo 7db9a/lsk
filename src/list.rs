@@ -7,38 +7,37 @@ use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
 pub struct List {
     pub files: Vec<PathBuf>,
     pub dirs: Vec<PathBuf>,
-    pub relative_parent_dir_path: PathBuf,
-    pub parent_dir: Option<PathBuf>,
+    pub parent_path: PathBuf,
     pub path_history: Vec<PathBuf>
 }
 
 impl List {
     pub fn new<P: AsRef<Path>>(path: P) -> Self {
         let mut list: List = Default::default();
-        list.relative_parent_dir_path = path.as_ref().to_path_buf();
-        list.path_history.push(list.relative_parent_dir_path.clone());
+        list.parent_path = path.as_ref().to_path_buf();
+        list.path_history.push(list.parent_path.clone());
         list.clone()
     }
 
     // Update due to going into a new directory.
     pub fn update<P: AsRef<Path>>(mut self, path: P) -> Self {
         let old_path_history = self.path_history;
-        let old_parent_dir = self.parent_dir;
-        let old_relative_parent_dir_path = self.relative_parent_dir_path;
+        let old_parent_dir = Some(self.parent_path.clone());
+        let old_parent_path = self.parent_path;
         let p = path.as_ref().to_str().unwrap();
         let np: String = basename(p, '/').into_owned();
         let basename = Path::new(&np);
         let mut list: List = Default::default();
         self = list;
         self.path_history = old_path_history;
-        self.relative_parent_dir_path = old_relative_parent_dir_path.join(basename);
-        self.path_history.push(self.relative_parent_dir_path.clone());
+        self.parent_path = old_parent_path.join(basename);
+        self.path_history.push(self.parent_path.clone());
         self.clone()
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
         let mut _list: List = Default::default();
-        let walker = WalkDir::new(self.relative_parent_dir_path.clone()).max_depth(1).into_iter();
+        let walker = WalkDir::new(self.parent_path.clone()).max_depth(1).into_iter();
         for entry in walker.filter_entry(|e| !_list.clone().skip(e)) {
                 self = list_maker(entry, self.clone())?;
         }
@@ -48,7 +47,7 @@ impl List {
 
     pub fn list_include_hidden(mut self) -> Result<(Self), std::io::Error> {
         let mut _list: List = Default::default();
-        for entry in WalkDir::new(self.relative_parent_dir_path.clone()).max_depth(1) {
+        for entry in WalkDir::new(self.parent_path.clone()).max_depth(1) {
                 self = list_maker(entry, self.clone())?;
         }
 
@@ -59,13 +58,9 @@ impl List {
         let path = pathbuf.into_boxed_path();
         let depth_from_root_dir = path.iter().count();
 
-        if let Some(x) = self.clone().parent_dir {
-            let parent_dir_count = x.iter().count();
-            if depth_from_root_dir < parent_dir_count {
-                self.parent_dir = Some(path.to_path_buf());
-            }
-        } else {
-            self.parent_dir = Some(path.to_path_buf());
+        let parent_dir_count = self.parent_path.clone().iter().count();
+        if depth_from_root_dir < parent_dir_count {
+            self.parent_path = path.to_path_buf();
         }
 
         self
@@ -82,7 +77,7 @@ impl List {
                 for entry in all_files.clone() {
                     //println!("{} [{}]", entry.display(), n);
                     let path = entry.to_path_buf();
-                    let parent = self.relative_parent_dir_path.clone();
+                    let parent = self.parent_path.clone();
                     let parent_file_name = file_or_dir_name(parent);
                     if Some(path.clone()) != parent_file_name {
                         if n == key {
@@ -103,7 +98,6 @@ impl List {
     fn skip(mut self, entry: &DirEntry) -> bool {
 
         //if is_parent_dir(entry) {
-        //    self.parent_dir = entry.path().to_path_buf();
         //    return true
         //}
         entry.file_name()
@@ -113,11 +107,8 @@ impl List {
     }
 
     fn full_entry_path(self, path: PathBuf) -> Option<PathBuf> {
-        if let Some(p) = self.parent_dir.clone() {
-            Some(p.join(path.as_path()))
-        } else {
-            None
-        }
+        let p = self.parent_path.clone();
+        Some(p.join(path.as_path()))
     }
 }
 
@@ -213,11 +204,9 @@ pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
         }
         if dirs.clone().count() > 0 {
             for entry in dirs.clone() {
-                if let Some(x) = list.parent_dir.clone() {
-                    let parent_file_name = file_or_dir_name(x);
-                    if Some(entry) != parent_file_name.as_ref() {
-                       all_files.push(entry.to_path_buf());
-                    }
+                let parent_file_name = file_or_dir_name(list.parent_path.clone());
+                if Some(entry) != parent_file_name.as_ref() {
+                   all_files.push(entry.to_path_buf());
                 }
             }
         }

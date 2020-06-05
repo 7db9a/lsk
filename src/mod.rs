@@ -237,10 +237,10 @@ impl LsKey {
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
                      //println!("\n\n{}", d);
-                     self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), d.to_string()));
                 } else {
                     let display = grid.fit_into_columns(1);
-                    self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                    self.display = Some((self.list.parent_path.clone(), display.to_string()));
                     //println!("\n\n");
                     //list::print_list_with_keys(list.clone());
                 }
@@ -264,10 +264,10 @@ impl LsKey {
                 let display = grid.fit_into_width(width);
                 if let Some(d) = display {
                      //println!("\n\n{}", d);
-                     self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), d.to_string()));
                 } else {
                     let display = grid.fit_into_columns(1);
-                     self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), display.to_string()));
                     //println!("\n\n");
                     //list::print_list_with_keys(list.clone());
                 }
@@ -300,17 +300,17 @@ impl LsKey {
                      //println!("\n\n{}", d);
                      //println!("\nmade it!\n");
                      let old_display = self.display.clone();
-                     //self.display = Some((self.list.relative_parent_dir_path.clone(), d.to_string()));
+                     //self.display = Some((self.list.parent_path.clone(), d.to_string()));
                      //assert_eq!(self.display, Some((PathBuf::from(""), "".to_string())));
                      //assert_ne!(old_display, self.display);
-                     return Some((self.list.relative_parent_dir_path.clone(), d.to_string()))
+                     return Some((self.list.parent_path.clone(), d.to_string()))
                      //println!("{:#?}", self.display);
                 } else {
                     let display = grid.fit_into_columns(1);
-                    //self.display = Some((self.list.relative_parent_dir_path.clone(), display.to_string()));
+                    //self.display = Some((self.list.parent_path.clone(), display.to_string()));
                     //println!("\n\n");
                     //list::print_list_with_keys(list.clone());
-                     return Some((self.list.relative_parent_dir_path.clone(), display.to_string()))
+                     return Some((self.list.parent_path.clone(), display.to_string()))
                 }
             } else {
                 //println!("\n\n");
@@ -355,9 +355,9 @@ impl LsKey {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
             0 => {
-                 self.list.relative_parent_dir_path.pop();
-                 let file_pathbuf = self.list.relative_parent_dir_path.clone();
-                 self.list.relative_parent_dir_path.pop();
+                 self.list.parent_path.pop();
+                 let file_pathbuf = self.list.parent_path.clone();
+                 self.list.parent_path.pop();
                  let list = self.list.clone().update(file_pathbuf);
                  self = self.update(list);
                  self.halt = false;
@@ -395,7 +395,7 @@ impl LsKey {
              // Unwrap is safe because is_key is not None and there are args.
              let cmd = input.cmd.unwrap();
              let mut path_cache = command_assistors::PathCache::new(
-                 self.list.relative_parent_dir_path.as_path()
+                 self.list.parent_path.as_path()
              );
              path_cache.switch();
              match cmd.as_str() {
@@ -420,7 +420,7 @@ impl LsKey {
                  "q" => (),
                  "fzf" => {
                      let mut path_cache = command_assistors::PathCache::new(
-                         self.list.relative_parent_dir_path.as_path()
+                         self.list.parent_path.as_path()
                      );
                      path_cache.switch();
                      let output = terminal::shell::cmd("fzf".to_string());
@@ -431,7 +431,7 @@ impl LsKey {
                  },
                  "vim" => {
                      let mut path_cache = command_assistors::PathCache::new(
-                         self.list.relative_parent_dir_path.as_path()
+                         self.list.parent_path.as_path()
                      );
                      path_cache.switch();
                      //Split cmd ('vim')
@@ -446,7 +446,7 @@ impl LsKey {
                  },
                  "zsh" => {
                      let mut path_cache = command_assistors::PathCache::new(
-                         self.list.relative_parent_dir_path.as_path()
+                         self.list.parent_path.as_path()
                      );
                      path_cache.switch();
                      //Split cmd ('zsh')
@@ -461,7 +461,7 @@ impl LsKey {
                  },
                  _ => {
                      let mut path_cache = command_assistors::PathCache::new(
-                         self.list.relative_parent_dir_path.as_path()
+                         self.list.parent_path.as_path()
                      );
                      path_cache.switch();
                      let output = terminal::shell::cmd(as_read.to_string()).unwrap();
@@ -573,7 +573,7 @@ impl LsKey {
         ).unwrap();
 
         if let Some(x) = show {
-            if x.0 == self.list.relative_parent_dir_path {
+            if x.0 == self.list.parent_path {
                 //into_raw_mode requires carriage returns.
                 let display = str::replace(x.1.as_str(), "\n", "\n\r");
                 write_it(b"", &mut stdout, display.to_string(), (0, 3));
@@ -632,7 +632,7 @@ impl LsKey {
                             //).unwrap();
 
                             //if let Some(x) = show {
-                            //    if x.0 == self.list.relative_parent_dir_path {
+                            //    if x.0 == self.list.parent_path {
                             //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
                             //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
 
@@ -703,7 +703,7 @@ impl LsKey {
                         Mode::Work => {
                             let few_ms = std::time::Duration::from_millis(2000);
                              if last == Some(&'\n') {
-                                 let path = self.list.relative_parent_dir_path.clone();
+                                 let path = self.list.parent_path.clone();
                                  let path = path.to_str().unwrap();
                                  let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
                                  terminal::parent_shell::type_text(cmd, 0);
@@ -748,7 +748,7 @@ impl LsKey {
             let show = self.clone().display.clone();
 
             if let Some(x) = show {
-                if x.0 == self.list.relative_parent_dir_path {
+                if x.0 == self.list.parent_path {
                     let display = str::replace(x.1.as_str(), "\n", "\n\r");
                     write_it(b"", &mut stdout, display.to_string(), (0, 3));
 
