@@ -995,7 +995,7 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($name:ident: $input:expr, $input_fuzz:expr, $sub_path:expr, $test_macro:ident) => {
+        ($name:ident:$input1:expr, $input2:expr, $input3:expr, $input4:expr, $input5:expr, $sub_path:expr, $test_macro:ident) => {
 
             #[test]
             #[$test_macro]
@@ -1026,10 +1026,11 @@ mod tests {
 
                 println!("");
                 let text_vec = vec![
-                     format!(r#""{}""#, $input_fuzz),
-                     format!(r#""{}""#, $input),
-                     r#""$(printf ':q\r')""#.to_string(),
-                     r#""$(printf 'q\r')""#.to_string(),
+                     format!(r#""{}""#, $input1),
+                     format!(r#""{}""#, $input2),
+                     format!(r#""{}""#, $input3),
+                     format!(r#""{}""#, $input4),
+                     format!(r#""{}""#, $input5),
                 ];
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
                 super::app::run(path.clone(), false);
@@ -1051,9 +1052,9 @@ mod tests {
         };
     }
 
-    test!(test_macro: "$(printf '2\r')", "", "test_macro", ignore/*macro_use*/);
-    test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore/*macro_use*/);
-    test!(host_enter_dir: "$(printf '1\r')", "", "test_macro", ignore/*macro_use*/);
+    test!(test_macro: "$(printf '2\r')", "$(printf ':q\r')", "$(printf 'q\r')", "", "",  "test_macro", ignore/*macro_use*/);
+    //test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore/*macro_use*/);
+    //test!(host_enter_dir: "$(printf '1\r')", "", "test_macro", ignore/*macro_use*/);
 
     #[test]
     #[ignore]//docker
@@ -1218,9 +1219,9 @@ mod tests {
         let path = env::current_dir().unwrap();
         println!("");
         let text_vec = vec![
-             r#""$(printf '2 \n ')""#.to_string(),
-             r#""$(printf ':q \n ')""#.to_string(),
-             r#""$(printf 'q \n ')""#.to_string(),
+             r#""$(printf '2\r')""#.to_string(),
+             r#""$(printf ':q\r')""#.to_string(),
+             r#""$(printf 'q\r')""#.to_string(),
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
@@ -1235,9 +1236,9 @@ mod tests {
         let path = env::current_dir().unwrap();
         println!("");
         let text_vec = vec![
-             r#""$(printf '7 \n ')""#.to_string(),
-             r#""$(printf ':q \n ')""#.to_string(),
-             r#""$(printf 'q \n ')""#.to_string(),
+             r#""$(printf '7\r')""#.to_string(),
+             r#""$(printf ':q\r')""#.to_string(),
+             r#""$(printf 'q\r')""#.to_string(),
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
@@ -1320,9 +1321,9 @@ mod tests {
 
         println!("");
         let text_vec = vec![
-             r#""$(printf '2 \n ')""#.to_string(),
-             r#""$(printf ':q \n ')""#.to_string(),
-             r#""$(printf 'q \n ')""#.to_string(),
+             r#""$(printf '2\r')""#.to_string(),
+             r#""$(printf ':q\r')""#.to_string(),
+             r#""$(printf 'q\r')""#.to_string(),
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         super::app::run(path, false);
@@ -1371,9 +1372,9 @@ mod tests {
 
         println!("");
         let text_vec = vec![
-             r#""$(printf '2 \n ')""#.to_string(),
-             r#""$(printf ':q \n ')""#.to_string(),
-             r#""$(printf 'q \n ')""#.to_string(),
+             r#""$(printf '2\r')""#.to_string(),
+             r#""$(printf ':q\r')""#.to_string(),
+             r#""$(printf 'q\r')""#.to_string(),
         ];
         let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
         super::app::run(path, true);
