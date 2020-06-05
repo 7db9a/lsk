@@ -995,7 +995,7 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($name:ident:$input1:expr, $input2:expr, $input3:expr, $input4:expr, $input5:expr, $sub_path:expr, $test_macro:ident) => {
+        ($name:ident, $delay:expr, $input1:expr, $input2:expr, $input3:expr, $input4:expr, $input5:expr, $sub_path:expr, $test_macro:ident) => {
 
             #[test]
             #[$test_macro]
@@ -1032,7 +1032,7 @@ mod tests {
                      format!(r#""{}""#, $input4),
                      format!(r#""{}""#, $input5),
                 ];
-                let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
+                let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
                 super::app::run(path.clone(), false);
                 spawn.join();
 
@@ -1052,7 +1052,17 @@ mod tests {
         };
     }
 
-    test!(test_macro: "$(printf '2\r')", "$(printf ':q\r')", "$(printf 'q\r')", "", "",  "test_macro", ignore/*macro_use*/);
+    test!(
+          test_macro,
+          200,               //$delay in milleseconds
+          "$(printf '2\r')", //$input1
+          "$(printf ':q\r')",//$input2
+          "$(printf 'q\r')", //$input3
+          "",                //$input4
+          "",                //$input5
+          "test_macro",
+          ignore/*macro_use*/
+    );
     //test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore/*macro_use*/);
     //test!(host_enter_dir: "$(printf '1\r')", "", "test_macro", ignore/*macro_use*/);
 
