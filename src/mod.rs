@@ -1047,8 +1047,8 @@ mod tests {
                 ];
 
 
-                println!("Intent:\n", $intent);
-                let few_ms = std::time::Duration::from_millis(2000);
+                println!("\n\n\nNew case intent:\n{}", $intent);
+                let few_ms = std::time::Duration::from_millis(5000);
                 std::thread::sleep(few_ms);
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
@@ -1082,7 +1082,7 @@ mod tests {
           "",                //$input4
           "",                //$input5
           "macro_enter_file",
-          "> Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
+          ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           ignore/*macro_use*/
     );
 
@@ -1097,7 +1097,7 @@ mod tests {
           "",                //$input4
           "",                //$input5
           "macro_enter_file_list_all",
-          "",
+          ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
           ignore/*macro_use*/
     );
 
@@ -1112,7 +1112,7 @@ mod tests {
           "$(printf 'q\r')",
           "",
           "macro_fuzzy_enter_file",
-          "",
+          ">Run lsk\n>Fuzzy widdle>Open file by key (1)\n>Quite vim\n>Quite lsk",
           ignore/*macro_use*/
     );
 
@@ -1127,6 +1127,7 @@ mod tests {
           "",
           "",
           "macro_fuzzy_enter_dir",
+          ">Run lsk\n>Fuzzy widdle>Open dir by key (1)\n>Quite vim\n>Quite lsk",
           ignore/*macro_use*/
     );
 
