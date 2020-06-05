@@ -1053,7 +1053,7 @@ mod tests {
     }
 
     test!(
-          false,
+          false, //list_all_bool
           macro_enter_file,
           200,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
@@ -1062,6 +1062,19 @@ mod tests {
           "",                //$input4
           "",                //$input5
           "macro_enter_file",
+          ignore/*macro_use*/
+    );
+
+    test!(
+          true, //list_all_bool
+          macro_enter_file_list_all,
+          200,               //$delay in milleseconds
+          "$(printf '2\r')", //$input1
+          "$(printf ':q\r')",//$input2
+          "$(printf 'q\r')", //$input3
+          "",                //$input4
+          "",                //$input5
+          "macro_enter_file_list_all",
           ignore/*macro_use*/
     );
 
