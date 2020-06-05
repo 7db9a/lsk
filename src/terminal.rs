@@ -483,7 +483,7 @@ mod tests {
         println!("\nwidth: {}\nheight: {}", w, h);
     }
     #[test]
-    #[ignore]//host
+    #[ignore]//play
     fn takes_input_read() {
         println!("");
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);

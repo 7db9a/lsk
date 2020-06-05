@@ -986,13 +986,179 @@ fn parse_keys(input: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::metadata;
+    use std::fs::{File, metadata,};
+    use std::io::Write;
     use std::path::{Path, PathBuf};
     use std::process::Command;
     use std::env;
-    use fixture::Fixture;
+    use fixture::{Fixture, command_assistors};
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
+    macro_rules! test {
+        (
+            $list_all_bool: expr, // lk -a would be true
+            $name:ident,
+            $test_file_path :expr, // We write text to a file so we know it's it when it's opened in test.
+            $delay: expr, // Delay in each character typed.
+            $input1: expr,
+            $input2: expr,
+            $input3: expr,
+            $input4: expr,
+            $input5: expr,
+            $input6: expr,
+            $input7: expr,
+            $sub_path: expr, //We test all of this in a specific path. This'll create a sub-dir under that test-path.
+            $intent: expr, //Explain what will happen in the test so tester can visually verify.
+            $test_macro: ident //We want to ignore the tests when we want and run when we want.
+        ) => {
+
+            #[test]
+            #[$test_macro]
+            fn $name() {
+                let path = format!("/tmp/lsk_tests/{}/", $sub_path);
+
+                let mut fixture = Fixture::new()
+                    .add_dirpath(path.to_string())
+                    .add_dirpath(path.to_string() + "a-dir")
+                    .add_dirpath(path.to_string() + ".a-hidden-dir")
+                    .add_file(path.to_string() + "a-file")
+                    .add_file(path.to_string() + "a-dir/a-file")
+                    .add_file(path.to_string() + "a-dir/b-file")
+                    .add_file(path.to_string() + ".a-hidden-dir/a-file")
+                    .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
+                    .add_file(path.to_string() + ".a-hidden-file")
+                    .build();
+
+                let path_path = Path::new(path.clone().as_str()).to_path_buf();
+                let mut path_cache = command_assistors::PathCache::new(&path_path);
+
+                // Changing directories.
+                path_cache.switch();
+
+                let stuff = format!(r#""Opening "{}" in test case "{}".""#, $test_file_path, $sub_path);
+                let mut file = std::fs::File::create($test_file_path).unwrap();
+                file.write_all(stuff.as_bytes()).unwrap();
+
+                println!("");
+                let text_vec = vec![
+                     format!(r#""{}""#, $input1),
+                     format!(r#""{}""#, $input2),
+                     format!(r#""{}""#, $input3),
+                     format!(r#""{}""#, $input4),
+                     format!(r#""{}""#, $input5),
+                     format!(r#""{}""#, $input6),
+                     format!(r#""{}""#, $input7),
+                ];
+
+
+                println!("\n\n\nNew case intent:\n{}", $intent);
+                let few_ms = std::time::Duration::from_millis(5000);
+                std::thread::sleep(few_ms);
+
+                let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
+                super::app::run(path.clone(), $list_all_bool);
+                spawn.join();
+
+                path_cache.switch_back();
+
+                assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
+                assert_eq!(true, metadata(path.clone() + "a-file" ).unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + "a-dir/a-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + "a-dir/b-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/a-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
+                assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
+
+                fixture.teardown(true);
+            }
+        };
+    }
+
+    test!(
+          false, //list_all_bool
+          macro_enter_file,
+          "a-file",
+          200,               //$delay in milleseconds
+          "$(printf '2\r')", //$input1
+          "$(printf ':q\r')",//$input2
+          "$(printf 'q\r')", //$input3
+          "",                //$input4
+          "",                //$input5
+          "",                //$input6
+          "",                //$input7
+          "macro_enter_file",
+          ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
+          ignore/*macro_use*/
+    );
+
+    test!(
+          true, //list_all_bool
+          macro_enter_file_list_all,
+          ".a-hidden-file",
+          200,               //$delay in milleseconds
+          "$(printf '2\r')", //$input1
+          "$(printf ':q\r')",//$input2
+          "$(printf 'q\r')", //$input3
+          "",                //$input4
+          "",                //$input5
+          "",                //$input6
+          "",                //$input7
+          "macro_enter_file_list_all",
+          ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
+          ignore/*macro_use*/
+    );
+
+    test!(
+          false,
+          macro_fuzzy_enter_file,
+          "a-file",
+          200,               //$delay in milleseconds
+          "$(printf 'f fi\r')",
+          "$(printf '1\r')",
+          "$(printf ':q\r')",
+          "$(printf 'q\r')",
+          "",
+          "",
+          "",
+          "macro_fuzzy_enter_file",
+          ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
+          ignore/*macro_use*/
+    );
+
+    test!(
+         false,
+          macro_fuzzy_enter_dir,
+          "a-file",
+          500,               //inrease 200 => 500 ms to see better.
+          "$(printf 'f di\r')",
+          "$(printf '1\r')",
+          "$(printf 'q\r')",
+          "",
+          "",
+          "",
+          "",
+          "macro_fuzzy_enter_dir",
+          ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
+          ignore/*macro_use*/
+    );
+
+    test!(
+         false,
+          macro_fuzzy_enter_dir_go_back_then_repeat,
+          "a-file",
+          500,               //inrease 200 => 500 ms to see better.
+          "$(printf 'f di\r')",
+          "$(printf '1\r')",
+          "$(printf '0\r')",
+          "$(printf 'f di\r')",
+          "$(printf '1\r')",
+          "$(printf 'q\r')",
+          "",
+          "macro_fuzzy_enter_dir",
+          ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
+          ignore/*macro_use*/
+    );
 
     #[test]
     #[ignore]//docker
@@ -1149,40 +1315,6 @@ mod tests {
     #[ignore]
     fn shell_cat() {
         super::terminal::shell::spawn("cat".to_string(), vec!["Cargo.toml".to_string()]);
-    }
-
-    #[test]
-    #[ignore]//host
-    fn takes_input_run_list_read() {
-        let path = env::current_dir().unwrap();
-        println!("");
-        let text_vec = vec![
-             r#""$(printf '2 \n ')""#.to_string(),
-             r#""$(printf ':q \n ')""#.to_string(),
-             r#""$(printf 'q \n ')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::app::run(path, false);
-        spawn.join();
-        //spawn_quite.join();
-    }
-
-    #[test]
-    #[ignore]//host
-    fn takes_input_run_list_all_read() {
-        let path = env::current_dir().unwrap();
-        println!("");
-        let text_vec = vec![
-             r#""$(printf '7 \n ')""#.to_string(),
-             r#""$(printf ':q \n ')""#.to_string(),
-             r#""$(printf 'q \n ')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::app::run(path, true);
-        spawn.join();
-        //spawn_quite.join();
     }
 
     #[test]
