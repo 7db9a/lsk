@@ -1075,8 +1075,18 @@ mod tests {
           "macro_fuzzy_enter_file",
           ignore/*macro_use*/
     );
-    //test!(host_app_fuzz_macro: "$(printf '1\r')", "$(printf 'f fi\r')", "test_fuzz_macro", ignore/*macro_use*/);
-    //test!(host_enter_dir: "$(printf '1\r')", "", "test_macro", ignore/*macro_use*/);
+
+    test!(
+          macro_fuzzy_enter_dir,
+          200,               //$delay in milleseconds
+          "$(printf 'f di\r')",
+          "$(printf '1\r')",
+          "$(printf 'q\r')",
+          "",
+          "",
+          "macro_fuzzy_enter_dir",
+          ignore/*macro_use*/
+    );
 
     #[test]
     #[ignore]//docker
