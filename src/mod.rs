@@ -998,14 +998,15 @@ mod tests {
         (
             $list_all_bool: expr,
             $name:ident,
-            $delay:expr,
-            $input1:expr,
-            $input2:expr,
-            $input3:expr,
-            $input4:expr,
-            $input5:expr,
-            $sub_path:expr,
-            $test_macro:ident
+            $test_file_path :expr,
+            $delay: expr,
+            $input1: expr,
+            $input2: expr,
+            $input3: expr,
+            $input4: expr,
+            $input5: expr,
+            $sub_path: expr,
+            $test_macro: ident
         ) => {
 
             #[test]
@@ -1032,7 +1033,7 @@ mod tests {
                 path_cache.switch();
 
                 let stuff = "Using test macro, you opened a-file if you're reading this in a running test case.".to_string();
-                let mut file = std::fs::File::create("a-file").unwrap();
+                let mut file = std::fs::File::create($test_file_path).unwrap();
                 file.write_all(stuff.as_bytes()).unwrap();
 
                 println!("");
@@ -1066,6 +1067,7 @@ mod tests {
     test!(
           false, //list_all_bool
           macro_enter_file,
+          "a-file",
           200,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
@@ -1079,6 +1081,7 @@ mod tests {
     test!(
           true, //list_all_bool
           macro_enter_file_list_all,
+          ".a-hidden-file",
           200,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
@@ -1092,6 +1095,7 @@ mod tests {
     test!(
           false,
           macro_fuzzy_enter_file,
+          "a-file",
           200,               //$delay in milleseconds
           "$(printf 'f fi\r')",
           "$(printf '1\r')",
@@ -1105,6 +1109,7 @@ mod tests {
     test!(
          false,
           macro_fuzzy_enter_dir,
+          "a-file",
           200,               //$delay in milleseconds
           "$(printf 'f di\r')",
           "$(printf '1\r')",
