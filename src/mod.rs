@@ -995,7 +995,7 @@ mod tests {
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
 
     macro_rules! test {
-        ($name:ident, $delay:expr, $input1:expr, $input2:expr, $input3:expr, $input4:expr, $input5:expr, $sub_path:expr, $test_macro:ident) => {
+        ($list_all_bool: expr, $name:ident, $delay:expr, $input1:expr, $input2:expr, $input3:expr, $input4:expr, $input5:expr, $sub_path:expr, $test_macro:ident) => {
 
             #[test]
             #[$test_macro]
@@ -1033,7 +1033,7 @@ mod tests {
                      format!(r#""{}""#, $input5),
                 ];
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                super::app::run(path.clone(), false);
+                super::app::run(path.clone(), $list_all_bool);
                 spawn.join();
 
                 path_cache.switch_back();
@@ -1053,6 +1053,7 @@ mod tests {
     }
 
     test!(
+          false,
           macro_enter_file,
           200,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
@@ -1065,6 +1066,7 @@ mod tests {
     );
 
     test!(
+          false,
           macro_fuzzy_enter_file,
           200,               //$delay in milleseconds
           "$(printf 'f fi\r')",
@@ -1077,6 +1079,7 @@ mod tests {
     );
 
     test!(
+         false,
           macro_fuzzy_enter_dir,
           200,               //$delay in milleseconds
           "$(printf 'f di\r')",
