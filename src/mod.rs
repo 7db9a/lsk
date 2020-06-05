@@ -1006,6 +1006,7 @@ mod tests {
             $input4: expr,
             $input5: expr,
             $sub_path: expr, //We test all of this in a specific path. This'll create a sub-dir under that test-path.
+            $intent: expr, //Explain what will happen in the test so tester can visually verify.
             $test_macro: ident //We want to ignore the tests when we want and run when we want.
         ) => {
 
@@ -1044,6 +1045,12 @@ mod tests {
                      format!(r#""{}""#, $input4),
                      format!(r#""{}""#, $input5),
                 ];
+
+
+                println!("Intent:\n", $intent);
+                let few_ms = std::time::Duration::from_millis(2000);
+                std::thread::sleep(few_ms);
+
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
                 super::app::run(path.clone(), $list_all_bool);
                 spawn.join();
@@ -1075,6 +1082,7 @@ mod tests {
           "",                //$input4
           "",                //$input5
           "macro_enter_file",
+          "> Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           ignore/*macro_use*/
     );
 
@@ -1089,6 +1097,7 @@ mod tests {
           "",                //$input4
           "",                //$input5
           "macro_enter_file_list_all",
+          "",
           ignore/*macro_use*/
     );
 
@@ -1103,6 +1112,7 @@ mod tests {
           "$(printf 'q\r')",
           "",
           "macro_fuzzy_enter_file",
+          "",
           ignore/*macro_use*/
     );
 
@@ -1278,40 +1288,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]//host
-    fn takes_input_run_list_read() {
-        let path = env::current_dir().unwrap();
-        println!("");
-        let text_vec = vec![
-             r#""$(printf '2\r')""#.to_string(),
-             r#""$(printf ':q\r')""#.to_string(),
-             r#""$(printf 'q\r')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::app::run(path, false);
-        spawn.join();
-        //spawn_quite.join();
-    }
-
-    #[test]
-    #[ignore]//host
-    fn takes_input_run_list_all_read() {
-        let path = env::current_dir().unwrap();
-        println!("");
-        let text_vec = vec![
-             r#""$(printf '7\r')""#.to_string(),
-             r#""$(printf ':q\r')""#.to_string(),
-             r#""$(printf 'q\r')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        //let spawn_quite = super::terminal::parent_shell::type_text_spawn(r#""$(printf ':q \n ')""#, 700);
-        super::app::run(path, true);
-        spawn.join();
-        //spawn_quite.join();
-    }
-
-    #[test]
     #[ignore]//docker
     fn test_mode_parse() {
        let input_single = "f something".to_string();
@@ -1355,160 +1331,4 @@ mod tests {
            None
        );
     }
-
-    #[test]
-    #[ignore]//host
-    fn host_run_app() {
-        let path = "/tmp/lsk_tests/";
-
-        let mut fixture = Fixture::new()
-            .add_dirpath(path.to_string())
-            .add_dirpath(path.to_string() + "a-dir")
-            .add_dirpath(path.to_string() + ".a-hidden-dir")
-            .add_file(path.to_string() + "a-file")
-            .add_file(path.to_string() + "a-dir/a-file")
-            .add_file(path.to_string() + "a-dir/b-file")
-            .add_file(path.to_string() + ".a-hidden-dir/a-file")
-            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
-            .add_file(path.to_string() + ".a-hidden-file")
-            .build();
-
-        let path_path = Path::new(path).to_path_buf();
-        let mut path_cache = command_assistors::PathCache::new(&path_path);
-
-        // Changing directories.
-        path_cache.switch();
-
-        let stuff = "You opened a-file if you're reading this in a running test case.".to_string();
-        let mut file = std::fs::File::create("a-file").unwrap();
-        file.write_all(stuff.as_bytes()).unwrap();
-
-        println!("");
-        let text_vec = vec![
-             r#""$(printf '2\r')""#.to_string(),
-             r#""$(printf ':q\r')""#.to_string(),
-             r#""$(printf 'q\r')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        super::app::run(path, false);
-        spawn.join();
-
-        path_cache.switch();
-
-        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
-        assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
-
-        fixture.teardown(true);
-    }
-
-    #[test]
-    #[ignore]//host
-    fn host_run_app_list_all() {
-        let path = "/tmp/lsk_tests/";
-
-        let mut fixture = Fixture::new()
-            .add_dirpath(path.to_string())
-            .add_dirpath(path.to_string() + "a-dir")
-            .add_dirpath(path.to_string() + ".a-hidden-dir")
-            .add_file(path.to_string() + "a-file")
-            .add_file(path.to_string() + "a-dir/a-file")
-            .add_file(path.to_string() + "a-dir/b-file")
-            .add_file(path.to_string() + ".a-hidden-dir/a-file")
-            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
-            .add_file(path.to_string() + ".a-hidden-file")
-            .build();
-
-        let path_path = Path::new(path).to_path_buf();
-        let mut path_cache = command_assistors::PathCache::new(&path_path);
-
-        // Changing directories.
-        path_cache.switch();
-
-        let stuff = "You opened .a-hidden-file if you're reading this in a running test case.".to_string();
-        let mut file = std::fs::File::create(".a-hidden-file").unwrap();
-        file.write_all(stuff.as_bytes()).unwrap();
-
-        println!("");
-        let text_vec = vec![
-             r#""$(printf '2\r')""#.to_string(),
-             r#""$(printf ':q\r')""#.to_string(),
-             r#""$(printf 'q\r')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        super::app::run(path, true);
-        //spawn.join();
-
-        path_cache.switch();
-
-        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
-        assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
-
-        fixture.teardown(true);
-    }
-
-
-    #[test]
-    #[ignore]//host
-    fn host_run_app_fuzzy() {
-        let path = "/tmp/lsk_tests/";
-
-        let mut fixture = Fixture::new()
-            .add_dirpath(path.to_string())
-            .add_dirpath(path.to_string() + "a-dir")
-            .add_dirpath(path.to_string() + ".a-hidden-dir")
-            .add_file(path.to_string() + "a-file")
-            .add_file(path.to_string() + "a-dir/a-file")
-            .add_file(path.to_string() + "a-dir/b-file")
-            .add_file(path.to_string() + ".a-hidden-dir/a-file")
-            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
-            .add_file(path.to_string() + ".a-hidden-file")
-            .build();
-
-        let path_path = Path::new(path).to_path_buf();
-        let mut path_cache = command_assistors::PathCache::new(&path_path);
-
-        // Changing directories.
-        path_cache.switch();
-
-        let stuff = "You opened a-file if you're reading this in a running test case.".to_string();
-        let mut file = std::fs::File::create("a-file").unwrap();
-        file.write_all(stuff.as_bytes()).unwrap();
-
-        println!("");
-        let text_vec = vec![
-             r#""$(printf 'f fi\r')""#.to_string(),
-             r#""$(printf '1\r')""#.to_string(),
-             r#""$(printf ':q\r')""#.to_string(),
-             r#""$(printf 'q\r')""#.to_string(),
-        ];
-        let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, 200);
-        super::app::run(path, false);
-        spawn.join();
-
-        path_cache.switch();
-
-        assert_eq!(true, metadata(path.to_string() + "a-dir").unwrap().is_dir());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir").unwrap().is_dir());
-        assert_eq!(true, metadata(path.to_string() + "a-file" ).unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + "a-dir/a-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + "a-dir/b-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/a-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-        assert_eq!(true, metadata(path.to_string() + ".a-hidden-file").unwrap().is_file());
-
-        fixture.teardown(true);
-    }
-
 }
