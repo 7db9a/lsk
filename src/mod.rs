@@ -540,7 +540,6 @@ impl LsKey {
         let mut execute = true;
 
         clear_display(&mut stdout);
-
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
