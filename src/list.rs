@@ -60,7 +60,7 @@ impl List {
         let path = pathbuf.into_boxed_path();
         let depth_from_root_dir = path.iter().count();
 
-        let parent_dir_count = self.parent_path.clone().iter().count();
+        let parent_dir_count = self.parent_path.iter().count();
         if depth_from_root_dir < parent_dir_count {
             self.parent_path = path.to_path_buf();
         }
