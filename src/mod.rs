@@ -28,33 +28,20 @@ pub mod app {
         ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
         let mut list = ls_key.list.clone();
 
-        //if ls_key.is_fuzzed {
-        //     let few_ms = std::time::Duration::from_millis(3000);
-        //     std::thread::sleep(few_ms);
-        //}
-
         while ls_key.is_fuzzed {
             ls_key.list = list;
-            //ls_key.list = ls_key.fuzzy_list.unwrap(); //safe (I think)
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
                 let _list = ls_key.list;
                 ls_key = LsKey::new(path, all);
                 ls_key.list = fuzzy_list.clone();
-
                 ls_key.display = display;
-
-                //assert_eq!(_list, fuzzy_list);
-                //ls_key.fuzzy_list = None;
             } else if !ls_key.halt {
                 let _list = ls_key.list;
                 ls_key = LsKey::new(path, all);
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            //ls_key.fuzzy_list = None;
-            //ls_key.is_fuzzed = false;
-            //ls_key.list = list;
             ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
             list = ls_key.list.clone();
         }
