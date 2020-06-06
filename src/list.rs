@@ -49,8 +49,8 @@ impl List {
 
     pub fn list_include_hidden(mut self) -> Result<(Self), std::io::Error> {
         let mut _list: List = Default::default();
-        for entry in WalkDir::new(self.parent_path.clone()).max_depth(1) {
-                self = list_maker(entry, self.clone())?;
+        for entry in WalkDir::new(&self.parent_path).max_depth(1) {
+                self = list_maker(entry, self)?;
         }
 
         Ok(self)
