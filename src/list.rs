@@ -81,7 +81,7 @@ impl List {
                     //println!("{} [{}]", entry.display(), n);
                     let path = entry.to_path_buf();
                     let parent = self.parent_path.clone();
-                    let parent_file_name = file_or_dir_name(parent);
+                    let parent_file_name = file_or_dir_name(&parent);
                     if Some(&path) != parent_file_name.as_ref() {
                         if n == key {
                             return self.clone().full_entry_path(path);
@@ -123,7 +123,7 @@ fn basename<'a>(path: &'a str, sep: char) -> Cow<'a, str> {
     }
 }
 
-fn file_or_dir_name(path: PathBuf) -> Option<PathBuf> {
+fn file_or_dir_name(path: &PathBuf) -> Option<PathBuf> {
     let path = path.as_path();
     let path = path.file_name();
 
@@ -143,7 +143,7 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
             match md {
                 Ok(md) => {
                    let path = entry.to_path_buf();
-                   let short_path = file_or_dir_name(path.clone());
+                   let short_path = file_or_dir_name(&path);
                    if md.is_file() {
                        list = list.replace_shortest_path(path);
                        if let Some(p) = short_path {
@@ -207,7 +207,7 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
         }
         if dirs.clone().count() > 0 {
             for entry in dirs.clone() {
-                let parent_file_name = file_or_dir_name(list.parent_path.clone());
+                let parent_file_name = file_or_dir_name(&list.parent_path);
                 if Some(entry) != parent_file_name.as_ref() {
                    all_files.push(entry.to_path_buf());
                 }
