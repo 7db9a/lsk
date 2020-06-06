@@ -69,7 +69,7 @@ impl List {
     }
 
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
-        let all_files = order_and_sort_list(self.clone(), sort);
+        let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
         let mut done = false;
 
@@ -186,7 +186,7 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     let files = list.files.iter();
     let dirs = list.dirs.iter();
     let mut done = false;
@@ -223,7 +223,7 @@ pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
-    let all_files = order_and_sort_list(list, true);
+    let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
         println!("{} [{}]", entry.display(), n);
