@@ -38,9 +38,9 @@ impl List {
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
-        let mut _list: List = Default::default();
+        let mut list: List = Default::default();
         let walker = WalkDir::new(&self.parent_path).max_depth(1).into_iter();
-        for entry in walker.filter_entry(|e| !_list.clone().skip(e)) {
+        for entry in walker.filter_entry(|e| !list.clone().skip(e)) {
                 self = list_maker(entry, self)?;
         }
 
