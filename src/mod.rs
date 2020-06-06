@@ -539,22 +539,12 @@ impl LsKey {
         let mut fuzzy_list: Option<list::List> = None;
         let mut execute = true;
 
-        write!(
-            stdout,
-            "{}",
-            termion::clear::All
-        ).unwrap();
-        stdout.flush().unwrap();
+        clear_all(&mut stdout);
 
         write_it(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
-            write!(
-                stdout,
-                "{}",
-                termion::clear::All
-            ).unwrap();
-            stdout.flush().unwrap();
+            clear_all(&mut stdout);
 
             match c.unwrap() {
                 Key::Char(c) => {
@@ -693,6 +683,15 @@ impl LsKey {
 
         (the_list, result, is_fuzzed, execute, fuzzy_list)
     }
+}
+
+fn clear_all(stdout: &mut RawTerminal<StdoutLock>) {
+    write!(
+        stdout,
+        "{}",
+        termion::clear::All
+    ).unwrap();
+    stdout.flush().unwrap();
 }
 
 fn write_it(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, locate: (u16, u16)) {
