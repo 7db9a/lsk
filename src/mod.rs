@@ -537,8 +537,6 @@ impl LsKey {
         let mut is_fuzzed = false;
         let mut the_list: Option<list::List> = None;
         let mut fuzzy_list: Option<list::List> = None;
-        let original_list = list;
-        let original_display = self.clone().display;
         let mut execute = true;
 
         write!(
