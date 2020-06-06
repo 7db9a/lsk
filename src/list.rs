@@ -71,11 +71,12 @@ impl List {
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
         let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
+        let count =  all_files.clone().count();
         let mut done = false;
 
         while !done {
             let mut n = 0;
-            if all_files.clone().count() > 0 {
+            if count > 0 {
                 for entry in all_files.clone() {
                     //println!("{} [{}]", entry.display(), n);
                     let path = entry.to_path_buf();
