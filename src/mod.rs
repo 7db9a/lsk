@@ -560,13 +560,8 @@ impl LsKey {
             stdout.flush().unwrap();
 
             match c.unwrap() {
-                //Key::Char('q') => break,
                 Key::Char(c) => {
                     match c {
-                        //' ' => {
-                        //    println!("$")
-                        //},
-                        //'v' => println!("{}im", c),
                         _ => {
                             input.push(c);
                         }
@@ -583,28 +578,7 @@ impl LsKey {
                 Key::Backspace => {
                     if let Some(x) = input.pop() {
                         if input.iter().count() == 0 {
-                            //write!(stdout, "{}{}", termion::cursor::Goto(0, 1), termion::clear::AfterCursor).unwrap();
                             execute = false;
-                            //let show = original_display.clone();
-                            //write!(
-                            //    stdout,
-                            //    "{}",
-                            //    termion::clear::All
-                            //).unwrap();
-
-                            //if let Some(x) = show {
-                            //    if x.0 == self.list.parent_path {
-                            //        let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                            //        write_it(b"", &mut stdout, display.to_string(), (0, 3));
-
-                            //        write!(
-                            //            stdout,
-                            //            "{}",
-                            //            termion::cursor::Goto(0, 3),
-                            //        ).unwrap();
-                            //        stdout.flush().unwrap();
-                            //    }
-                            //}
                         }
                     }
                 },
@@ -633,7 +607,6 @@ impl LsKey {
                 }
 
                 let some_mode = mode_parse(input_string.clone());
-                //println!("{:?}", last);
 
                 if let Some(mode) = some_mode {
                     match mode {
@@ -721,9 +694,6 @@ impl LsKey {
             the_list = Some(self.list);
         }
 
-
-
-        //write!(stdout, "{}", termion::cursor::Show).unwrap();
         (the_list, result, is_fuzzed, execute, fuzzy_list)
     }
 }
