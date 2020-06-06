@@ -542,48 +542,47 @@ impl LsKey {
         let mut execute = true;
 
 
-        let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
-            write!(
-                stdout,
-                "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
-                termion::cursor::Goto(locate.0, locate.1),
-                termion::cursor::Hide,
+        let write_it = |ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, locate: (u16, u16)| {
+             let show = ls_key.clone().display;
+             if let Some(x) = show {
+                 if x.0 == ls_key.list.parent_path {
+                      //into_raw_mode requires carriage returns.
+                      let display = str::replace(x.1.as_str(), "\n", "\n\r");
+                      write!(
+                          stdout,
+                          "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
+                          termion::cursor::Goto(locate.0, locate.1),
+                          termion::cursor::Hide,
 
-            ).unwrap();
-            stdout.flush().unwrap();
+                      ).unwrap();
+                      stdout.flush().unwrap();
 
-            write!(stdout,
-                "{}{}{}{}", format!("{}", input_string.as_str()
-                ),
-               termion::clear::AfterCursor,
-               termion::cursor::Goto((locate.0), (locate.1 + 1)),
-               termion::cursor::Hide,
-            ).unwrap();
-            stdout.flush().unwrap();
+                      write!(stdout,
+                          "{}{}{}{}", format!("{}", display.as_str()
+                          ),
+                         termion::clear::AfterCursor,
+                         termion::cursor::Goto((locate.0), (locate.1 + 1)),
+                         termion::cursor::Hide,
+                      ).unwrap();
+                      stdout.flush().unwrap();
+
+                      write!(
+                          stdout,
+                          "{}",
+                          termion::cursor::Goto(0, 3),
+                      ).unwrap();
+                      stdout.flush().unwrap();
+                 }
+             }
         };
 
-        let show = self.display.clone();
         write!(
             stdout,
             "{}",
             termion::clear::All
         ).unwrap();
 
-        if let Some(x) = show {
-            if x.0 == self.list.parent_path {
-                //into_raw_mode requires carriage returns.
-                let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                write_it(b"", &mut stdout, display.to_string(), (0, 3));
-
-                stdout.flush().unwrap();
-                write!(
-                    stdout,
-                    "{}",
-                    termion::cursor::Goto(0, 3),
-                ).unwrap();
-                stdout.flush().unwrap();
-            }
-        }
+         write_it(self.clone(), b"", &mut stdout, (0, 3));
 
         stdout.flush().unwrap();
 
@@ -727,7 +726,7 @@ impl LsKey {
                             } else {
 
                                 if input.iter().last() != Some(&'\n') {
-                                    let ls_key = self.fuzzy_update(fuzzy_mode_input);
+                                    let ls_key = self.clone().fuzzy_update(fuzzy_mode_input);
                                     self = ls_key.clone();
                                     fuzzy_list = ls_key.fuzzy_list;
                                 }
@@ -740,21 +739,7 @@ impl LsKey {
                 }
             }
 
-            let show = self.clone().display.clone();
-
-            if let Some(x) = show {
-                if x.0 == self.list.parent_path {
-                    let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                    write_it(b"", &mut stdout, display.to_string(), (0, 3));
-
-                    write!(
-                        stdout,
-                        "{}",
-                        termion::cursor::Goto(0, 3),
-                    ).unwrap();
-                    stdout.flush().unwrap();
-                }
-            }
+            write_it(self.clone(), b"", &mut stdout, (0, 3));
 
             if input.iter().last() == Some(&'\n') {
                 input.pop();
