@@ -529,21 +529,18 @@ impl LsKey {
 
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input:Input = Input::new();
-        let stdin = stdin();
-        let stdout = stdout();
-        let mut stdout = stdout.lock().into_raw_mode().unwrap();
-        let mut stdin = stdin.lock();
+        let (stdin, stdout) = (stdin(), stdout());
+        let (mut stdin, mut stdout) = (stdin.lock(), stdout.lock().into_raw_mode().unwrap());
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
-        let mut the_list: Option<list::List> = None;
-        let mut fuzzy_list: Option<list::List> = None;
-
+        let mut the_list: Option<List> = None;
+        let mut fuzzy_list: Option<List> = None;
+        
         clear_display(&mut stdout);
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
             clear_display(&mut stdout);
-
             input = input.clone().match_event(c.unwrap());
             let mut input_string: String = input.display.iter().collect();
             let input_len = input.display.iter().count();
