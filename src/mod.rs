@@ -541,41 +541,6 @@ impl LsKey {
         let original_display = self.clone().display;
         let mut execute = true;
 
-
-        let write_it = |ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, locate: (u16, u16)| {
-             let show = ls_key.clone().display;
-             if let Some(x) = show {
-                 if x.0 == ls_key.list.parent_path {
-                      //into_raw_mode requires carriage returns.
-                      let display = str::replace(x.1.as_str(), "\n", "\n\r");
-                      write!(
-                          stdout,
-                          "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
-                          termion::cursor::Goto(locate.0, locate.1),
-                          termion::cursor::Hide,
-
-                      ).unwrap();
-                      stdout.flush().unwrap();
-
-                      write!(stdout,
-                          "{}{}{}{}", format!("{}", display.as_str()
-                          ),
-                         termion::clear::AfterCursor,
-                         termion::cursor::Goto((locate.0), (locate.1 + 1)),
-                         termion::cursor::Hide,
-                      ).unwrap();
-                      stdout.flush().unwrap();
-
-                      write!(
-                          stdout,
-                          "{}",
-                          termion::cursor::Goto(0, 3),
-                      ).unwrap();
-                      stdout.flush().unwrap();
-                 }
-             }
-        };
-
         write!(
             stdout,
             "{}",
@@ -761,6 +726,40 @@ impl LsKey {
         //write!(stdout, "{}", termion::cursor::Show).unwrap();
         (the_list, result, is_fuzzed, execute, fuzzy_list)
     }
+}
+
+fn write_it(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, locate: (u16, u16)) {
+     let show = ls_key.clone().display;
+     if let Some(x) = show {
+         if x.0 == ls_key.list.parent_path {
+              //into_raw_mode requires carriage returns.
+              let display = str::replace(x.1.as_str(), "\n", "\n\r");
+              write!(
+                  stdout,
+                  "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
+                  termion::cursor::Goto(locate.0, locate.1),
+                  termion::cursor::Hide,
+
+              ).unwrap();
+              stdout.flush().unwrap();
+
+              write!(stdout,
+                  "{}{}{}{}", format!("{}", display.as_str()
+                  ),
+                 termion::clear::AfterCursor,
+                 termion::cursor::Goto((locate.0), (locate.1 + 1)),
+                 termion::cursor::Hide,
+              ).unwrap();
+              stdout.flush().unwrap();
+
+              write!(
+                  stdout,
+                  "{}",
+                  termion::cursor::Goto(0, 3),
+              ).unwrap();
+              stdout.flush().unwrap();
+         }
+     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
