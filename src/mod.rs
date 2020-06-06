@@ -539,12 +539,12 @@ impl LsKey {
         let mut fuzzy_list: Option<list::List> = None;
         let mut execute = true;
 
-        clear_all(&mut stdout);
+        clear_display(&mut stdout);
 
-        write_it(self.clone(), b"", &mut stdout, (0, 3));
+        display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
-            clear_all(&mut stdout);
+            clear_display(&mut stdout);
 
             match c.unwrap() {
                 Key::Char(c) => {
@@ -579,14 +579,7 @@ impl LsKey {
 
             let place = (0, 1);
             if let Some(mut first) = _first {
-                write!(stdout,
-                    "{}{}{}{}", format!("{}", input_string.as_str()
-                    ),
-                   termion::clear::AfterCursor,
-                   termion::cursor::Goto((place.0), (place.1 + 1)),
-                   termion::cursor::Hide,
-                ).unwrap();
-                stdout.flush().unwrap();
+                display_input(input_string.clone(), &mut stdout, place);
 
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
@@ -664,7 +657,7 @@ impl LsKey {
                 }
             }
 
-            write_it(self.clone(), b"", &mut stdout, (0, 3));
+            display_files(self.clone(), b"", &mut stdout, (0, 3));
 
             if input.iter().last() == Some(&'\n') {
                 input.pop();
@@ -685,7 +678,7 @@ impl LsKey {
     }
 }
 
-fn clear_all(stdout: &mut RawTerminal<StdoutLock>) {
+fn clear_display(stdout: &mut RawTerminal<StdoutLock>) {
     write!(
         stdout,
         "{}",
@@ -694,7 +687,18 @@ fn clear_all(stdout: &mut RawTerminal<StdoutLock>) {
     stdout.flush().unwrap();
 }
 
-fn write_it(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, locate: (u16, u16)) {
+fn display_input(input_string: String, stdout: &mut RawTerminal<StdoutLock>, position: (u16, u16)) {
+    write!(stdout,
+        "{}{}{}{}", format!("{}", input_string.as_str()
+        ),
+       termion::clear::AfterCursor,
+       termion::cursor::Goto((position.0), (position.1 + 1)),
+       termion::cursor::Hide,
+    ).unwrap();
+    stdout.flush().unwrap();
+}
+
+fn display_files(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, position: (u16, u16)) {
      let show = ls_key.clone().display;
      if let Some(x) = show {
          if x.0 == ls_key.list.parent_path {
@@ -703,7 +707,7 @@ fn write_it(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLoc
               write!(
                   stdout,
                   "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
-                  termion::cursor::Goto(locate.0, locate.1),
+                  termion::cursor::Goto(position.0, position.1),
                   termion::cursor::Hide,
 
               ).unwrap();
@@ -713,7 +717,7 @@ fn write_it(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLoc
                   "{}{}{}{}", format!("{}", display.as_str()
                   ),
                  termion::clear::AfterCursor,
-                 termion::cursor::Goto((locate.0), (locate.1 + 1)),
+                 termion::cursor::Goto((position.0), (position.1 + 1)),
                  termion::cursor::Hide,
               ).unwrap();
               stdout.flush().unwrap();
