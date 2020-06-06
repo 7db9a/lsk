@@ -591,27 +591,10 @@ impl LsKey {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
-                                 input.pop();
-                                 input_string = input.iter().collect();
-                                 let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
-                                 match cmd_mode {
-                                     Mode::Cmd(cmd_mode_input) => {
-                                         let input = Input::new();
-                                         let input = input.parse(cmd_mode_input);
-
-                                         match input.clone().cmd_type.unwrap() {
-                                             CmdType::cmd => {
-                                                 self.clone().cmd_mode(input);
-                                                 self.clone().run_list_read_beta();
-                                             },
-                                             _ => {}
-                                         }
-                                         //break
-                                     }
-                                     _ => { }
-                                 }
+                                 let cmd_res = cmd_read(&mut input, &self);
+                                 input = cmd_res.0;
+                                 input_string = cmd_res.1;
                              }
-
                         },
                         Mode::Work => {
                             let few_ms = std::time::Duration::from_millis(2000);
@@ -675,6 +658,30 @@ impl LsKey {
 
         (the_list, result, is_fuzzed, execute, fuzzy_list)
     }
+}
+
+fn cmd_read(input: &mut Vec<char>, ls_key: &LsKey) -> (Vec<char>, String) {
+     input.pop();
+     let input_string: String = input.iter().collect();
+     let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
+     match cmd_mode {
+         Mode::Cmd(cmd_mode_input) => {
+             let input = Input::new();
+             let input = input.parse(cmd_mode_input);
+
+             match input.clone().cmd_type.unwrap() {
+                 CmdType::cmd => {
+                     ls_key.clone().cmd_mode(input);
+                     ls_key.clone().run_list_read_beta();
+                 },
+                 _ => {}
+             }
+             //break
+         }
+         _ => { }
+     }
+     
+     (input.to_vec(), input_string)
 }
 
 fn clear_display(stdout: &mut RawTerminal<StdoutLock>) {
