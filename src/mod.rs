@@ -546,10 +546,10 @@ impl LsKey {
             "{}",
             termion::clear::All
         ).unwrap();
-
-         write_it(self.clone(), b"", &mut stdout, (0, 3));
-
         stdout.flush().unwrap();
+
+        write_it(self.clone(), b"", &mut stdout, (0, 3));
+
 
         for c in stdin.keys() {
             write!(
