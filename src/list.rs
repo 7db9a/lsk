@@ -16,7 +16,8 @@ impl List {
         let mut list: List = Default::default();
         list.parent_path = path.as_ref().to_path_buf();
         list.path_history.push(list.parent_path.clone());
-        list.clone()
+
+        list
     }
 
     // Update due to going into a new directory.
@@ -32,7 +33,8 @@ impl List {
         self.path_history = old_path_history;
         self.parent_path = old_parent_path.join(basename);
         self.path_history.push(self.parent_path.clone());
-        self.clone()
+
+        self
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {

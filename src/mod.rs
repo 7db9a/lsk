@@ -985,7 +985,7 @@ fn parse_keys(input: &str) -> Option<String> {
 }
 
 #[cfg(test)]
-mod tests {
+mod app_test {
     use std::fs::{File, metadata,};
     use std::io::Write;
     use std::path::{Path, PathBuf};
