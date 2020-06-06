@@ -41,7 +41,7 @@ impl List {
         let mut _list: List = Default::default();
         let walker = WalkDir::new(self.parent_path.clone()).max_depth(1).into_iter();
         for entry in walker.filter_entry(|e| !_list.clone().skip(e)) {
-                self = list_maker(entry, self.clone())?;
+                self = list_maker(entry, self)?;
         }
 
         Ok(self)
