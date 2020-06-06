@@ -82,7 +82,7 @@ impl List {
                     let path = entry.to_path_buf();
                     let parent = self.parent_path.clone();
                     let parent_file_name = file_or_dir_name(parent);
-                    if Some(path.clone()) != parent_file_name {
+                    if Some(&path) != parent_file_name.as_ref() {
                         if n == key {
                             return self.clone().full_entry_path(path);
                         }
