@@ -548,7 +548,6 @@ impl LsKey {
 
         write_it(self.clone(), b"", &mut stdout, (0, 3));
 
-
         for c in stdin.keys() {
             write!(
                 stdout,
