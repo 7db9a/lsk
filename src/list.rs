@@ -110,7 +110,7 @@ impl List {
     }
 
     fn full_entry_path(self, path: PathBuf) -> Option<PathBuf> {
-        let p = self.parent_path.clone();
+        let p = self.parent_path;
         Some(p.join(path.as_path()))
     }
 }
