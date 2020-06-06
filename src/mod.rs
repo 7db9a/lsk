@@ -70,7 +70,6 @@ pub struct LsKey {
     pub display: Option<(PathBuf, String)>,
     pub halt: bool,
     pub is_fuzzed: bool,
-    pub kill: bool
 }
 
 impl LsKey {
@@ -93,7 +92,6 @@ impl LsKey {
                 display: None,
                 halt: true,
                 is_fuzzed: false,
-                kill: false
             }
     }
 
@@ -511,7 +509,7 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, _is_fuzzed, _execute, fuzzy_list, kill) = self.clone().read_process_chars(self.list.clone());
+           let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.clone().read_process_chars(self.list.clone());
                execute = _execute;
                self.is_fuzzed = _is_fuzzed;
                self.fuzzy_list = fuzzy_list;
@@ -529,7 +527,7 @@ impl LsKey {
         self
     }
 
-    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>, bool) {
+    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input: Vec<char> = vec![];
         let stdin = stdin();
         let stdout = stdout();
@@ -542,7 +540,6 @@ impl LsKey {
         let original_list = list;
         let original_display = self.clone().display;
         let mut execute = true;
-        let mut kill = false;
 
 
         let write_it = |some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, input_string: String, locate: (u16, u16)| {
@@ -707,9 +704,7 @@ impl LsKey {
                                  let path = path.to_str().unwrap();
                                  let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
                                  terminal::parent_shell::type_text(cmd, 0);
-                                 kill = true;
                                  self.is_fuzzed = false;
-                                 self.kill = true;
                                  break
                             } else {
 
@@ -779,7 +774,7 @@ impl LsKey {
 
 
         //write!(stdout, "{}", termion::cursor::Show).unwrap();
-        (the_list, result, is_fuzzed, execute, fuzzy_list, kill)
+        (the_list, result, is_fuzzed, execute, fuzzy_list)
     }
 }
 
