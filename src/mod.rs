@@ -528,7 +528,7 @@ impl LsKey {
     }
 
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
-        let mut input: Vec<char> = vec![];
+        let mut input:Input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
@@ -537,7 +537,6 @@ impl LsKey {
         let mut is_fuzzed = false;
         let mut the_list: Option<list::List> = None;
         let mut fuzzy_list: Option<list::List> = None;
-        let mut execute = true;
 
         clear_display(&mut stdout);
         display_files(self.clone(), b"", &mut stdout, (0, 3));
@@ -545,36 +544,12 @@ impl LsKey {
         for c in stdin.keys() {
             clear_display(&mut stdout);
 
-            match c.unwrap() {
-                Key::Char(c) => {
-                    match c {
-                        _ => {
-                            input.push(c);
-                        }
-                    }
-                }
-                Key::Alt(c) => println!("^{}", c),
-                Key::Ctrl(c) => println!("*{}", c),
-                Key::Esc => println!("ESC"),
-                Key::Esc => println!("ESC"),
-                Key::Left => println!("←"),
-                Key::Right => println!("→"),
-                Key::Up => println!("↑"),
-                Key::Down => println!("↓"),
-                Key::Backspace => {
-                    if let Some(x) = input.pop() {
-                        if input.iter().count() == 0 {
-                            execute = false;
-                        }
-                    }
-                },
-                _ => {}
-            }
-            let mut input_string: String = input.iter().collect();
-            let input_len = input.iter().count();
+            input = input.clone().match_event(c.unwrap());
+            let mut input_string: String = input.display.iter().collect();
+            let input_len = input.display.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
-            let _first = input.iter().nth(0);
-            let last = input.iter().last();
+            let _first = input.display.iter().nth(0);
+            let last = input.display.iter().last();
 
             let place = (0, 1);
             if let Some(mut first) = _first {
@@ -591,8 +566,8 @@ impl LsKey {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
-                                 let cmd_res = cmd_read(&mut input, &self);
-                                 input = cmd_res.0;
+                                 let cmd_res = cmd_read(&mut input.display, &self);
+                                 input.display = cmd_res.0;
                                  input_string = cmd_res.1;
                              }
                         },
@@ -609,9 +584,9 @@ impl LsKey {
                             }
                         },
                         Mode::Fuzzy(fuzzy_mode_input) => {
-                            let fuzzy_res = fuzzy_read(fuzzy_mode_input.as_str() ,input, self.clone());
+                            let fuzzy_res = fuzzy_read(fuzzy_mode_input.as_str() ,input.display, self.clone());
                             is_fuzzed = true;
-                            input = fuzzy_res.0;
+                            input.display = fuzzy_res.0;
                             input_string = fuzzy_res.1;
                             if let Some(new_list) = fuzzy_res.2 { the_list = Some(new_list); };
                             if let Some(new_fuzzy_list) = fuzzy_res.3 { fuzzy_list = Some(new_fuzzy_list); };
@@ -624,9 +599,9 @@ impl LsKey {
 
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
-            if input.iter().last() == Some(&'\n') {
-                input.pop();
-                let input_string: String = input.iter().collect();
+            if input.display.iter().last() == Some(&'\n') {
+                input.display.pop();
+                let input_string: String = input.display.iter().collect();
                 result = Some(input_string);
                 self.is_fuzzed = is_fuzzed;
                 if self.is_fuzzed {
@@ -639,7 +614,7 @@ impl LsKey {
             the_list = Some(self.list);
         }
 
-        (the_list, result, is_fuzzed, execute, fuzzy_list)
+        (the_list, result, is_fuzzed, input.execute, fuzzy_list)
     }
 }
 
@@ -757,14 +732,46 @@ pub struct Input {
     pub cmd: Option<String>,
     pub args: Option<Vec<String>>,
     pub as_read: String,
-    pub cmd_type: Option<CmdType>
+    pub cmd_type: Option<CmdType>,
+    pub display: Vec<char>,
+    pub execute: bool,
 }
 
 impl Input {
     pub fn new() -> Self {
-        let input: Input = Default::default();
+        let mut input: Input = Default::default();
+        input.execute = true;
 
         input
+    }
+
+    pub fn match_event(mut self, c: termion::event::Key) -> Self {
+            match c {
+                Key::Char(c) => {
+                    match c {
+                        _ => {
+                            self.display.push(c);
+                        }
+                    }
+                }
+                Key::Alt(c) => println!("^{}", c),
+                Key::Ctrl(c) => println!("*{}", c),
+                Key::Esc => println!("ESC"),
+                Key::Esc => println!("ESC"),
+                Key::Left => println!("←"),
+                Key::Right => println!("→"),
+                Key::Up => println!("↑"),
+                Key::Down => println!("↓"),
+                Key::Backspace => {
+                    if let Some(x) = self.display.pop() {
+                        if self.display.iter().count() == 0 {
+                            self.execute = false;
+                        }
+                    }
+                },
+                _ => {}
+            }
+            self
     }
 
     fn defang_args(&self, args: Vec<String>) -> Option<Vec<String>> {
