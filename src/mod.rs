@@ -225,7 +225,7 @@ impl LsKey {
 
    pub fn run_list_read_beta(mut self) {
             let list = self.list.clone();
-            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
+            let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
             //let res = terminal::input_n_display::grid(entries_keyed);
@@ -252,7 +252,7 @@ impl LsKey {
 
    pub fn run_list_read(mut self, halt: bool) -> Self {
             let list = self.list.clone();
-            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), true);
+            let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
             //let res = terminal::input_n_display::grid(entries_keyed);
@@ -284,7 +284,7 @@ impl LsKey {
     }
 
    pub fn fuzzy_update_list_read(mut self, list: List) -> Option<(PathBuf, String)> {
-            let entries: Vec<PathBuf> = list::order_and_sort_list(list.clone(), false);
+            let entries: Vec<PathBuf> = list::order_and_sort_list(&list, false);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
             //let res = terminal::input_n_display::grid(entries_keyed);
@@ -985,7 +985,7 @@ fn parse_keys(input: &str) -> Option<String> {
 }
 
 #[cfg(test)]
-mod tests {
+mod app_test {
     use std::fs::{File, metadata,};
     use std::io::Write;
     use std::path::{Path, PathBuf};

@@ -16,13 +16,13 @@ impl List {
         let mut list: List = Default::default();
         list.parent_path = path.as_ref().to_path_buf();
         list.path_history.push(list.parent_path.clone());
-        list.clone()
+
+        list
     }
 
     // Update due to going into a new directory.
     pub fn update<P: AsRef<Path>>(mut self, path: P) -> Self {
         let old_path_history = self.path_history;
-        let old_parent_dir = Some(self.parent_path.clone());
         let old_parent_path = self.parent_path;
         let p = path.as_ref().to_str().unwrap();
         let np: String = basename(p, '/').into_owned();
@@ -32,14 +32,15 @@ impl List {
         self.path_history = old_path_history;
         self.parent_path = old_parent_path.join(basename);
         self.path_history.push(self.parent_path.clone());
-        self.clone()
+
+        self
     }
 
     pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
-        let mut _list: List = Default::default();
-        let walker = WalkDir::new(self.parent_path.clone()).max_depth(1).into_iter();
-        for entry in walker.filter_entry(|e| !_list.clone().skip(e)) {
-                self = list_maker(entry, self.clone())?;
+        let mut list: List = Default::default();
+        let walker = WalkDir::new(&self.parent_path).max_depth(1).into_iter();
+        for entry in walker.filter_entry(|e| !list.clone().skip(e)) {
+                self = list_maker(entry, self)?;
         }
 
         Ok(self)
@@ -47,8 +48,8 @@ impl List {
 
     pub fn list_include_hidden(mut self) -> Result<(Self), std::io::Error> {
         let mut _list: List = Default::default();
-        for entry in WalkDir::new(self.parent_path.clone()).max_depth(1) {
-                self = list_maker(entry, self.clone())?;
+        for entry in WalkDir::new(&self.parent_path).max_depth(1) {
+                self = list_maker(entry, self)?;
         }
 
         Ok(self)
@@ -58,7 +59,7 @@ impl List {
         let path = pathbuf.into_boxed_path();
         let depth_from_root_dir = path.iter().count();
 
-        let parent_dir_count = self.parent_path.clone().iter().count();
+        let parent_dir_count = self.parent_path.iter().count();
         if depth_from_root_dir < parent_dir_count {
             self.parent_path = path.to_path_buf();
         }
@@ -67,28 +68,23 @@ impl List {
     }
 
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
-        let all_files = order_and_sort_list(self.clone(), sort);
+        let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
-        let mut done = false;
+        let count =  all_files.clone().count();
 
-        while !done {
-            let mut n = 0;
-            if all_files.clone().count() > 0 {
-                for entry in all_files.clone() {
-                    //println!("{} [{}]", entry.display(), n);
-                    let path = entry.to_path_buf();
-                    let parent = self.parent_path.clone();
-                    let parent_file_name = file_or_dir_name(parent);
-                    if Some(path.clone()) != parent_file_name {
-                        if n == key {
-                            return self.clone().full_entry_path(path);
-                        }
-                       n += 1;
+        let mut n = 0;
+        if count > 0 {
+            for entry in all_files.clone() {
+                //println!("{} [{}]", entry.display(), n);
+                let path = entry.to_path_buf();
+                let parent_file_name = file_or_dir_name(&self.parent_path);
+                if Some(&path) != parent_file_name.as_ref() {
+                    if n == key {
+                        return self.clone().full_entry_path(path);
                     }
+                   n += 1;
                 }
             }
-
-            done = true;
         }
 
         return None
@@ -107,7 +103,7 @@ impl List {
     }
 
     fn full_entry_path(self, path: PathBuf) -> Option<PathBuf> {
-        let p = self.parent_path.clone();
+        let p = self.parent_path;
         Some(p.join(path.as_path()))
     }
 }
@@ -120,7 +116,7 @@ fn basename<'a>(path: &'a str, sep: char) -> Cow<'a, str> {
     }
 }
 
-fn file_or_dir_name(path: PathBuf) -> Option<PathBuf> {
+fn file_or_dir_name(path: &PathBuf) -> Option<PathBuf> {
     let path = path.as_path();
     let path = path.file_name();
 
@@ -133,14 +129,12 @@ fn file_or_dir_name(path: PathBuf) -> Option<PathBuf> {
 
 fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result<(List), std::io::Error> {
     match entry {
-        Ok(x) => {
-            let entry = x;
+        Ok(entry) => {
             let entry = entry.path();
-            let md = metadata(entry);
-            match md {
+            match metadata(entry) {
                 Ok(md) => {
                    let path = entry.to_path_buf();
-                   let short_path = file_or_dir_name(path.clone());
+                   let short_path = file_or_dir_name(&path);
                    if md.is_file() {
                        list = list.replace_shortest_path(path);
                        if let Some(p) = short_path {
@@ -184,7 +178,7 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     let files = list.files.iter();
     let dirs = list.dirs.iter();
     let mut done = false;
@@ -204,7 +198,7 @@ pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
         }
         if dirs.clone().count() > 0 {
             for entry in dirs.clone() {
-                let parent_file_name = file_or_dir_name(list.parent_path.clone());
+                let parent_file_name = file_or_dir_name(&list.parent_path);
                 if Some(entry) != parent_file_name.as_ref() {
                    all_files.push(entry.to_path_buf());
                 }
@@ -221,7 +215,7 @@ pub fn order_and_sort_list(list: List, sort: bool) -> Vec<PathBuf> {
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
-    let all_files = order_and_sort_list(list, true);
+    let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
         println!("{} [{}]", entry.display(), n);

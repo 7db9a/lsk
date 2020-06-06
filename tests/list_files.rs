@@ -89,7 +89,7 @@ fn assert_files(path: &str) {
 
 #[test]
 #[ignore]//docker
-fn test_build_files() {
+fn list_build_files() {
         let path = "/tmp/lsk_tests/";
         build_files(path);
         let path_path = Path::new(path).to_path_buf();
@@ -399,7 +399,7 @@ fn list_enter_into_fuzzed_dir() {
 
 #[test]
 #[ignore]//play
-fn test_cmd_in_different_dir() {
+fn list_test_cmd_in_different_dir() {
         let path = "/tmpt/lsk_tests/";
         build_files(path);
         let path_path = Path::new(path).to_path_buf();
