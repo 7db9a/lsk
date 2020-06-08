@@ -33,12 +33,12 @@ pub mod app {
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all);
+                ls_key = LsKey::new(path, all, test);
                 ls_key.list = fuzzy_list.clone();
                 ls_key.display = display;
             } else if !ls_key.halt {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all);
+                ls_key = LsKey::new(path, all, test);
                 ls_key.list = _list;
                 ls_key.display = display;
             }
@@ -63,7 +63,7 @@ pub struct LsKey {
 
 impl LsKey {
     pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool) -> Self {
-        let ls_key: LsKey = Default::default();
+        let mut ls_key: LsKey = Default::default();
         let list = if all {
            list::List::new(path)
                .list_include_hidden()
@@ -79,6 +79,8 @@ impl LsKey {
         ls_key.halt = true;
         ls_key.is_fuzzed = false;
         ls_key.test = test;
+
+        ls_key
     }
 
     fn fuzzy_score(mut self, mut input: String) -> fuzzy::demo::Scores {
