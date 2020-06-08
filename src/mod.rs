@@ -643,7 +643,7 @@ fn cmd_read(input: &mut Vec<char>, ls_key: &LsKey) -> (Vec<char>, String) {
          }
          _ => { }
      }
-     
+
      (input.to_vec(), input_string)
 }
 
