@@ -22,9 +22,9 @@ pub mod app {
     use super::LsKey;
     use super::Path;
 
-    pub fn run<P: AsRef<Path>>(path: P, all: bool) /*-> LsKey*/ {
+    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) /*-> LsKey*/ {
         let path = path.as_ref();
-        let mut ls_key = LsKey::new(path, all);
+        let mut ls_key = LsKey::new(path, all, test);
         ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
         let mut list = ls_key.list.clone();
 
@@ -57,29 +57,28 @@ pub struct LsKey {
     pub display: Option<(PathBuf, String)>,
     pub halt: bool,
     pub is_fuzzed: bool,
+    pub test: bool,
+    pub output: Vec<(String, String)>
 }
 
 impl LsKey {
-    pub fn new<P: AsRef<Path>>(path: P, all: bool) -> Self {
-            let list = if all {
-               list::List::new(path)
-                   .list_include_hidden()
-                   .unwrap()
-            } else {
-               list::List::new(path)
-                   .list_skip_hidden()
-                   .unwrap()
-            };
+    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool) -> Self {
+        let ls_key: LsKey = Default::default();
+        let list = if all {
+           list::List::new(path)
+               .list_include_hidden()
+               .unwrap()
+        } else {
+           list::List::new(path)
+               .list_skip_hidden()
+               .unwrap()
+        };
 
-            LsKey {
-                list,
-                all,
-                input: None,
-                fuzzy_list: None,
-                display: None,
-                halt: true,
-                is_fuzzed: false,
-            }
+        ls_key.list = list;
+        ls_key.all = all;
+        ls_key.halt = true;
+        ls_key.is_fuzzed = false;
+        ls_key.test = test;
     }
 
     fn fuzzy_score(mut self, mut input: String) -> fuzzy::demo::Scores {
@@ -1013,7 +1012,7 @@ mod app_test {
                 std::thread::sleep(few_ms);
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                super::app::run(path.clone(), $list_all_bool);
+                super::app::run(path.clone(), $list_all_bool, false);
                 spawn.join();
 
                 path_cache.switch_back();
