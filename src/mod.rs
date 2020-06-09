@@ -25,7 +25,7 @@ pub mod app {
     use super::LsKey;
     use super::Path;
 
-    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) /*-> LsKey*/ {
+    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) -> LsKey {
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
         ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
@@ -48,6 +48,8 @@ pub mod app {
             ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
             list = ls_key.list.clone();
         }
+
+        ls_key
     }
 }
 
