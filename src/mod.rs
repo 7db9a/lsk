@@ -538,6 +538,20 @@ impl LsKey {
         }
     }
 
+    fn test_data_sum_to_single_hash(&mut self) -> [u8; 32] {
+        let mut complete_vec = self.input_vec.to_owned();
+        complete_vec.append(&mut self.output_vec);
+        let mut hasher = Sha256::new();
+        for i in complete_vec.iter() {
+            let str_i = std::str::from_utf8(i).unwrap();
+            hasher.input(str_i);
+        }
+
+        let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
+
+        result
+    }
+
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input:Input = Input::new();
         let stdin = stdin();
