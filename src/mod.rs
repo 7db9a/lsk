@@ -516,6 +516,17 @@ impl LsKey {
         self
     }
 
+    fn test_data_update(&mut self) {
+        if self.test == true {
+            if self.input.is_some() {
+                self.input_vec.push(self.input.clone().unwrap());
+            }
+            if self.display.is_some() {
+                self.output_vec.push(self.display.clone().unwrap().1);
+            }
+        }
+    }
+
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input:Input = Input::new();
         let stdin = stdin();
@@ -529,15 +540,7 @@ impl LsKey {
 
         clear_display(&mut stdout);
 
-        if self.test == true {
-            if self.input.is_some() {
-                self.input_vec.push(self.input.clone().unwrap());
-            }
-            if self.display.is_some() {
-                self.output_vec.push(self.display.clone().unwrap().1);
-            }
-        }
-
+        self.test_data_update();
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
@@ -552,6 +555,7 @@ impl LsKey {
 
             let place = (0, 1);
             if let Some(mut first) = _first {
+                self.test_data_update();
                 display_input(input_string.clone(), &mut stdout, place);
 
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
@@ -613,6 +617,7 @@ impl LsKey {
                 }
             }
 
+            self.test_data_update();
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
             if input.display.iter().last() == Some(&'\n') {
