@@ -122,7 +122,7 @@ fn list() {
 
         // Changing directories.
         path_cache.switch();
-        let ls_key = ls_key::LsKey::new(path, list_all);
+        let ls_key = ls_key::LsKey::new(path, list_all, false);
 
         path_cache.switch_back();
 
@@ -150,7 +150,7 @@ fn fuzzy_list() {
         // Changing directories.
         path_cache.switch();
 
-        let ls_key = ls_key::LsKey::new(path, list_all);
+        let ls_key = ls_key::LsKey::new(path, list_all, false);
 
         let list_original = ls_key.list.clone();
         let ls_key_fuzzed = ls_key.clone().fuzzy_update(input.to_string());
@@ -218,7 +218,7 @@ fn list_go_up_one_level() {
         // Changing directories.
         path_cache.switch();
 
-        let mut ls_key = ls_key::LsKey::new(path, list_all);
+        let mut ls_key = ls_key::LsKey::new(path, list_all, false);
 
         let list_original = ls_key.list.clone();
 
@@ -279,7 +279,7 @@ fn list_enter_into_dir() {
         // Changing directories.
         path_cache.switch();
 
-        let mut ls_key = ls_key::LsKey::new(path, list_all);
+        let mut ls_key = ls_key::LsKey::new(path, list_all, false);
 
         let list_original = ls_key.list.clone();
 
@@ -349,7 +349,7 @@ fn list_enter_into_fuzzed_dir() {
         // Changing directories.
         path_cache.switch();
 
-        let mut ls_key = ls_key::LsKey::new(path, list_all);
+        let mut ls_key = ls_key::LsKey::new(path, list_all, false);
 
         let list_original = ls_key.list.clone();
         let ls_key_fuzzed = ls_key.clone().fuzzy_update(input.to_string());

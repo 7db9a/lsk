@@ -1057,10 +1057,12 @@ mod app_test {
                 std::thread::sleep(few_ms);
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                super::app::run(path.clone(), $list_all_bool, false);
+                let mut ls_key = super::app::run(path.clone(), $list_all_bool, true);
                 spawn.join();
 
                 path_cache.switch_back();
+
+                let data_hash = ls_key.test_data_sum_to_single_hash();
 
                 assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
                 assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
