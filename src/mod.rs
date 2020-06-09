@@ -2,6 +2,7 @@ pub mod list;
 pub mod terminal;
 pub mod fuzzy;
 
+use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use list::List;
@@ -17,6 +18,8 @@ use termion::async_stdin;
 use termion::screen::AlternateScreen;
 use std::thread;
 use std::time::Duration;
+use sha2::{Sha256, Sha512, Digest};
+use sha2::digest::generic_array::{ArrayLength, GenericArray};
 
 pub mod app {
     use super::LsKey;
@@ -58,8 +61,8 @@ pub struct LsKey {
     pub halt: bool,
     pub is_fuzzed: bool,
     pub test: bool,
-    pub input_vec: Vec<String>,
-    pub output_vec: Vec<String>
+    pub input_vec: Vec<[u8; 32]>,
+    pub output_vec: Vec<[u8; 32]>
 }
 
 impl LsKey {
@@ -519,10 +522,18 @@ impl LsKey {
     fn test_data_update(&mut self) {
         if self.test == true {
             if self.input.is_some() {
-                self.input_vec.push(self.input.clone().unwrap());
+                let mut hasher = Sha256::new();
+                let input = self.input.clone().unwrap();
+                hasher.input(input);
+                let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
+                self.input_vec.push(result);
             }
             if self.display.is_some() {
-                self.output_vec.push(self.display.clone().unwrap().1);
+                let mut hasher = Sha256::new();
+                let output = self.display.clone().unwrap().1;
+                hasher.input(output);
+                let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
+                self.output_vec.push(result);
             }
         }
     }
