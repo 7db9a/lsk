@@ -58,7 +58,8 @@ pub struct LsKey {
     pub halt: bool,
     pub is_fuzzed: bool,
     pub test: bool,
-    pub output: Vec<(String, String)>
+    pub input_vec: Vec<String>,
+    pub output_vec: Vec<String>
 }
 
 impl LsKey {
@@ -527,6 +528,16 @@ impl LsKey {
         let mut fuzzy_list: Option<list::List> = None;
 
         clear_display(&mut stdout);
+
+        if self.test == true {
+            if self.input.is_some() {
+                self.input_vec.push(self.input.clone().unwrap());
+            }
+            if self.display.is_some() {
+                self.output_vec.push(self.display.clone().unwrap().1);
+            }
+        }
+
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
