@@ -63,8 +63,8 @@ pub struct LsKey {
     pub halt: bool,
     pub is_fuzzed: bool,
     pub test: bool,
-    pub input_vec: Vec<[u8; 32]>,
-    pub output_vec: Vec<[u8; 32]>
+    pub input_vec: Vec<String>,
+    pub output_vec: Vec<String>
 }
 
 impl LsKey {
@@ -527,32 +527,53 @@ impl LsKey {
                 let mut hasher = Sha256::new();
                 let input = self.input.clone().unwrap();
                 hasher.input(input);
-                let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
-                self.input_vec.push(result);
+                let result = hasher.result();
+                let result: [u8; 32] = result.as_slice().try_into().expect("Wrong length");
+                let result_str = result.iter().map(|&c| c as char).collect::<String>();
+                self.input_vec.push(result_str.clone());
+
+                let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                if original_dir.is_some() {
+                    let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                    let mut original_dir = original_dir.unwrap();
+                    //file.write_all(stuff.as_bytes()).unwrap();
+                    original_dir.push(result_str);
+                    let mut file = std::fs::File::create(original_dir).unwrap();
+                }
             }
             if self.display.is_some() {
                 let mut hasher = Sha256::new();
                 let output = self.display.clone().unwrap().1;
                 hasher.input(output);
-                let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
-                self.output_vec.push(result);
+                let result = hasher.result();
+                let result: [u8; 32] = result.as_slice().try_into().expect("Wrong length");
+                let result_str = result.iter().map(|&c| c as char).collect::<String>();
+                self.output_vec.push(result_str.clone());
+
+                let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                if original_dir.is_some() {
+                    let mut original_dir = original_dir.unwrap();
+                    //file.write_all(stuff.as_bytes()).unwrap();
+                    original_dir.push(result_str);
+                    let mut file = std::fs::File::create(original_dir).unwrap();
+                }
             }
         }
     }
 
-    fn test_data_sum_to_single_hash(&mut self) -> [u8; 32] {
-        let mut complete_vec = self.input_vec.to_owned();
-        complete_vec.append(&mut self.output_vec);
-        let mut hasher = Sha256::new();
-        for i in complete_vec.iter() {
-            let str_i = std::str::from_utf8(i).unwrap();
-            hasher.input(str_i);
-        }
+    //fn test_data_sum_to_single_hash(&mut self) -> [u8; 32] {
+    //    let mut complete_vec = self.input_vec.to_owned();
+    //    complete_vec.append(&mut self.output_vec);
+    //    let mut hasher = Sha256::new();
+    //    for i in complete_vec.iter() {
+    //        let str_i = std::str::from_utf8(i).unwrap();
+    //        hasher.input(str_i);
+    //    }
 
-        let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
+    //    let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
 
-        result
-    }
+    //    result
+    //}
 
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input:Input = Input::new();
@@ -1051,7 +1072,6 @@ mod app_test {
                      format!(r#""{}""#, $input7),
                 ];
 
-
                 println!("\n\n\nNew case intent:\n{}", $intent);
                 let few_ms = std::time::Duration::from_millis(5000);
                 std::thread::sleep(few_ms);
@@ -1062,7 +1082,7 @@ mod app_test {
 
                 path_cache.switch_back();
 
-                let data_hash = ls_key.test_data_sum_to_single_hash();
+                //let data_hash = ls_key.test_data_sum_to_single_hash();
 
                 assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
                 assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
