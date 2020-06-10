@@ -4,7 +4,7 @@ pub mod fuzzy;
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
-use std::fs::metadata;
+use std::fs::{create_dir_all, metadata};
 use list::List;
 use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
@@ -20,6 +20,7 @@ use std::thread;
 use std::time::Duration;
 use sha2::{Sha256, Sha512, Digest};
 use sha2::digest::generic_array::{ArrayLength, GenericArray};
+use easy_hasher::easy_hasher::*;
 
 pub mod app {
     use super::LsKey;
@@ -524,37 +525,42 @@ impl LsKey {
     fn test_data_update(&mut self) {
         if self.test == true {
             if self.input.is_some() {
-                let mut hasher = Sha256::new();
-                let input = self.input.clone().unwrap();
-                hasher.input(input);
-                let result = hasher.result();
-                let result: [u8; 32] = result.as_slice().try_into().expect("Wrong length");
-                let result_str = result.iter().map(|&c| c as char).collect::<String>();
-                self.input_vec.push(result_str.clone());
+                //let mut hasher = Sha256::new();
+                //let input = self.input.clone().unwrap();
+                //hasher.input(input);
+                //let result = hasher.result();
+                //let result: [u8; 32] = result.as_slice().try_into().expect("Wrong length");
+                //let result_str = result.iter().map(|&c| c as char).collect::<String>();
+                //self.input_vec.push(result_str.clone());
 
-                let original_dir = self.clone().list.path_history.into_iter().nth(0);
-                if original_dir.is_some() {
-                    let original_dir = self.clone().list.path_history.into_iter().nth(0);
-                    let mut original_dir = original_dir.unwrap();
-                    //file.write_all(stuff.as_bytes()).unwrap();
-                    original_dir.push(result_str);
-                    let mut file = std::fs::File::create(original_dir).unwrap();
-                }
+                //let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                //if original_dir.is_some() {
+                //    let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                //    let mut original_dir = original_dir.unwrap();
+                //    //file.write_all(stuff.as_bytes()).unwrap();
+                //    original_dir.push(".lsk_test_output");
+                //    create_dir_all(Path::new(&original_dir.clone())).expect("Failed to create directories.");
+                //    original_dir.push(result_str);
+                //    let mut file = std::fs::File::create(original_dir).unwrap();
+                //}
             }
             if self.display.is_some() {
                 let mut hasher = Sha256::new();
                 let output = self.display.clone().unwrap().1;
-                hasher.input(output);
-                let result = hasher.result();
-                let result: [u8; 32] = result.as_slice().try_into().expect("Wrong length");
-                let result_str = result.iter().map(|&c| c as char).collect::<String>();
-                self.output_vec.push(result_str.clone());
+                let hash = sha256(&output);
+                //self.output_vec.push(hash.to_hex_string());
 
                 let original_dir = self.clone().list.path_history.into_iter().nth(0);
                 if original_dir.is_some() {
                     let mut original_dir = original_dir.unwrap();
                     //file.write_all(stuff.as_bytes()).unwrap();
-                    original_dir.push(result_str);
+                    original_dir.push(".lsk_test_output");
+                    create_dir_all(Path::new(&original_dir.clone())).expect("Failed to create directories.");
+                    original_dir.push(hash.to_hex_string());
+                    //assert_eq!(
+                    //    "/home/me/projects/work/ls-key/.ls_key_output".to_string(),
+                    //    original_dir.clone().into_os_string().into_string().unwrap()
+                    //);
                     let mut file = std::fs::File::create(original_dir).unwrap();
                 }
             }
@@ -1093,7 +1099,7 @@ mod app_test {
                 assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
                 assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
 
-                fixture.teardown(true);
+                fixture.teardown(false);
             }
         };
     }
@@ -1112,7 +1118,8 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          ignore/*macro_use*/
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
