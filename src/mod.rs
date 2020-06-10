@@ -522,27 +522,26 @@ impl LsKey {
         self
     }
 
-    fn test_data_update(&mut self) {
+    fn test_data_update(&mut self, input: Option<String>) {
         if self.test == true {
-            if self.input.is_some() {
-                //let mut hasher = Sha256::new();
-                //let input = self.input.clone().unwrap();
-                //hasher.input(input);
-                //let result = hasher.result();
-                //let result: [u8; 32] = result.as_slice().try_into().expect("Wrong length");
-                //let result_str = result.iter().map(|&c| c as char).collect::<String>();
-                //self.input_vec.push(result_str.clone());
+            if input.is_some() {
+                let mut hasher = Sha256::new();
+                let hash = sha256(&input.unwrap());
+                //self.output_vec.push(hash.to_hex_string());
 
-                //let original_dir = self.clone().list.path_history.into_iter().nth(0);
-                //if original_dir.is_some() {
-                //    let original_dir = self.clone().list.path_history.into_iter().nth(0);
-                //    let mut original_dir = original_dir.unwrap();
-                //    //file.write_all(stuff.as_bytes()).unwrap();
-                //    original_dir.push(".lsk_test_output");
-                //    create_dir_all(Path::new(&original_dir.clone())).expect("Failed to create directories.");
-                //    original_dir.push(result_str);
-                //    let mut file = std::fs::File::create(original_dir).unwrap();
-                //}
+                let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                if original_dir.is_some() {
+                    let mut original_dir = original_dir.unwrap();
+                    //file.write_all(stuff.as_bytes()).unwrap();
+                    original_dir.push(".lsk_test_output");
+                    create_dir_all(Path::new(&original_dir.clone())).expect("Failed to create directories.");
+                    original_dir.push(hash.to_hex_string());
+                    //assert_eq!(
+                    //    "/home/me/projects/work/ls-key/.ls_key_output".to_string(),
+                    //    original_dir.clone().into_os_string().into_string().unwrap()
+                    //);
+                    let mut file = std::fs::File::create(original_dir).unwrap();
+                }
             }
             if self.display.is_some() {
                 let mut hasher = Sha256::new();
@@ -594,7 +593,8 @@ impl LsKey {
 
         clear_display(&mut stdout);
 
-        self.test_data_update();
+        let mut input_string: String = input.display.iter().collect();
+        self.test_data_update(Some(input_string));
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
@@ -609,7 +609,7 @@ impl LsKey {
 
             let place = (0, 1);
             if let Some(mut first) = _first {
-                self.test_data_update();
+                self.test_data_update(Some(input_string.clone()));
                 display_input(input_string.clone(), &mut stdout, place);
 
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
@@ -671,7 +671,7 @@ impl LsKey {
                 }
             }
 
-            self.test_data_update();
+            self.test_data_update(Some(input_string.clone()));
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
             if input.display.iter().last() == Some(&'\n') {
