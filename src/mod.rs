@@ -1026,6 +1026,7 @@ mod app_test {
     use std::env;
     use fixture::{Fixture, command_assistors};
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
+    use super::*;
 
     macro_rules! test {
         (
@@ -1096,6 +1097,23 @@ mod app_test {
                 let mut ls_key = super::app::run(path.clone(), $list_all_bool, true);
                 spawn.join();
 
+                let mut test_output_path = path_path.clone();
+                test_output_path.push(".lsk_test_output");
+                let mut test_output_path = test_output_path.clone().into_os_string().into_string().unwrap();
+                let file256 = file_sha256(test_output_path.clone());
+                let hash: Hash;
+
+                match file256 {
+                    Ok(h) => {
+                        assert_eq!(
+                            h.to_hex_string(),
+                            "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871".to_string())
+                    },
+                    Err(..) => assert!(false)
+                }
+
+                //println!("SHA256({}) = {}", path, hash.to_hex_string());
+
                 path_cache.switch_back();
 
                 //let data_hash = ls_key.test_data_sum_to_single_hash();
@@ -1109,7 +1127,7 @@ mod app_test {
                 assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
                 assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
 
-                fixture.teardown(false);
+                fixture.teardown(true);
             }
         };
     }
