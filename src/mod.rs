@@ -1058,6 +1058,7 @@ mod app_test {
                     .add_file(format!("{}saints", path))
                     .add_file(format!("{}heaven", path))
                     .add_file(format!("{}intercession", path))
+                    .add_file(format!("{}.eternal", path))
 
                     .add_dirpath(format!("{}joseph/", path))
                     .add_dirpath(format!("{}joseph/spouse/", path))
@@ -1218,13 +1219,14 @@ mod app_test {
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           "96964d45fc2c8738486d2818a032b6d18d9123ba25901632bde7529112492700",
-          ignore/*macro_use*/
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
           true, //list_all_bool
           macro_enter_file_list_all,
-          ".a-hidden-file",
+          ".eternal",
           200,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
@@ -1235,7 +1237,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-          "edc75f60796a85658ee09af0ac47075936d2019b0534e71ea5e93ef72ae15650",
+          "50980c602c1d8ff3e66d0c025e572dafa4cd381441e8a1800a70a3c68d995b73",
           ignore/*macro_use*/
     );
 
