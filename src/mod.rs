@@ -1218,8 +1218,7 @@ mod app_test {
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           "96964d45fc2c8738486d2818a032b6d18d9123ba25901632bde7529112492700",
-          macro_use
-          //ignore/*macro_use*/
+          ignore/*macro_use*/
     );
 
     test!(
