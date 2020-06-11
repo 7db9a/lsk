@@ -1080,10 +1080,6 @@ mod app_test {
                 // Changing directories.
                 path_cache.switch();
 
-                //let stuff = format!(r#""Opening "{}" in test case "{}".""#, $test_file_path, $sub_path);
-                //let mut file = std::fs::File::create($test_file_path).unwrap();
-                //file.write_all(stuff.as_bytes()).unwrap();
-
                 println!("");
                 let text_vec = vec![
                      format!(r#""{}""#, $input1),
@@ -1138,20 +1134,7 @@ mod app_test {
                     Err(..) => assert!(false)
                 }
 
-                //println!("SHA256({}) = {}", path, hash.to_hex_string());
-
                 path_cache.switch_back();
-
-                //let data_hash = ls_key.test_data_sum_to_single_hash();
-
-                //assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
-                //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
-                //assert_eq!(true, metadata(path.clone() + "a-file" ).unwrap().is_file());
-                //assert_eq!(true, metadata(path.clone() + "a-dir/a-file").unwrap().is_file());
-                //assert_eq!(true, metadata(path.clone() + "a-dir/b-file").unwrap().is_file());
-                //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/a-file").unwrap().is_file());
-                //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-                //assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
 
                 std::fs::remove_file(output_mv_to_path_string).unwrap();
             }
