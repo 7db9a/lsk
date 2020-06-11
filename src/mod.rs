@@ -1161,7 +1161,7 @@ mod app_test {
     test!(
           false, //list_all_bool
           macro_enter_file,
-          "saints",
+          "Makefile",
           700,               //$delay in milleseconds
           "$(printf '1\r')", //$input1
           "$(printf ':q\r')",//$input2
