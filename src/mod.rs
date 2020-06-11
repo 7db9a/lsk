@@ -1057,11 +1057,11 @@ mod app_test {
 
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
 
-                let mut redox_files = PathBuf::from(".fixtures");
-                redox_files.push("redox");
+                let mut sample_files_files = PathBuf::from(".fixtures");
+                sample_files_files.push("sample_files");
 
                 let mut path_test = path_path.clone();
-                path_test.push("redox");
+                path_test.push("sample_files");
 
                 let md = metadata(path_test.clone());
                 let test_path_string = path_test.clone().into_os_string().into_string().unwrap();
@@ -1070,7 +1070,7 @@ mod app_test {
                     fixture.build();
                     Command::new("cp")
                         .arg("-r".to_string())
-                        .arg(redox_files.clone().into_os_string().into_string().unwrap())
+                        .arg(sample_files_files.clone().into_os_string().into_string().unwrap())
                         .arg(test_path_string.clone())
                         .output()
                         .expect("failed to execute lsk process");
@@ -1100,7 +1100,7 @@ mod app_test {
                 spawn.join();
 
                 let mut test_output_path = path_path.clone();
-                test_output_path.push("redox");
+                test_output_path.push("sample_files");
                 test_output_path.push(".lsk_test_output");
                 let mut test_output_path_string = test_output_path.clone().into_os_string().into_string().unwrap();
                 let mut output_mv_to_path = path_path.clone();
@@ -1155,7 +1155,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "ed91c0f49a6fd4e39e299c6dfd9b7a7b233cfd151c3192a2daa1977ad56f8c04",
+          "e636b86d6467fc7880254f18611971bb9f04e9d7f1414dd6bd1c13ead34b6b25",
           ignore/*macro_use*/
     );
 
@@ -1164,7 +1164,7 @@ mod app_test {
           macro_enter_file_list_all,
           ".eternal",
           200,               //$delay in milleseconds
-          "$(printf '4\r')", //$input1
+          "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1173,7 +1173,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-          "dc9a3e2be09af548877969b9f18ba4cf01628c1c32b13ea6203307dd9525b102",
+          "488a19bb1d0fdbefa492333e3b54f772ef5b5f2547e64f9e062cd81f6f48f34a",
           ignore/*macro_use*/
     );
 
@@ -1191,64 +1191,63 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-          "4e351124b12de8e37381a9a62952910c78fd47eab2719c42797e15b697f7bca1",
-          macro_use
-          //ignore/*macro_use*/
-    );
-
-    test!(
-         false,
-          macro_fuzzy_enter_dir,
-          "a-file",
-          500,               //inrease 200 => 500 ms to see better.
-          "$(printf 'f di\r')",
-          "$(printf '1\r')",
-          "$(printf 'q\r')",
-          "",
-          "",
-          "",
-          "",
-          "macro_fuzzy_enter_dir",
-          ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
-          "68fcebbb9b7d42a0f7d9dff4318d5e0a2b20b2dd0c7de4af6ae361ed1590290a",
+          "cf5e09bfcb83e3d33c459488862a08b0f4a255531fea3aa7dcc0b16805ecd934",
           ignore/*macro_use*/
     );
 
-    test!(
-         false,
-          macro_fuzzy_enter_dir_go_back_then_repeat,
-          "a-file",
-          500,               //inrease 200 => 500 ms to see better.
-          "$(printf 'f di\r')",
-          "$(printf '1\r')",
-          "$(printf '0\r')",
-          "$(printf 'f di\r')",
-          "$(printf '1\r')",
-          "$(printf 'q\r')",
-          "",
-          "macro_fuzzy_enter_dir",
-          ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
-          "1ca5fb03de479a14f53e9fba1c293bf9410a717904930828209749e4fafbbbe7",
-          ignore/*macro_use*/
-    );
+    //test!(
+    //     false,
+    //      macro_fuzzy_enter_dir,
+    //      "a-file",
+    //      500,               //inrease 200 => 500 ms to see better.
+    //      "$(printf 'f di\r')",
+    //      "$(printf '1\r')",
+    //      "$(printf 'q\r')",
+    //      "",
+    //      "",
+    //      "",
+    //      "",
+    //      "macro_fuzzy_enter_dir",
+    //      ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
+    //      "68fcebbb9b7d42a0f7d9dff4318d5e0a2b20b2dd0c7de4af6ae361ed1590290a",
+    //      ignore/*macro_use*/
+    //);
 
-    test!(
-         false,
-          macro_go_back_fuzzy_enter_back_into_dir,
-          "a-file",
-          500,               //inrease 200 => 500 ms to see better.
-          "$(printf '0\r')",
-          "$(printf 'f bf\r')",
-          "$(printf '2\r')",
-          "$(printf 'q\r')",
-          "",
-          "",
-          "",
-          "macro_go_back_fuzzy_enter_back_into_dir",
-          ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "071396a47b6b5cef3bd25237871b0cf92ee21c25f774a4ee5439b07a5c413fe8",
-          ignore/*macro_use*/
-    );
+    //test!(
+    //     false,
+    //      macro_fuzzy_enter_dir_go_back_then_repeat,
+    //      "a-file",
+    //      500,               //inrease 200 => 500 ms to see better.
+    //      "$(printf 'f di\r')",
+    //      "$(printf '1\r')",
+    //      "$(printf '0\r')",
+    //      "$(printf 'f di\r')",
+    //      "$(printf '1\r')",
+    //      "$(printf 'q\r')",
+    //      "",
+    //      "macro_fuzzy_enter_dir",
+    //      ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
+    //      "1ca5fb03de479a14f53e9fba1c293bf9410a717904930828209749e4fafbbbe7",
+    //      ignore/*macro_use*/
+    //);
+
+    //test!(
+    //     false,
+    //      macro_go_back_fuzzy_enter_back_into_dir,
+    //      "a-file",
+    //      500,               //inrease 200 => 500 ms to see better.
+    //      "$(printf '0\r')",
+    //      "$(printf 'f bf\r')",
+    //      "$(printf '2\r')",
+    //      "$(printf 'q\r')",
+    //      "",
+    //      "",
+    //      "",
+    //      "macro_go_back_fuzzy_enter_back_into_dir",
+    //      ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
+    //      "071396a47b6b5cef3bd25237871b0cf92ee21c25f774a4ee5439b07a5c413fe8",
+    //      ignore/*macro_use*/
+    //);
 
     #[test]
     #[ignore]//docker
