@@ -1167,8 +1167,7 @@ mod app_test {
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
           "edc75f60796a85658ee09af0ac47075936d2019b0534e71ea5e93ef72ae15650",
-          macro_use
-          //ignore/*macro_use*/
+          ignore/*macro_use*/
     );
 
     test!(
