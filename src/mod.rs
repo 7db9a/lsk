@@ -1043,6 +1043,7 @@ mod app_test {
             $input7: expr,
             $sub_path: expr, //We test all of this in a specific path. This'll create a sub-dir under that test-path.
             $intent: expr, //Explain what will happen in the test so tester can visually verify.
+            $file_hash: expr,
             $test_macro: ident //We want to ignore the tests when we want and run when we want.
         ) => {
 
@@ -1107,7 +1108,8 @@ mod app_test {
                     Ok(h) => {
                         assert_eq!(
                             h.to_hex_string(),
-                            "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871".to_string())
+                            $file_hash.to_string()
+                        )
                     },
                     Err(..) => assert!(false)
                 }
@@ -1146,6 +1148,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
+         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
           macro_use
           //ignore/*macro_use*/
     );
@@ -1164,6 +1167,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
+         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
           ignore/*macro_use*/
     );
 
@@ -1181,6 +1185,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
+         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
           ignore/*macro_use*/
     );
 
@@ -1198,6 +1203,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
+         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
           ignore/*macro_use*/
     );
 
@@ -1215,6 +1221,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
+          "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
           ignore/*macro_use*/
     );
 
@@ -1232,6 +1239,7 @@ mod app_test {
           "",
           "macro_go_back_fuzzy_enter_back_into_dir",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
+          "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
           ignore/*macro_use*/
     );
 
