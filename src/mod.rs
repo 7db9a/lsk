@@ -1174,8 +1174,7 @@ mod app_test {
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
           "dc9a3e2be09af548877969b9f18ba4cf01628c1c32b13ea6203307dd9525b102",
-          macro_use
-          //ignore/*macro_use*/
+          ignore/*macro_use*/
     );
 
     test!(
@@ -1183,8 +1182,8 @@ mod app_test {
           macro_fuzzy_enter_file,
           "intercession",
           700,               //$delay in milleseconds
-          "$(printf 'f in\r')",
-          "$(printf '3\r')",
+          "$(printf 'f boo\r')",
+          "$(printf '4\r')",
           "$(printf ':q\r')",
           "$(printf 'q\r')",
           "",
@@ -1192,8 +1191,9 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-          "d85898217a69271d74ed5c399e9ef5245430e4ee2f6d198fd026812f19fb64e8",
-          ignore/*macro_use*/
+          "4e351124b12de8e37381a9a62952910c78fd47eab2719c42797e15b697f7bca1",
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
