@@ -1184,7 +1184,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
+          "92c4baa308a5891c64bb5e4be5251fcc7a86c3fce72429ff7533631c221a5255",
           ignore/*macro_use*/
     );
 
