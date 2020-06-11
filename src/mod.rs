@@ -1052,25 +1052,29 @@ mod app_test {
             fn $name() {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
+                let mut fixture = Fixture::new()
+                    .add_dirpath(path.clone());
+
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
 
-                let mut rcu_files = path_path.clone();
-                rcu_files.push(".fixtures");
+                let mut rcu_files = PathBuf::from(".fixtures");
                 rcu_files.push("rcutorture");
-
-                let md = metadata(rcu_files.clone());
-
-                if !md.is_ok() {
-                    Command::new("cp")
-                        .arg("-r".to_string())
-                        .arg(rcu_files.clone().into_os_string().into_string().unwrap())
-                        .arg(path_path.clone().into_os_string().into_string().unwrap())
-                        .output()
-                        .expect("failed to execute lsk process");
-                }
 
                 let mut path_test = path_path.clone();
                 path_test.push("rcutorture");
+
+                let md = metadata(path_test.clone());
+                let test_path_string = path_test.clone().into_os_string().into_string().unwrap();
+
+                if !md.is_ok() {
+                    fixture.build();
+                    Command::new("cp")
+                        .arg("-r".to_string())
+                        .arg(rcu_files.clone().into_os_string().into_string().unwrap())
+                        .arg(test_path_string.clone())
+                        .output()
+                        .expect("failed to execute lsk process");
+                }
 
                 let mut path_cache = command_assistors::PathCache::new(&path_test);
                 // Changing directories.
@@ -1096,7 +1100,7 @@ mod app_test {
                 std::thread::sleep(few_ms);
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                let mut ls_key = super::app::run(path.clone(), $list_all_bool, true);
+                let mut ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
                 spawn.join();
 
                 let mut test_output_path = path_path.clone();
@@ -1142,7 +1146,7 @@ mod app_test {
           macro_enter_file,
           "saints",
           700,               //$delay in milleseconds
-          "$(printf '27\r')", //$input1
+          "$(printf '1\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1152,7 +1156,8 @@ mod app_test {
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           "2538f2ef62eb5df92380570f0551e8b4f30d5ca6f98917366969369c779440a3",
-          ignore/*macro_use*/
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
