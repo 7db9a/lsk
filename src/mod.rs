@@ -234,9 +234,9 @@ impl LsKey {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
-                if let Some(d) = display {
+                if display.is_some() && !self.test {
                      //println!("\n\n{}", d);
-                     self.display = Some((self.list.parent_path.clone(), d.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
                 } else {
                     let display = grid.fit_into_columns(1);
                     self.display = Some((self.list.parent_path.clone(), display.to_string()));
@@ -261,9 +261,9 @@ impl LsKey {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
-                if let Some(d) = display {
+                if display.is_some() && !self.test {
                      //println!("\n\n{}", d);
-                     self.display = Some((self.list.parent_path.clone(), d.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
                 } else {
                     let display = grid.fit_into_columns(1);
                      self.display = Some((self.list.parent_path.clone(), display.to_string()));
@@ -295,14 +295,14 @@ impl LsKey {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
-                if let Some(d) = display {
+                if display.is_some() && !self.test {
                      //println!("\n\n{}", d);
                      //println!("\nmade it!\n");
                      let old_display = self.display.clone();
                      //self.display = Some((self.list.parent_path.clone(), d.to_string()));
                      //assert_eq!(self.display, Some((PathBuf::from(""), "".to_string())));
                      //assert_ne!(old_display, self.display);
-                     return Some((self.list.parent_path.clone(), d.to_string()))
+                     return Some((self.list.parent_path.clone(), display.unwrap().to_string())) // safe to unwrap.
                      //println!("{:#?}", self.display);
                 } else {
                     let display = grid.fit_into_columns(1);
@@ -1208,7 +1208,7 @@ mod app_test {
           false, //list_all_bool
           macro_enter_file,
           "saints",
-          200,               //$delay in milleseconds
+          700,               //$delay in milleseconds
           "$(printf '27\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
@@ -1218,7 +1218,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "96964d45fc2c8738486d2818a032b6d18d9123ba25901632bde7529112492700",
+          "2538f2ef62eb5df92380570f0551e8b4f30d5ca6f98917366969369c779440a3",
           ignore/*macro_use*/
     );
 
