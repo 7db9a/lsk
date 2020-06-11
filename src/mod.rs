@@ -4,7 +4,8 @@ pub mod fuzzy;
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
-use std::fs::{create_dir_all, metadata};
+use std::fs::{create_dir_all, metadata, OpenOptions};
+use std::io::prelude::*;
 use list::List;
 use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
@@ -23,10 +24,15 @@ use sha2::digest::generic_array::{ArrayLength, GenericArray};
 use easy_hasher::easy_hasher::*;
 
 pub mod app {
-    use super::LsKey;
-    use super::Path;
+    use super::*;
 
     pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) -> LsKey {
+        if test {
+            let mut path = path.as_ref().to_path_buf();
+            create_dir_all(path.clone()).expect("Failed to create directories.");
+            path.push(".lsk_test_output");
+            let mut file = std::fs::File::create(path.clone()).unwrap();
+        }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
         ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
@@ -526,7 +532,7 @@ impl LsKey {
         if self.test == true {
             if input.is_some() {
                 let mut hasher = Sha256::new();
-                let hash = sha256(&input.unwrap());
+                let hash = sha256(&input.clone().unwrap());
                 //self.output_vec.push(hash.to_hex_string());
 
                 let original_dir = self.clone().list.path_history.into_iter().nth(0);
@@ -534,19 +540,21 @@ impl LsKey {
                     let mut original_dir = original_dir.unwrap();
                     //file.write_all(stuff.as_bytes()).unwrap();
                     original_dir.push(".lsk_test_output");
-                    create_dir_all(Path::new(&original_dir.clone())).expect("Failed to create directories.");
-                    original_dir.push(hash.to_hex_string());
-                    //assert_eq!(
-                    //    "/home/me/projects/work/ls-key/.ls_key_output".to_string(),
-                    //    original_dir.clone().into_os_string().into_string().unwrap()
-                    //);
-                    let mut file = std::fs::File::create(original_dir).unwrap();
+                    let mut file = OpenOptions::new()
+                       .write(true)
+                       .append(true)
+                       .open(original_dir.clone().into_os_string().into_string().unwrap())
+                       .unwrap();
+
+                   if let Err(e) = writeln!(file, "{}", hash.to_hex_string()) {
+                       eprintln!("Couldn't write to file: {}", e);
+                   }
                 }
             }
             if self.display.is_some() {
                 let mut hasher = Sha256::new();
-                let output = self.display.clone().unwrap().1;
-                let hash = sha256(&output);
+                let mut hasher = Sha256::new();
+                let hash = sha256(&self.display.clone().unwrap().1);
                 //self.output_vec.push(hash.to_hex_string());
 
                 let original_dir = self.clone().list.path_history.into_iter().nth(0);
@@ -554,13 +562,15 @@ impl LsKey {
                     let mut original_dir = original_dir.unwrap();
                     //file.write_all(stuff.as_bytes()).unwrap();
                     original_dir.push(".lsk_test_output");
-                    create_dir_all(Path::new(&original_dir.clone())).expect("Failed to create directories.");
-                    original_dir.push(hash.to_hex_string());
-                    //assert_eq!(
-                    //    "/home/me/projects/work/ls-key/.ls_key_output".to_string(),
-                    //    original_dir.clone().into_os_string().into_string().unwrap()
-                    //);
-                    let mut file = std::fs::File::create(original_dir).unwrap();
+                    let mut file = OpenOptions::new()
+                       .write(true)
+                       .append(true)
+                       .open(original_dir.clone().into_os_string().into_string().unwrap())
+                       .unwrap();
+
+                   if let Err(e) = writeln!(file, "{}", hash.to_hex_string()) {
+                       eprintln!("Couldn't write to file: {}", e);
+                   }
                 }
             }
         }
