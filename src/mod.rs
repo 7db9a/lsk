@@ -1053,20 +1053,45 @@ mod app_test {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
                 let mut fixture = Fixture::new()
-                    .add_dirpath("/tmp/lsk_tests/boniface/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/cariciollo/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/peter/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/marcillenus/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/angela/".to_string())
                     .add_dirpath(path.to_string())
-                    .add_dirpath(path.to_string() + "a-dir")
-                    .add_dirpath(path.to_string() + ".a-hidden-dir")
-                    .add_file(path.to_string() + "a-file")
-                    .add_file(path.to_string() + "a-dir/a-file")
-                    .add_file(path.to_string() + "a-dir/b-file")
-                    .add_file(path.to_string() + ".a-hidden-dir/a-file")
-                    .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
-                    .add_file(path.to_string() + ".a-hidden-file")
+                    .add_dirpath(format!("{}joseph/", path))
+                    .add_dirpath(format!("{}joachim/", path))
+                    .add_dirpath(format!("{}anne/", path))
+                    .add_dirpath(format!("{}faustina/", path))
+                    .add_dirpath(format!("{}faustina/kowalski", path))
+                    .add_dirpath(format!("{}cecilia/", path))
+                    .add_dirpath(format!("{}nicholaus/", path))
+                    .add_dirpath(format!("{}francis/", path))
+                    .add_dirpath(format!("{}francis/padua", path))
+                    .add_dirpath(format!("{}francis/assisi", path))
+                    .add_dirpath(format!("{}boniface/", path))
+                    .add_dirpath(format!("{}cariciollo/", path))
+                    .add_dirpath(format!("{}peter/", path))
+                    .add_dirpath(format!("{}marcillenus/", path))
+                    .add_dirpath(format!("{}angela/", path))
+                    .add_dirpath(format!("{}primus/", path))
+                    .add_dirpath(format!("{}felician/", path))
+                    .add_dirpath(format!("{}margaret/", path))
+                    .add_dirpath(format!("{}margaret/scotland", path))
+                    .add_dirpath(format!("{}barnabas/", path))
+                    .add_dirpath(format!("{}elias/", path))
+                    .add_dirpath(format!("{}john/", path))
+                    .add_dirpath(format!("{}john/baptist", path))
+                    .add_dirpath(format!("{}john/apostle", path))
+                    .add_dirpath(format!("{}maximillian/", path))
+                    .add_dirpath(format!("{}maximillian/kolbe", path))
+                    .add_dirpath(format!("{}magdelene/", path))
+                    .add_dirpath(format!("{}elizabeth/", path))
+                    .add_dirpath(format!("{}peter/", path))
+                    .add_dirpath(format!("{}jude/", path))
+                    .add_dirpath(format!("{}teresa/", path))
+                    .add_dirpath(format!("{}sienna/", path))
+                    .add_dirpath(format!("{}stephen/", path))
+                    .add_dirpath(format!("{}michael/", path))
+                    .add_dirpath(format!("{}.subsidiarity/", path))
+                    .add_dirpath(format!("{}.continuity/", path))
+                    .add_dirpath(format!("{}.succession/", path))
+                    .add_dirpath(format!("{}.hierarchy/", path))
                     .build();
 
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
@@ -1149,7 +1174,8 @@ mod app_test {
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
-          ignore/*macro_use*/
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
