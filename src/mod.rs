@@ -1219,8 +1219,7 @@ mod app_test {
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           "96964d45fc2c8738486d2818a032b6d18d9123ba25901632bde7529112492700",
-          macro_use
-          //ignore/*macro_use*/
+          ignore/*macro_use*/
     );
 
     test!(
@@ -1244,10 +1243,10 @@ mod app_test {
     test!(
           false,
           macro_fuzzy_enter_file,
-          "a-file",
-          200,               //$delay in milleseconds
-          "$(printf 'f fi\r')",
-          "$(printf '1\r')",
+          "intercession",
+          700,               //$delay in milleseconds
+          "$(printf 'f in\r')",
+          "$(printf '3\r')",
           "$(printf ':q\r')",
           "$(printf 'q\r')",
           "",
@@ -1255,7 +1254,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-          "92c4baa308a5891c64bb5e4be5251fcc7a86c3fce72429ff7533631c221a5255",
+          "d85898217a69271d74ed5c399e9ef5245430e4ee2f6d198fd026812f19fb64e8",
           ignore/*macro_use*/
     );
 
