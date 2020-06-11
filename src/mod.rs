@@ -1057,11 +1057,11 @@ mod app_test {
 
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
 
-                let mut rcu_files = PathBuf::from(".fixtures");
-                rcu_files.push("rcutorture");
+                let mut redox_files = PathBuf::from(".fixtures");
+                redox_files.push("redox");
 
                 let mut path_test = path_path.clone();
-                path_test.push("rcutorture");
+                path_test.push("redox");
 
                 let md = metadata(path_test.clone());
                 let test_path_string = path_test.clone().into_os_string().into_string().unwrap();
@@ -1070,7 +1070,7 @@ mod app_test {
                     fixture.build();
                     Command::new("cp")
                         .arg("-r".to_string())
-                        .arg(rcu_files.clone().into_os_string().into_string().unwrap())
+                        .arg(redox_files.clone().into_os_string().into_string().unwrap())
                         .arg(test_path_string.clone())
                         .output()
                         .expect("failed to execute lsk process");
@@ -1100,7 +1100,7 @@ mod app_test {
                 spawn.join();
 
                 let mut test_output_path = path_path.clone();
-                test_output_path.push("rcutorture");
+                test_output_path.push("redox");
                 test_output_path.push(".lsk_test_output");
                 let mut test_output_path_string = test_output_path.clone().into_os_string().into_string().unwrap();
                 let mut output_mv_to_path = path_path.clone();
@@ -1146,7 +1146,7 @@ mod app_test {
           macro_enter_file,
           "Makefile",
           700,               //$delay in milleseconds
-          "$(printf '1\r')", //$input1
+          "$(printf '3\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1155,7 +1155,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "ea46fd9eaeb3e5a37707b10e916d6e647a604f3a02496cae82877d427ae576cf",
+          "ed91c0f49a6fd4e39e299c6dfd9b7a7b233cfd151c3192a2daa1977ad56f8c04",
           macro_use
           //ignore/*macro_use*/
     );
