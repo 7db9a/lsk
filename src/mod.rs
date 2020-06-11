@@ -1156,8 +1156,7 @@ mod app_test {
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
           "ed91c0f49a6fd4e39e299c6dfd9b7a7b233cfd151c3192a2daa1977ad56f8c04",
-          macro_use
-          //ignore/*macro_use*/
+          ignore/*macro_use*/
     );
 
     test!(
@@ -1165,7 +1164,7 @@ mod app_test {
           macro_enter_file_list_all,
           ".eternal",
           200,               //$delay in milleseconds
-          "$(printf '2\r')", //$input1
+          "$(printf '4\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1174,8 +1173,9 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-          "50980c602c1d8ff3e66d0c025e572dafa4cd381441e8a1800a70a3c68d995b73",
-          ignore/*macro_use*/
+          "dc9a3e2be09af548877969b9f18ba4cf01628c1c32b13ea6203307dd9525b102",
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
