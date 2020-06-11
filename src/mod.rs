@@ -1054,16 +1054,39 @@ mod app_test {
 
                 let mut fixture = Fixture::new()
                     .add_dirpath(path.to_string())
+
+                    .add_file(format!("{}saints", path))
+                    .add_file(format!("{}heaven", path))
+                    .add_file(format!("{}intercession", path))
+
                     .add_dirpath(format!("{}joseph/", path))
+                    .add_dirpath(format!("{}joseph/spouse/", path))
+                    .add_dirpath(format!("{}joseph/spouse/.just/", path))
+                    .add_dirpath(format!("{}joseph/spouse/.chaste/", path))
+                    .add_dirpath(format!("{}joseph/spouse/.protector/", path))
+                    .add_dirpath(format!("{}joseph/spouse/.protector/.terror_of_demons/", path))
+                    .add_dirpath(format!("{}joseph/lafabre/", path))
+
+                    .add_file(format!("{}joseph/good_name", path))
+                    .add_file(format!("{}joseph/spouse/pray_for_us", path))
+                    .add_file(format!("{}joseph/spouse/.just/pray_for_us", path))
+                    .add_file(format!("{}joseph/spouse/.chaste/pray_for_us", path))
+                    .add_file(format!("{}joseph/spouse/.protector/pray_for_us", path))
+                    .add_file(format!("{}joseph/spouse/.protector/.terror_of_demons/pray_for_us", path))
+                    .add_file(format!("{}joseph/lafabre/pray_for_us", path))
+
                     .add_dirpath(format!("{}joachim/", path))
                     .add_dirpath(format!("{}anne/", path))
                     .add_dirpath(format!("{}faustina/", path))
-                    .add_dirpath(format!("{}faustina/kowalski", path))
+                    .add_dirpath(format!("{}faustina/kowalski/", path))
                     .add_dirpath(format!("{}cecilia/", path))
                     .add_dirpath(format!("{}nicholaus/", path))
                     .add_dirpath(format!("{}francis/", path))
-                    .add_dirpath(format!("{}francis/padua", path))
-                    .add_dirpath(format!("{}francis/assisi", path))
+                    .add_dirpath(format!("{}francis/padua/", path))
+                    .add_dirpath(format!("{}francis/assisi/", path))
+
+                    .add_file(format!("{}francis/assisi/.franciscan_order", path))
+
                     .add_dirpath(format!("{}boniface/", path))
                     .add_dirpath(format!("{}cariciollo/", path))
                     .add_dirpath(format!("{}peter/", path))
@@ -1071,15 +1094,20 @@ mod app_test {
                     .add_dirpath(format!("{}angela/", path))
                     .add_dirpath(format!("{}primus/", path))
                     .add_dirpath(format!("{}felician/", path))
+
+                    .add_file(format!("{}primus/martyr", path))
+                    .add_file(format!("{}felician/martyr", path))
+
                     .add_dirpath(format!("{}margaret/", path))
-                    .add_dirpath(format!("{}margaret/scotland", path))
+                    .add_dirpath(format!("{}margaret/scotland/", path))
+                    .add_dirpath(format!("{}margaret/scotland/.hungary", path))
                     .add_dirpath(format!("{}barnabas/", path))
                     .add_dirpath(format!("{}elias/", path))
                     .add_dirpath(format!("{}john/", path))
-                    .add_dirpath(format!("{}john/baptist", path))
-                    .add_dirpath(format!("{}john/apostle", path))
+                    .add_dirpath(format!("{}john/baptist/", path))
+                    .add_dirpath(format!("{}john/apostle/", path))
                     .add_dirpath(format!("{}maximillian/", path))
-                    .add_dirpath(format!("{}maximillian/kolbe", path))
+                    .add_dirpath(format!("{}maximillian/kolbe/", path))
                     .add_dirpath(format!("{}magdelene/", path))
                     .add_dirpath(format!("{}elizabeth/", path))
                     .add_dirpath(format!("{}peter/", path))
@@ -1087,11 +1115,27 @@ mod app_test {
                     .add_dirpath(format!("{}teresa/", path))
                     .add_dirpath(format!("{}sienna/", path))
                     .add_dirpath(format!("{}stephen/", path))
+                    .add_dirpath(format!("{}stephen/martyr/", path))
+                    .add_dirpath(format!("{}stephen/hungary/", path))
                     .add_dirpath(format!("{}michael/", path))
+                    .add_dirpath(format!("{}isidore/", path))
+                    .add_dirpath(format!("{}isidore/seville/", path))
+
+                    .add_file(format!("{}isidore/seville/.internet", path))
+
                     .add_dirpath(format!("{}.subsidiarity/", path))
                     .add_dirpath(format!("{}.continuity/", path))
                     .add_dirpath(format!("{}.succession/", path))
                     .add_dirpath(format!("{}.hierarchy/", path))
+
+                    .add_dirpath(format!("{}.subsidiarity/.hierarchy/", path))
+                    .add_dirpath(format!("{}.continuity/.deposit/", path))
+                    .add_dirpath(format!("{}.succession/.keys/", path))
+
+                    .add_file(format!("{}.subsidiarity/.hierarchy/benevolent", path))
+                    .add_file(format!("{}.continuity/.deposit/one", path))
+                    .add_file(format!("{}.succession/.keys/.consecration", path))
+
                     .build();
 
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
@@ -1145,14 +1189,14 @@ mod app_test {
 
                 //let data_hash = ls_key.test_data_sum_to_single_hash();
 
-                assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
-                assert_eq!(true, metadata(path.clone() + "a-file" ).unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + "a-dir/a-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + "a-dir/b-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/a-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
+                //assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
+                //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
+                //assert_eq!(true, metadata(path.clone() + "a-file" ).unwrap().is_file());
+                //assert_eq!(true, metadata(path.clone() + "a-dir/a-file").unwrap().is_file());
+                //assert_eq!(true, metadata(path.clone() + "a-dir/b-file").unwrap().is_file());
+                //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/a-file").unwrap().is_file());
+                //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
+                //assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
 
                 fixture.teardown(true);
             }
@@ -1162,9 +1206,9 @@ mod app_test {
     test!(
           false, //list_all_bool
           macro_enter_file,
-          "a-file",
+          "saints",
           200,               //$delay in milleseconds
-          "$(printf '2\r')", //$input1
+          "$(printf '27\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1173,7 +1217,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
+          "96964d45fc2c8738486d2818a032b6d18d9123ba25901632bde7529112492700",
           macro_use
           //ignore/*macro_use*/
     );
