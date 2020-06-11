@@ -1090,7 +1090,7 @@ mod app_test {
                 ];
 
                 println!("\n\n\nNew case intent:\n{}", $intent);
-                let few_ms = std::time::Duration::from_millis(5000);
+                let few_ms = std::time::Duration::from_millis(0);
                 std::thread::sleep(few_ms);
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
