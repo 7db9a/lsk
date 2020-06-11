@@ -1148,9 +1148,8 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
-          macro_use
-          //ignore/*macro_use*/
+          "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
+          ignore/*macro_use*/
     );
 
     test!(
@@ -1167,8 +1166,9 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-         "c0a73d82b92fb39cfa7fd83adf03aa116beec34c549601d6461876c2a71aa871",
-          ignore/*macro_use*/
+          "edc75f60796a85658ee09af0ac47075936d2019b0534e71ea5e93ef72ae15650",
+          macro_use
+          //ignore/*macro_use*/
     );
 
     test!(
