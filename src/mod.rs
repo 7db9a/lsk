@@ -1104,9 +1104,28 @@ mod app_test {
                 spawn.join();
 
                 let mut test_output_path = path_path.clone();
+                test_output_path.push("rcutorture");
                 test_output_path.push(".lsk_test_output");
-                let mut test_output_path = test_output_path.clone().into_os_string().into_string().unwrap();
-                let file256 = file_sha256(test_output_path.clone());
+                let mut test_output_path_string = test_output_path.clone().into_os_string().into_string().unwrap();
+                let mut output_mv_to_path = path_path.clone();
+                let mut output_mv_to_path_string = path_path.clone().into_os_string().into_string().unwrap();
+
+                Command::new("mv")
+                    .arg(test_output_path_string)
+                    .arg(output_mv_to_path_string.clone())
+                    .output()
+                    .expect("failed to execute lsk process");
+
+                let few_ms = std::time::Duration::from_millis(100);
+                std::thread::sleep(few_ms);
+
+                let mut output_mv_to_path = path_path.clone();
+                output_mv_to_path.push(".lsk_test_output");
+                let mut output_mv_to_path_string = output_mv_to_path.clone().into_os_string().into_string().unwrap();
+
+                println!("\npath:\n{}", output_mv_to_path_string.clone());
+
+                let file256 = file_sha256(output_mv_to_path_string.clone());
                 let hash: Hash;
 
                 match file256 {
@@ -1134,9 +1153,7 @@ mod app_test {
                 //assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
                 //assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
 
-                Fixture::new()
-                    .add_dirpath(test_output_path)
-                    .teardown(true);
+                std::fs::remove_file(output_mv_to_path_string).unwrap();
             }
         };
     }
@@ -1155,7 +1172,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "2538f2ef62eb5df92380570f0551e8b4f30d5ca6f98917366969369c779440a3",
+          "ea46fd9eaeb3e5a37707b10e916d6e647a604f3a02496cae82877d427ae576cf",
           macro_use
           //ignore/*macro_use*/
     );
