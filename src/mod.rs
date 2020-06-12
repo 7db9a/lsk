@@ -178,7 +178,7 @@ impl LsKey {
     }
 
     pub fn fuzzy_update(mut self, input: String) -> Self {
-        let scores = self.clone().fuzzy_score(input);
+        let scores = self.fuzzy_score(input);
         let scores = self.clone().fuzzy_rank(scores);
         let scores = self.clone().fuzzy_filter(scores);
         let list = self.clone().scores_to_list(scores);
