@@ -235,7 +235,7 @@ fn list_go_up_one_level() {
         let file_pathbuf = ls_key.list.parent_path.clone();
         ls_key.list.parent_path.pop();
         let list = ls_key.list.clone().update(file_pathbuf);
-        ls_key = ls_key.update(list);
+        ls_key.update(list);
         let list_up_level = ls_key.list;
         //self.run_list_read();
 
@@ -301,7 +301,7 @@ fn list_enter_into_dir() {
                 .to_string();
 
             let list = ls_key.list.clone().update(file_pathbuf);
-            ls_key = ls_key.update(list);
+            ls_key.update(list);
         } else {
             assert!(false);
         }
@@ -368,7 +368,7 @@ fn list_enter_into_fuzzed_dir() {
         let file_pathbuf = ls_key.list.parent_path.clone();
         ls_key.list.parent_path.pop();
         let list = ls_key.list.clone().update(file_pathbuf);
-        ls_key = ls_key.update(list);
+        ls_key.update(list);
         let list_up_level = ls_key.list;
 
         path_cache.switch_back();

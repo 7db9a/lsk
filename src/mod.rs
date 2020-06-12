@@ -207,7 +207,7 @@ impl LsKey {
         self.list.clone()
     }
 
-    pub fn update(mut self, list: List) -> Self {
+    pub fn update(&mut self, list: List) {
             let list = if self.all {
                    list
                    .list_include_hidden()
@@ -219,7 +219,6 @@ impl LsKey {
             };
 
             self.list = list;
-            self.clone()
     }
 
    pub fn run_list_read_beta(mut self) {
@@ -358,7 +357,7 @@ impl LsKey {
                  let file_pathbuf = self.list.parent_path.clone();
                  self.list.parent_path.pop();
                  let list = self.list.clone().update(file_pathbuf);
-                 self = self.update(list);
+                 self.update(list);
                  self.halt = false;
                  self.clone().run_list_read(is_fuzzed)
             },
@@ -371,7 +370,7 @@ impl LsKey {
                           .to_string();
 
                       let list = self.list.clone().update(file_pathbuf);
-                      self = self.update(list);
+                      self.update(list);
                       self.halt = false;
                       self.clone().run_list_read(is_fuzzed)
                   } else {
