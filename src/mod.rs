@@ -1213,23 +1213,23 @@ mod app_test {
     //      ignore/*macro_use*/
     //);
 
-    //test!(
-    //     false,
-    //      macro_fuzzy_enter_dir_go_back_then_repeat,
-    //      "a-file",
-    //      500,               //inrease 200 => 500 ms to see better.
-    //      "$(printf 'f di\r')",
-    //      "$(printf '1\r')",
-    //      "$(printf '0\r')",
-    //      "$(printf 'f di\r')",
-    //      "$(printf '1\r')",
-    //      "$(printf 'q\r')",
-    //      "",
-    //      "macro_fuzzy_enter_dir",
-    //      ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
-    //      "1ca5fb03de479a14f53e9fba1c293bf9410a717904930828209749e4fafbbbe7",
-    //      ignore/*macro_use*/
-    //);
+    test!(
+         false,
+          macro_fuzzy_enter_dir_go_back_then_repeat,
+          "a-file",
+          500,               //inrease 200 => 500 ms to see better.
+          "$(printf 'f do\r')",
+          "$(printf '2\r')",
+          "$(printf '0\r')",
+          "$(printf 'f do\r')",
+          "$(printf '2\r')",
+          "$(printf 'q\r')",
+          "",
+          "macro_fuzzy_enter_dir",
+          ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
+          "1e137b3ad8fffa9bc9011d808c70069edeca6904edd976ea13efe694b71a408a",
+          ignore/*macro_use*/
+    );
 
     //test!(
     //     false,
