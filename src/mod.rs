@@ -506,7 +506,7 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.clone().read_process_chars(self.list.clone());
+           let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.read_process_chars(self.list.clone());
                execute = _execute;
                self.is_fuzzed = _is_fuzzed;
                self.fuzzy_list = fuzzy_list;
@@ -584,7 +584,7 @@ impl LsKey {
     //    result
     //}
 
-    fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
+    fn read_process_chars(&mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input:Input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
@@ -627,7 +627,7 @@ impl LsKey {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
-                                 let cmd_res = cmd_read(&mut input.display, &mut self);
+                                 let cmd_res = cmd_read(&mut input.display, self);
                                  input.display = cmd_res.0;
                                  input_string = cmd_res.1;
                              }
@@ -663,7 +663,6 @@ impl LsKey {
 
                                 if input.display.iter().last() != Some(&'\n') {
                                     let ls_key = self.fuzzy_update(fuzzy_mode_input);
-                                    self = ls_key.clone();
                                     fuzzy_list = ls_key.fuzzy_list;
                                 }
                             }
@@ -690,7 +689,7 @@ impl LsKey {
         }
 
         if the_list.is_none() {
-            the_list = Some(self.list);
+            the_list = Some(self.list.clone());
         }
 
         (the_list, result, is_fuzzed, input.execute, fuzzy_list)
