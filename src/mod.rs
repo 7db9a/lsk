@@ -96,9 +96,9 @@ impl LsKey {
         ls_key
     }
 
-    fn fuzzy_score(mut self, mut input: String) -> fuzzy::demo::Scores {
-        let files = self.list.files.clone();
-        let dirs = self.list.dirs.clone();
+    fn fuzzy_score(&mut self, mut input: String) -> fuzzy::demo::Scores {
+        let files = &self.list.files;
+        let dirs = &self.list.dirs;
 
         let mut input_vec_str: Vec<&str> = input.split(" ").collect();
         //let mut input_vec: Vec<String> = vec![];
