@@ -35,7 +35,7 @@ pub mod app {
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
-        ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
+        ls_key.run_list_read(ls_key.clone().is_fuzzed);
         let mut list = ls_key.list.clone();
 
         while ls_key.is_fuzzed {
@@ -52,7 +52,7 @@ pub mod app {
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
+            ls_key.run_list_read(ls_key.clone().is_fuzzed);
             list = ls_key.list.clone();
         }
 
@@ -248,7 +248,7 @@ impl LsKey {
             }
     }
 
-   pub fn run_list_read(mut self, halt: bool) -> Self {
+   pub fn run_list_read(&mut self, halt: bool) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
 
@@ -274,10 +274,8 @@ impl LsKey {
                 //list::print_list_with_keys(list.clone());
             }
 
-            if halt {
-                self
-            } else {
-                self.run_cmd()
+            if !halt {
+                self.run_cmd();
             }
     }
 
@@ -349,7 +347,7 @@ impl LsKey {
         }
     }
 
-    pub fn key_mode(mut self, list: List, input: Input, is_fuzzed: bool) -> Self {
+    pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
             0 => {
@@ -359,7 +357,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self.update(list);
                  self.halt = false;
-                 self.clone().run_list_read(is_fuzzed)
+                 self.run_list_read(is_fuzzed);
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -372,7 +370,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self.update(list);
                       self.halt = false;
-                      self.clone().run_list_read(is_fuzzed)
+                      self.run_list_read(is_fuzzed);
                   } else {
                       let file_path =
                           file_pathbuf
@@ -380,7 +378,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.clone().run_list_read(is_fuzzed)
+                      self.run_list_read(is_fuzzed);
                   }
             }
         }
@@ -470,7 +468,7 @@ impl LsKey {
         }
     }
 
-    fn key_related_mode(mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) -> Self {
+    fn key_related_mode(&mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -479,7 +477,7 @@ impl LsKey {
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
                         CmdType::single_key => {
-                            self.key_mode(list, input, is_fuzzed)
+                            self.key_mode(list, input, is_fuzzed);
                         },
                         CmdType::multiple_keys => {
                             /*
@@ -488,15 +486,14 @@ impl LsKey {
                                 * then type_text_spawn(text_vec);
                             */
                             self.return_file_by_key_mode(list, input, is_fuzzed);
-                            self
                         },
-                        _ => {self}
+                        _ => ()
                     }
                 } else {
-                    (self)
+                    ()
                 }
             },
-            Err(_) => (self)
+            Err(_) => ()
         }
     }
 
@@ -505,7 +502,7 @@ impl LsKey {
     // ls-key. If the non-built in command doesn't return output and enters
     // into a child process (e.g. vim), then shell::cmd cannot be used, to my
     // understanding.
-    fn run_cmd(mut self) -> Self {
+    fn run_cmd(&mut self) {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
@@ -516,15 +513,13 @@ impl LsKey {
                if let Some(list) = some_list {
                    if execute {
                        let new_list = list.clone();
-                       self = self.clone().key_related_mode(list, Ok(input), self.is_fuzzed);
+                       self.key_related_mode(list, Ok(input), self.is_fuzzed);
                    } else {
                        break
                     }
 
                }
         }
-
-        self
     }
 
     fn test_data_update(&mut self, input: Option<String>) {
