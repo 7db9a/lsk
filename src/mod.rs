@@ -317,7 +317,7 @@ impl LsKey {
             }
     }
 
-    fn return_file_by_key_mode(mut self, list: List, input: Input, is_fuzzed: bool) {
+    fn return_file_by_key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
         let get_file = |key_string: String| {
              let key: usize = key_string.parse().unwrap();
              self.list.get_file_by_key(key, !is_fuzzed).unwrap()
@@ -487,7 +487,7 @@ impl LsKey {
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
                                 * then type_text_spawn(text_vec);
                             */
-                            self.clone().return_file_by_key_mode(list, input, is_fuzzed);
+                            self.return_file_by_key_mode(list, input, is_fuzzed);
                             self
                         },
                         _ => {self}
