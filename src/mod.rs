@@ -1279,6 +1279,24 @@ mod app_test {
           ignore/*macro_use*/
     );
 
+    test!(
+         false,
+          macro_walk_in_park,
+          "a-file",
+          500,               //inrease 200 => 500 ms to see better.
+          "$(printf '24\r')",
+          "$(printf '1\r')",
+          "$(printf 'f con\r')",
+          "$(printf '2\r')",
+          "$(printf '5\r')",
+          "$(printf ':q\r')",
+          "$(printf 'q\r')",
+          "macro_walk_in_park",
+          ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
+          "c3e28f308c901173a895e437b14383121df6991f7ccec2a763332c43ea4c7108",
+          ignore/*macro_use*/
+    );
+
     #[test]
     #[ignore]//docker
     fn parse() {
