@@ -221,7 +221,7 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn run_list_read_beta(mut self) {
+   pub fn run_list_read_beta(&mut self) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
 
@@ -632,7 +632,7 @@ impl LsKey {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
-                                 let cmd_res = cmd_read(&mut input.display, &self);
+                                 let cmd_res = cmd_read(&mut input.display, &mut self);
                                  input.display = cmd_res.0;
                                  input_string = cmd_res.1;
                              }
@@ -702,7 +702,7 @@ impl LsKey {
     }
 }
 
-fn cmd_read(input: &mut Vec<char>, ls_key: &LsKey) -> (Vec<char>, String) {
+fn cmd_read(input: &mut Vec<char>, ls_key: &mut LsKey) -> (Vec<char>, String) {
      input.pop();
      let input_string: String = input.iter().collect();
      let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
@@ -714,7 +714,7 @@ fn cmd_read(input: &mut Vec<char>, ls_key: &LsKey) -> (Vec<char>, String) {
              match input.clone().cmd_type.unwrap() {
                  CmdType::cmd => {
                      ls_key.clone().cmd_mode(input);
-                     ls_key.clone().run_list_read_beta();
+                     ls_key.run_list_read_beta();
                  },
                  _ => {}
              }
