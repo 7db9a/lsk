@@ -1261,23 +1261,23 @@ mod app_test {
           ignore/*macro_use*/
     );
 
-    //test!(
-    //     false,
-    //      macro_go_back_fuzzy_enter_back_into_dir,
-    //      "a-file",
-    //      500,               //inrease 200 => 500 ms to see better.
-    //      "$(printf '0\r')",
-    //      "$(printf 'f bf\r')",
-    //      "$(printf '2\r')",
-    //      "$(printf 'q\r')",
-    //      "",
-    //      "",
-    //      "",
-    //      "macro_go_back_fuzzy_enter_back_into_dir",
-    //      ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-    //      "071396a47b6b5cef3bd25237871b0cf92ee21c25f774a4ee5439b07a5c413fe8",
-    //      ignore/*macro_use*/
-    //);
+    test!(
+         false,
+          macro_go_back_fuzzy_enter_back_into_dir,
+          "a-file",
+          500,               //inrease 200 => 500 ms to see better.
+          "$(printf '0\r')",
+          "$(printf 'f sa\r')",
+          "$(printf '2\r')",
+          "$(printf 'q\r')",
+          "",
+          "",
+          "",
+          "macro_go_back_fuzzy_enter_back_into_dir",
+          ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
+          "5fb1505474abce6d3c2797fdb1777746bf78b29282f398b97a087cf278bcbc60",
+          ignore/*macro_use*/
+    );
 
     #[test]
     #[ignore]//docker
