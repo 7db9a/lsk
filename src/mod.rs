@@ -182,7 +182,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        let res =  self.fuzzy_update_list_read(list.clone());
+        let res =  self.fuzzy_update_list_read(&list);
         //self.list = list;
         self.display = res;
         self.fuzzy_list = Some(list);
@@ -282,7 +282,7 @@ impl LsKey {
             }
     }
 
-   pub fn fuzzy_update_list_read(&mut self, list: List) -> Option<(PathBuf, String)> {
+   pub fn fuzzy_update_list_read(&mut self, list: &List) -> Option<(PathBuf, String)> {
             let entries: Vec<PathBuf> = list::order_and_sort_list(&list, false);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
