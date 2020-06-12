@@ -384,7 +384,7 @@ impl LsKey {
         }
     }
 
-    fn cmd_mode(mut self, input: Input) {
+    fn cmd_mode(&mut self, input: Input) {
          let args = input.args;
          if let Some(a) = args {
              let args = a;
@@ -707,7 +707,7 @@ fn cmd_read(input: &mut Vec<char>, ls_key: &mut LsKey) -> (Vec<char>, String) {
 
              match input.clone().cmd_type.unwrap() {
                  CmdType::cmd => {
-                     ls_key.clone().cmd_mode(input);
+                     ls_key.cmd_mode(input);
                      ls_key.run_list_read_beta();
                  },
                  _ => {}
