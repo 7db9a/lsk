@@ -138,7 +138,7 @@ impl LsKey {
         }
     }
 
-    fn fuzzy_rank(mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
+    fn fuzzy_rank(&mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
         scores.files.sort_by(|a, b| fuzzy::demo::order(a, b));
         scores.dirs.sort_by(|a, b| fuzzy::demo::order(a, b));
 
@@ -146,7 +146,7 @@ impl LsKey {
     }
 
     // Filter out no-scores.
-    fn fuzzy_filter(mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
+    fn fuzzy_filter(&mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
          let mut files_vec: Vec<fuzzy::demo::Score> = vec![];
          let mut dirs_vec: Vec<fuzzy::demo::Score> = vec![];
          for score in scores.files.iter() {
@@ -179,8 +179,8 @@ impl LsKey {
 
     pub fn fuzzy_update(mut self, input: String) -> Self {
         let scores = self.fuzzy_score(input);
-        let scores = self.clone().fuzzy_rank(scores);
-        let scores = self.clone().fuzzy_filter(scores);
+        let scores = self.fuzzy_rank(scores);
+        let scores = self.fuzzy_filter(scores);
         let list = self.clone().scores_to_list(scores);
         let res =  self.clone().fuzzy_update_list_read(list.clone());
         //self.list = list;
