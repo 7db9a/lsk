@@ -2,8 +2,10 @@ pub mod list;
 pub mod terminal;
 pub mod fuzzy;
 
+use std::convert::TryInto;
 use std::path::{Path, PathBuf};
-use std::fs::metadata;
+use std::fs::{create_dir_all, metadata, OpenOptions};
+use std::io::prelude::*;
 use list::List;
 use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
@@ -17,14 +19,22 @@ use termion::async_stdin;
 use termion::screen::AlternateScreen;
 use std::thread;
 use std::time::Duration;
+use sha2::{Sha256, Sha512, Digest};
+use sha2::digest::generic_array::{ArrayLength, GenericArray};
+use easy_hasher::easy_hasher::*;
 
 pub mod app {
-    use super::LsKey;
-    use super::Path;
+    use super::*;
 
-    pub fn run<P: AsRef<Path>>(path: P, all: bool) /*-> LsKey*/ {
+    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) -> LsKey {
+        if test {
+            let mut path = path.as_ref().to_path_buf();
+            create_dir_all(path.clone()).expect("Failed to create directories.");
+            path.push(".lsk_test_output");
+            let mut file = std::fs::File::create(path.clone()).unwrap();
+        }
         let path = path.as_ref();
-        let mut ls_key = LsKey::new(path, all);
+        let mut ls_key = LsKey::new(path, all, test);
         ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
         let mut list = ls_key.list.clone();
 
@@ -33,18 +43,20 @@ pub mod app {
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all);
+                ls_key = LsKey::new(path, all, test);
                 ls_key.list = fuzzy_list.clone();
                 ls_key.display = display;
             } else if !ls_key.halt {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all);
+                ls_key = LsKey::new(path, all, test);
                 ls_key.list = _list;
                 ls_key.display = display;
             }
             ls_key = ls_key.clone().run_list_read(ls_key.clone().is_fuzzed);
             list = ls_key.list.clone();
         }
+
+        ls_key
     }
 }
 
@@ -57,29 +69,31 @@ pub struct LsKey {
     pub display: Option<(PathBuf, String)>,
     pub halt: bool,
     pub is_fuzzed: bool,
+    pub test: bool,
+    pub input_vec: Vec<String>,
+    pub output_vec: Vec<String>
 }
 
 impl LsKey {
-    pub fn new<P: AsRef<Path>>(path: P, all: bool) -> Self {
-            let list = if all {
-               list::List::new(path)
-                   .list_include_hidden()
-                   .unwrap()
-            } else {
-               list::List::new(path)
-                   .list_skip_hidden()
-                   .unwrap()
-            };
+    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool) -> Self {
+        let mut ls_key: LsKey = Default::default();
+        let list = if all {
+           list::List::new(path)
+               .list_include_hidden()
+               .unwrap()
+        } else {
+           list::List::new(path)
+               .list_skip_hidden()
+               .unwrap()
+        };
 
-            LsKey {
-                list,
-                all,
-                input: None,
-                fuzzy_list: None,
-                display: None,
-                halt: true,
-                is_fuzzed: false,
-            }
+        ls_key.list = list;
+        ls_key.all = all;
+        ls_key.halt = true;
+        ls_key.is_fuzzed = false;
+        ls_key.test = test;
+
+        ls_key
     }
 
     fn fuzzy_score(mut self, mut input: String) -> fuzzy::demo::Scores {
@@ -220,9 +234,9 @@ impl LsKey {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
-                if let Some(d) = display {
+                if display.is_some() && !self.test {
                      //println!("\n\n{}", d);
-                     self.display = Some((self.list.parent_path.clone(), d.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
                 } else {
                     let display = grid.fit_into_columns(1);
                     self.display = Some((self.list.parent_path.clone(), display.to_string()));
@@ -247,9 +261,9 @@ impl LsKey {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
-                if let Some(d) = display {
+                if display.is_some() && !self.test {
                      //println!("\n\n{}", d);
-                     self.display = Some((self.list.parent_path.clone(), d.to_string()));
+                     self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
                 } else {
                     let display = grid.fit_into_columns(1);
                      self.display = Some((self.list.parent_path.clone(), display.to_string()));
@@ -281,14 +295,14 @@ impl LsKey {
                 let grid = r.0;
                 let width = r.1;
                 let display = grid.fit_into_width(width);
-                if let Some(d) = display {
+                if display.is_some() && !self.test {
                      //println!("\n\n{}", d);
                      //println!("\nmade it!\n");
                      let old_display = self.display.clone();
                      //self.display = Some((self.list.parent_path.clone(), d.to_string()));
                      //assert_eq!(self.display, Some((PathBuf::from(""), "".to_string())));
                      //assert_ne!(old_display, self.display);
-                     return Some((self.list.parent_path.clone(), d.to_string()))
+                     return Some((self.list.parent_path.clone(), display.unwrap().to_string())) // safe to unwrap.
                      //println!("{:#?}", self.display);
                 } else {
                     let display = grid.fit_into_columns(1);
@@ -514,6 +528,68 @@ impl LsKey {
         self
     }
 
+    fn test_data_update(&mut self, input: Option<String>) {
+        if self.test == true {
+            if input.is_some() {
+                let mut hasher = Sha256::new();
+                let hash = sha256(&input.clone().unwrap());
+                //self.output_vec.push(hash.to_hex_string());
+
+                let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                if original_dir.is_some() {
+                    let mut original_dir = original_dir.unwrap();
+                    //file.write_all(stuff.as_bytes()).unwrap();
+                    original_dir.push(".lsk_test_output");
+                    let mut file = OpenOptions::new()
+                       .write(true)
+                       .append(true)
+                       .open(original_dir.clone().into_os_string().into_string().unwrap())
+                       .unwrap();
+
+                   if let Err(e) = writeln!(file, "{}", hash.to_hex_string()) {
+                       eprintln!("Couldn't write to file: {}", e);
+                   }
+                }
+            }
+            if self.display.is_some() {
+                let mut hasher = Sha256::new();
+                let mut hasher = Sha256::new();
+                let hash = sha256(&self.display.clone().unwrap().1);
+                //self.output_vec.push(hash.to_hex_string());
+
+                let original_dir = self.clone().list.path_history.into_iter().nth(0);
+                if original_dir.is_some() {
+                    let mut original_dir = original_dir.unwrap();
+                    //file.write_all(stuff.as_bytes()).unwrap();
+                    original_dir.push(".lsk_test_output");
+                    let mut file = OpenOptions::new()
+                       .write(true)
+                       .append(true)
+                       .open(original_dir.clone().into_os_string().into_string().unwrap())
+                       .unwrap();
+
+                   if let Err(e) = writeln!(file, "{}", hash.to_hex_string()) {
+                       eprintln!("Couldn't write to file: {}", e);
+                   }
+                }
+            }
+        }
+    }
+
+    //fn test_data_sum_to_single_hash(&mut self) -> [u8; 32] {
+    //    let mut complete_vec = self.input_vec.to_owned();
+    //    complete_vec.append(&mut self.output_vec);
+    //    let mut hasher = Sha256::new();
+    //    for i in complete_vec.iter() {
+    //        let str_i = std::str::from_utf8(i).unwrap();
+    //        hasher.input(str_i);
+    //    }
+
+    //    let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
+
+    //    result
+    //}
+
     fn read_process_chars(mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
         let mut input:Input = Input::new();
         let stdin = stdin();
@@ -526,6 +602,9 @@ impl LsKey {
         let mut fuzzy_list: Option<list::List> = None;
 
         clear_display(&mut stdout);
+
+        let mut input_string: String = input.display.iter().collect();
+        self.test_data_update(Some(input_string));
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
@@ -540,6 +619,7 @@ impl LsKey {
 
             let place = (0, 1);
             if let Some(mut first) = _first {
+                self.test_data_update(Some(input_string.clone()));
                 display_input(input_string.clone(), &mut stdout, place);
 
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
@@ -601,6 +681,7 @@ impl LsKey {
                 }
             }
 
+            self.test_data_update(Some(input_string.clone()));
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
             if input.display.iter().last() == Some(&'\n') {
@@ -642,7 +723,7 @@ fn cmd_read(input: &mut Vec<char>, ls_key: &LsKey) -> (Vec<char>, String) {
          }
          _ => { }
      }
-     
+
      (input.to_vec(), input_string)
 }
 
@@ -945,6 +1026,7 @@ mod app_test {
     use std::env;
     use fixture::{Fixture, command_assistors};
     use super::{Input, LsKey, CmdType, Mode, mode_parse};
+    use super::*;
 
     macro_rules! test {
         (
@@ -961,6 +1043,7 @@ mod app_test {
             $input7: expr,
             $sub_path: expr, //We test all of this in a specific path. This'll create a sub-dir under that test-path.
             $intent: expr, //Explain what will happen in the test so tester can visually verify.
+            $file_hash: expr,
             $test_macro: ident //We want to ignore the tests when we want and run when we want.
         ) => {
 
@@ -970,31 +1053,62 @@ mod app_test {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
                 let mut fixture = Fixture::new()
-                    .add_dirpath("/tmp/lsk_tests/boniface/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/cariciollo/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/peter/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/marcillenus/".to_string())
-                    .add_dirpath("/tmp/lsk_tests/angela/".to_string())
-                    .add_dirpath(path.to_string())
-                    .add_dirpath(path.to_string() + "a-dir")
-                    .add_dirpath(path.to_string() + ".a-hidden-dir")
-                    .add_file(path.to_string() + "a-file")
-                    .add_file(path.to_string() + "a-dir/a-file")
-                    .add_file(path.to_string() + "a-dir/b-file")
-                    .add_file(path.to_string() + ".a-hidden-dir/a-file")
-                    .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
-                    .add_file(path.to_string() + ".a-hidden-file")
+                    .add_dirpath(path.clone())
+                    .add_dirpath(format!("{}basilides/", path.clone()))
+                    .add_dirpath(format!("{}cyrinus/", path.clone()))
+                    .add_dirpath(format!("{}nabor/", path.clone()))
+                    .add_dirpath(format!("{}nazarius/", path.clone()))
+                    .add_dirpath(format!("{}primus/", path.clone()))
+                    .add_dirpath(format!("{}felician/", path.clone()))
+                    .add_dirpath(format!("{}marcelinus/", path.clone()))
+                    .add_dirpath(format!("{}isidore/", path.clone()))
+                    .add_dirpath(format!("{}margaret/", path.clone()))
+                    .add_dirpath(format!("{}angela/", path.clone()))
+                    .add_dirpath(format!("{}francis/", path.clone()))
+                    .add_dirpath(format!("{}gregory/", path.clone()))
+                    .add_dirpath(format!("{}joseph/", path.clone()))
+                    .add_dirpath(format!("{}anne/", path.clone()))
+                    .add_dirpath(format!("{}joachim/", path.clone()))
+                    .add_dirpath(format!("{}faustina/", path.clone()))
+                    .add_dirpath(format!("{}john/", path.clone()))
+                    .add_dirpath(format!("{}peter/", path.clone()))
+                    .add_dirpath(format!("{}cecilia/", path.clone()))
+                    .add_dirpath(format!("{}rita/", path.clone()))
+                    .add_dirpath(format!("{}magdelene/", path.clone()))
+                    .add_dirpath(format!("{}expeditus/", path.clone()))
+                    .add_dirpath(format!("{}sebastian/", path.clone()))
+                    .add_dirpath(format!("{}gabriel/", path.clone()))
+                    .add_dirpath(format!("{}michael/", path.clone()))
+                    .add_dirpath(format!("{}jude/", path.clone()))
+                    .add_dirpath(format!("{}anthony/", path.clone()))
+                    .add_dirpath(format!("{}nicholaus/", path.clone()))
+                    .add_dirpath(format!("{}teresa/", path.clone()))
                     .build();
 
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
-                let mut path_cache = command_assistors::PathCache::new(&path_path);
 
+                let mut sample_files_files = PathBuf::from(".fixtures");
+                sample_files_files.push("sample_files");
+
+                let mut path_test = path_path.clone();
+                path_test.push("sample_files");
+
+                let md = metadata(path_test.clone());
+                let test_path_string = path_test.clone().into_os_string().into_string().unwrap();
+
+                if !md.is_ok() {
+                    fixture.build();
+                    Command::new("cp")
+                        .arg("-r".to_string())
+                        .arg(sample_files_files.clone().into_os_string().into_string().unwrap())
+                        .arg(test_path_string.clone())
+                        .output()
+                        .expect("failed to execute lsk process");
+                }
+
+                let mut path_cache = command_assistors::PathCache::new(&path_test);
                 // Changing directories.
                 path_cache.switch();
-
-                let stuff = format!(r#""Opening "{}" in test case "{}".""#, $test_file_path, $sub_path);
-                let mut file = std::fs::File::create($test_file_path).unwrap();
-                file.write_all(stuff.as_bytes()).unwrap();
 
                 println!("");
                 let text_vec = vec![
@@ -1007,27 +1121,52 @@ mod app_test {
                      format!(r#""{}""#, $input7),
                 ];
 
-
-                println!("\n\n\nNew case intent:\n{}", $intent);
-                let few_ms = std::time::Duration::from_millis(5000);
-                std::thread::sleep(few_ms);
+                //println!("\n\n\nNew case intent:\n{}", $intent);
+                //let few_ms = std::time::Duration::from_millis(5000);
+                //std::thread::sleep(few_ms);
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                super::app::run(path.clone(), $list_all_bool);
+                let mut ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
                 spawn.join();
+
+                let mut test_output_path = path_path.clone();
+                test_output_path.push("sample_files");
+                test_output_path.push(".lsk_test_output");
+                let mut test_output_path_string = test_output_path.clone().into_os_string().into_string().unwrap();
+                let mut output_mv_to_path = path_path.clone();
+                let mut output_mv_to_path_string = path_path.clone().into_os_string().into_string().unwrap();
+
+                Command::new("mv")
+                    .arg(test_output_path_string)
+                    .arg(output_mv_to_path_string.clone())
+                    .output()
+                    .expect("failed to execute lsk process");
+
+                let few_ms = std::time::Duration::from_millis(100);
+                std::thread::sleep(few_ms);
+
+                let mut output_mv_to_path = path_path.clone();
+                output_mv_to_path.push(".lsk_test_output");
+                let mut output_mv_to_path_string = output_mv_to_path.clone().into_os_string().into_string().unwrap();
+
+                println!("\npath:\n{}", output_mv_to_path_string.clone());
+
+                let file256 = file_sha256(output_mv_to_path_string.clone());
+                let hash: Hash;
+
+                match file256 {
+                    Ok(h) => {
+                        assert_eq!(
+                            h.to_hex_string(),
+                            $file_hash.to_string()
+                        )
+                    },
+                    Err(..) => assert!(false)
+                }
 
                 path_cache.switch_back();
 
-                assert_eq!(true, metadata(path.clone() + "a-dir").unwrap().is_dir());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir").unwrap().is_dir());
-                assert_eq!(true, metadata(path.clone() + "a-file" ).unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + "a-dir/a-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + "a-dir/b-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/a-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-dir/.a-hidden-file").unwrap().is_file());
-                assert_eq!(true, metadata(path.clone() + ".a-hidden-file").unwrap().is_file());
-
-                fixture.teardown(true);
+                std::fs::remove_file(output_mv_to_path_string).unwrap();
             }
         };
     }
@@ -1035,9 +1174,9 @@ mod app_test {
     test!(
           false, //list_all_bool
           macro_enter_file,
-          "a-file",
-          200,               //$delay in milleseconds
-          "$(printf '2\r')", //$input1
+          "Makefile",
+          0,               //$delay in milleseconds
+          "$(printf '3\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1046,14 +1185,15 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
+          "e636b86d6467fc7880254f18611971bb9f04e9d7f1414dd6bd1c13ead34b6b25",
           ignore/*macro_use*/
     );
 
     test!(
           true, //list_all_bool
           macro_enter_file_list_all,
-          ".a-hidden-file",
-          200,               //$delay in milleseconds
+          ".eternal",
+          0,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
@@ -1063,16 +1203,17 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
+          "488a19bb1d0fdbefa492333e3b54f772ef5b5f2547e64f9e062cd81f6f48f34a",
           ignore/*macro_use*/
     );
 
     test!(
           false,
           macro_fuzzy_enter_file,
-          "a-file",
-          200,               //$delay in milleseconds
-          "$(printf 'f fi\r')",
-          "$(printf '1\r')",
+          "intercession",
+          0,               //$delay in milleseconds
+          "$(printf 'f boo\r')",
+          "$(printf '4\r')",
           "$(printf ':q\r')",
           "$(printf 'q\r')",
           "",
@@ -1080,6 +1221,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
+          "cf5e09bfcb83e3d33c459488862a08b0f4a255531fea3aa7dcc0b16805ecd934",
           ignore/*macro_use*/
     );
 
@@ -1087,9 +1229,9 @@ mod app_test {
          false,
           macro_fuzzy_enter_dir,
           "a-file",
-          500,               //inrease 200 => 500 ms to see better.
-          "$(printf 'f di\r')",
-          "$(printf '1\r')",
+          0,               //inrease 200 => 500 ms to see better.
+          "$(printf 'f ins\r')",
+          "$(printf '5\r')",
           "$(printf 'q\r')",
           "",
           "",
@@ -1097,6 +1239,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
+          "d3c43dc3b99ba0d23060fc9f7a233dad1282c3ebf265253d26f13be019a1ce41",
           ignore/*macro_use*/
     );
 
@@ -1104,16 +1247,17 @@ mod app_test {
          false,
           macro_fuzzy_enter_dir_go_back_then_repeat,
           "a-file",
-          500,               //inrease 200 => 500 ms to see better.
-          "$(printf 'f di\r')",
-          "$(printf '1\r')",
+          0,               //inrease 200 => 500 ms to see better.
+          "$(printf 'f do\r')",
+          "$(printf '2\r')",
           "$(printf '0\r')",
-          "$(printf 'f di\r')",
-          "$(printf '1\r')",
+          "$(printf 'f do\r')",
+          "$(printf '2\r')",
           "$(printf 'q\r')",
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
+          "1e137b3ad8fffa9bc9011d808c70069edeca6904edd976ea13efe694b71a408a",
           ignore/*macro_use*/
     );
 
@@ -1121,9 +1265,9 @@ mod app_test {
          false,
           macro_go_back_fuzzy_enter_back_into_dir,
           "a-file",
-          500,               //inrease 200 => 500 ms to see better.
+          0,               //inrease 200 => 500 ms to see better.
           "$(printf '0\r')",
-          "$(printf 'f bf\r')",
+          "$(printf 'f sa\r')",
           "$(printf '2\r')",
           "$(printf 'q\r')",
           "",
@@ -1131,6 +1275,25 @@ mod app_test {
           "",
           "macro_go_back_fuzzy_enter_back_into_dir",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
+          "5fb1505474abce6d3c2797fdb1777746bf78b29282f398b97a087cf278bcbc60",
+          ignore/*macro_use*/
+    );
+
+    test!(
+         false,
+          macro_walk_in_park,
+          "a-file",
+          0,               //inrease 200 => 500 ms to see better.
+          "$(printf '24\r')",
+          "$(printf '1\r')",
+          "$(printf 'f con\r')",
+          "$(printf '2\r')",
+          "$(printf '5\r')",
+          "$(printf ':q\r')",
+          "$(printf 'q\r')",
+          "macro_walk_in_park",
+          ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
+          "c3e28f308c901173a895e437b14383121df6991f7ccec2a763332c43ea4c7108",
           ignore/*macro_use*/
     );
 

@@ -111,15 +111,15 @@ fn default_action(c: &Context) {
 
     if c.bool_flag("all") {
         if path != "" {
-            app::run(path, true)
+            app::run(path, true, false);
         } else {
-            app::run(env::current_dir().unwrap(), true)
+            app::run(env::current_dir().unwrap(), true, false);
         }
     } else {
         if path != "" {
-            app::run(path, false)
+            app::run(path, false, false);
         } else {
-            app::run(env::current_dir().unwrap(), false)
+            app::run(env::current_dir().unwrap(), false, false);
         }
     }
 }
