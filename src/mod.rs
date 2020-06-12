@@ -1053,7 +1053,37 @@ mod app_test {
                 let path = format!("/tmp/lsk_tests/{}/", $sub_path);
 
                 let mut fixture = Fixture::new()
-                    .add_dirpath(path.clone());
+                    .add_dirpath(path.clone())
+                    .add_dirpath(format!("{}basilides/", path.clone()))
+                    .add_dirpath(format!("{}cyrinus/", path.clone()))
+                    .add_dirpath(format!("{}nabor/", path.clone()))
+                    .add_dirpath(format!("{}nazarius/", path.clone()))
+                    .add_dirpath(format!("{}primus/", path.clone()))
+                    .add_dirpath(format!("{}felician/", path.clone()))
+                    .add_dirpath(format!("{}marcelinus/", path.clone()))
+                    .add_dirpath(format!("{}isidore/", path.clone()))
+                    .add_dirpath(format!("{}margaret/", path.clone()))
+                    .add_dirpath(format!("{}angela/", path.clone()))
+                    .add_dirpath(format!("{}francis/", path.clone()))
+                    .add_dirpath(format!("{}gregory/", path.clone()))
+                    .add_dirpath(format!("{}joseph/", path.clone()))
+                    .add_dirpath(format!("{}anne/", path.clone()))
+                    .add_dirpath(format!("{}joachim/", path.clone()))
+                    .add_dirpath(format!("{}faustina/", path.clone()))
+                    .add_dirpath(format!("{}john/", path.clone()))
+                    .add_dirpath(format!("{}peter/", path.clone()))
+                    .add_dirpath(format!("{}cecilia/", path.clone()))
+                    .add_dirpath(format!("{}rita/", path.clone()))
+                    .add_dirpath(format!("{}magdelene/", path.clone()))
+                    .add_dirpath(format!("{}expeditus/", path.clone()))
+                    .add_dirpath(format!("{}sebastian/", path.clone()))
+                    .add_dirpath(format!("{}gabriel/", path.clone()))
+                    .add_dirpath(format!("{}michael/", path.clone()))
+                    .add_dirpath(format!("{}jude/", path.clone()))
+                    .add_dirpath(format!("{}anthony/", path.clone()))
+                    .add_dirpath(format!("{}nicholaus/", path.clone()))
+                    .add_dirpath(format!("{}teresa/", path.clone()))
+                    .build();
 
                 let path_path = Path::new(path.clone().as_str()).to_path_buf();
 
