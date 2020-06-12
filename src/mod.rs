@@ -177,7 +177,7 @@ impl LsKey {
          }
     }
 
-    pub fn fuzzy_update(mut self, input: String) -> Self {
+    pub fn fuzzy_update(&mut self, input: String) -> Self {
         let scores = self.fuzzy_score(input);
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
@@ -668,7 +668,7 @@ impl LsKey {
                             } else {
 
                                 if input.display.iter().last() != Some(&'\n') {
-                                    let ls_key = self.clone().fuzzy_update(fuzzy_mode_input);
+                                    let ls_key = self.fuzzy_update(fuzzy_mode_input);
                                     self = ls_key.clone();
                                     fuzzy_list = ls_key.fuzzy_list;
                                 }
