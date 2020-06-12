@@ -181,7 +181,7 @@ impl LsKey {
         let scores = self.fuzzy_score(input);
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
-        let list = self.clone().scores_to_list(scores);
+        let list = self.scores_to_list(scores);
         let res =  self.clone().fuzzy_update_list_read(list.clone());
         //self.list = list;
         self.display = res;
@@ -190,7 +190,7 @@ impl LsKey {
         self.clone()
     }
 
-    pub fn scores_to_list(mut self, mut scores: fuzzy::demo::Scores) -> list::List {
+    pub fn scores_to_list(&mut self, mut scores: fuzzy::demo::Scores) -> list::List {
         let files_list: Vec<PathBuf> = scores.files.iter().map(|score|
             score.score().0
         ).collect();
