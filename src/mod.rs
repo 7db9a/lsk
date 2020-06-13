@@ -509,11 +509,13 @@ impl LsKey {
         while !execute {
            let (input,_execute) = self.read_process_chars();
             execute = _execute;
-           if execute {
+           if execute && !self.input.full_backspace {
                self.key_related_mode(Ok(input), self.is_fuzzed);
+           } else if !execute && self.input.full_backspace {
            } else {
                break
            }
+           self.input.full_backspace = false;
         }
     }
 
@@ -587,6 +589,7 @@ impl LsKey {
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
+        let orig_ls_key = self.clone();
 
         clear_display(&mut stdout);
 
@@ -595,16 +598,19 @@ impl LsKey {
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
+            self.input.full_backspace;
             clear_display(&mut stdout);
+            let c = c.unwrap();
 
-            self.input.match_event(c.unwrap());
+            self.input.match_event(c);
             let mut input_string: String = self.input.display.iter().collect();
-            let input_len = self.input.display.iter().count();
-            let input_len = u16::try_from(input_len).ok().unwrap();
-            let input = self.input.clone();
-            let _first = input.display.iter().nth(0);
-            let input = self.input.clone();
-            let last = input.display.iter().last();
+            let mut input_len = self.input.display.iter().count();
+            let mut input_len = u16::try_from(input_len).ok().unwrap();
+            let mut input = self.input.clone();
+            let mut _first = input.display.iter().nth(0);
+            let mut input = self.input.clone();
+            let mut last = input.display.iter().last();
+            let mut _input = self.input.clone();
 
             let place = (0, 1);
             if let Some(mut first) = _first {
@@ -613,6 +619,25 @@ impl LsKey {
                     self.fuzzy_list = self.pre_fuzz_list.clone();
                     if let Some(x) = self.pre_fuzz_list.clone() {
                         self.list = x;
+                    }
+                    if self.input.full_backspace {
+                       *self = orig_ls_key.clone();
+                       is_fuzzed = false;
+                       //self.read_process_chars();
+                       //let path = self.list.parent_path.clone();
+                       //let path = path.to_str().unwrap();
+                       ////let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                       ////terminal::parent_shell::type_text(cmd, 0);
+                       //self.is_fuzzed = false;
+                       //self.input = Input::new();
+
+                       //self.input.match_event(c);
+                       //input_string = self.input.display.iter().collect();
+                       //input_len = self.input.display.iter().count().try_into().unwrap();
+                       //input = self.input.clone();
+                       //_first = input.display.iter().nth(0);
+                       //_input = self.input.clone();
+                       //last = _input.display.iter().last();
                     }
                 }
                 self.test_data_update(Some(input_string.clone()));
@@ -687,7 +712,26 @@ impl LsKey {
                 if let Some(x) = self.pre_fuzz_list.clone() {
                     self.list = x;
                 }
+                if self.input.full_backspace {
+                   *self = orig_ls_key.clone();
+                   is_fuzzed = false;
+                    //self.read_process_chars();
+                   //let path = self.list.parent_path.clone();
+                   //let path = path.to_str().unwrap();
+                   ////let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
+                   ////terminal::parent_shell::type_text(cmd, 0);
+                   //self.is_fuzzed = false;
+                   //self.input = Input::new();
+
+                   //input_string = self.input.display.iter().collect();
+                   //input_len = self.input.display.iter().count().try_into().unwrap();
+                   //input = self.input.clone();
+                   //_first = input.display.iter().nth(0);
+                   //input = self.input.clone();
+                   //last = input.display.iter().last();
+                }
             }
+
             self.test_data_update(Some(input_string.clone()));
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
@@ -799,6 +843,7 @@ pub struct Input {
     pub display: Vec<char>,
     pub execute: bool,
     pub unwiddle: bool, //i.e. backspacing
+    pub full_backspace: bool,
 }
 
 
@@ -809,6 +854,7 @@ impl Input {
         let mut input: Input = Default::default();
         input.execute = true;
         input.unwiddle = false;
+        input.full_backspace = false;
 
         input
     }
@@ -834,8 +880,10 @@ impl Input {
                 Key::Backspace => {
                     self.unwiddle = true;
                     if let Some(x) = self.display.pop() {
-                        if self.display.iter().count() == 0 {
+                        let count = self.display.iter().count();
+                        if count  == 0 {
                             self.execute = false;
+                            self.full_backspace = true;
                         }
                     }
 
@@ -1315,11 +1363,11 @@ mod app_test {
            "BackSpace",
            "BackSpace",
            "BackSpace",
-           "q\rq\r",
+           "q\r",
            "macro_bad_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "5ba57dc7835f37e3e7296b32a75e88a97607b69e5891b3974c3bddd24631f2be",
-          ignore/*macro_use*/
+           "2d1eb66f36db76ff5c70166b8d522c537a6438ca6fe7bf93b59c91e03b669131",
+           ignore/*macro_use*/
      );
 
     #[test]
