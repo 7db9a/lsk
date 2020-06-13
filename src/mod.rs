@@ -608,6 +608,13 @@ impl LsKey {
 
             let place = (0, 1);
             if let Some(mut first) = _first {
+
+                if self.input.unwiddle {
+                    self.fuzzy_list = self.pre_fuzz_list.clone();
+                    if let Some(x) = self.pre_fuzz_list.clone() {
+                        self.list = x;
+                    }
+                }
                 self.test_data_update(Some(input_string.clone()));
                 display_input(input_string.clone(), &mut stdout, place);
 
@@ -656,6 +663,13 @@ impl LsKey {
                                 }
                             } else {
 
+                                if self.input.unwiddle {
+                                    self.fuzzy_list = self.pre_fuzz_list.clone();
+                                    if let Some(x) = self.pre_fuzz_list.clone() {
+                                        self.list = x;
+                                    }
+                                }
+
                                 if self.input.display.iter().last() != Some(&'\n') {
                                     let ls_key = self.fuzzy_update(fuzzy_mode_input);
                                 }
@@ -668,6 +682,12 @@ impl LsKey {
                 }
             }
 
+            if self.input.unwiddle {
+                self.fuzzy_list = self.pre_fuzz_list.clone();
+                if let Some(x) = self.pre_fuzz_list.clone() {
+                    self.list = x;
+                }
+            }
             self.test_data_update(Some(input_string.clone()));
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
@@ -818,6 +838,7 @@ impl Input {
                             self.execute = false;
                         }
                     }
+
                 },
                 _ => {}
             }
@@ -1297,7 +1318,7 @@ mod app_test {
            "q\rq\r",
            "macro_bad_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "dd3c81714c9579295316517bdb6a7d28d59d6cbe6352ad7a725178b17abebca3",
+           "5ba57dc7835f37e3e7296b32a75e88a97607b69e5891b3974c3bddd24631f2be",
           ignore/*macro_use*/
      );
 
