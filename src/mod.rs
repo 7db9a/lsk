@@ -468,7 +468,7 @@ impl LsKey {
         }
     }
 
-    fn key_related_mode(&mut self, list: List, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
+    fn key_related_mode(&mut self, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -477,7 +477,7 @@ impl LsKey {
                     // Safe to unwrap.
                     match input.clone().cmd_type.unwrap() {
                         CmdType::single_key => {
-                            self.key_mode(list, input, is_fuzzed);
+                            self.key_mode(self.list.clone(), input, is_fuzzed);
                         },
                         CmdType::multiple_keys => {
                             /*
@@ -485,7 +485,7 @@ impl LsKey {
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
                                 * then type_text_spawn(text_vec);
                             */
-                            self.return_file_by_key_mode(list, input, is_fuzzed);
+                            self.return_file_by_key_mode(self.list.clone(), input, is_fuzzed);
                         },
                         _ => ()
                     }
@@ -506,10 +506,10 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, _is_fuzzed, _execute) = self.read_process_chars(self.list.clone());
+           let (input, _is_fuzzed, _execute) = self.read_process_chars(self.list.clone());
             execute = _execute;
            if execute {
-               self.key_related_mode(self.list.clone(), Ok(input), self.is_fuzzed);
+               self.key_related_mode(Ok(input), self.is_fuzzed);
            } else {
                break
            }
@@ -578,7 +578,7 @@ impl LsKey {
     //    result
     //}
 
-    fn read_process_chars(&mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool) {
+    fn read_process_chars(&mut self, list: List) -> (Option<String>, bool, bool) {
         let mut input:Input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
@@ -682,7 +682,7 @@ impl LsKey {
             the_list = Some(self.list.clone());
         }
 
-        (the_list, result, is_fuzzed, input.execute)
+        (result, is_fuzzed, input.execute)
     }
 }
 
