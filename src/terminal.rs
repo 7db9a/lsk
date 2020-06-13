@@ -6,16 +6,22 @@ pub mod parent_shell {
     use xdotool::optionvec::OptionVec;
     use xdotool::command::options::KeyboardOption;
 
-    pub fn send_key<T: AsRef<str>>(key: T) {
-        keyboard::send_key("Return", option_vec![
-            KeyboardOption::Delay(200)
+    pub fn send_key<T: AsRef<str>>(key: T, delay: u32) {
+        keyboard::send_key(key.as_ref(), option_vec![
+            KeyboardOption::Delay(delay)
         ]);
     }
 
     pub fn type_text<T: AsRef<str>>(text: T, delay: u32/*, options: Option<KeyboardOption>*/) -> std::process::Output {
-        keyboard::type_text(text.as_ref(), option_vec![
-            KeyboardOption::Delay(delay)
-        ])
+        if text.as_ref() == "BackSpace" {
+             keyboard::send_key("BackSpace".as_ref(), option_vec![
+                 KeyboardOption::Delay(delay)
+             ])
+        } else {
+            keyboard::type_text(text.as_ref(), option_vec![
+                KeyboardOption::Delay(delay)
+            ])
+        }
     }
 
     pub fn type_text_spawn(text: Vec<String>, delay: u32/*, options: Option<KeyboardOption>*/)  -> thread::JoinHandle<()> {
@@ -25,9 +31,13 @@ pub mod parent_shell {
 	       // Send the message
            let text_iter = text.iter();
            let type_n_sleep = |text: String, delay: u32| {
-               let few_ms = std::time::Duration::from_millis(1000);
-               std::thread::sleep(few_ms);
-               type_text(text, delay);
+               //let few_ms = std::time::Duration::from_millis(100);
+               //std::thread::sleep(few_ms);
+               if text == format!(r#""BackSpace""#) {
+                   send_key("BackSpace", delay);
+               } else {
+                   type_text(text, delay);
+               }
            };
 
            text_iter.for_each(|x|

@@ -129,6 +129,4 @@ mod tests {
             PathBuf::from("xayb")
         )
     }
-
-    //#[ignore]//host
 }

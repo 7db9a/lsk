@@ -1168,7 +1168,7 @@ mod app_test {
           false, //list_all_bool
           macro_enter_file,
           "Makefile",
-          0,               //$delay in milleseconds
+          100,               //$delay in milleseconds
           "$(printf '3\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
@@ -1186,7 +1186,7 @@ mod app_test {
           true, //list_all_bool
           macro_enter_file_list_all,
           ".eternal",
-          0,               //$delay in milleseconds
+          100,               //$delay in milleseconds
           "$(printf '2\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
@@ -1204,7 +1204,7 @@ mod app_test {
           false,
           macro_fuzzy_enter_file,
           "intercession",
-          0,               //$delay in milleseconds
+          100,               //$delay in milleseconds
           "$(printf 'f boo\r')",
           "$(printf '4\r')",
           "$(printf ':q\r')",
@@ -1222,7 +1222,7 @@ mod app_test {
          false,
           macro_fuzzy_enter_dir,
           "a-file",
-          0,               //inrease 200 => 500 ms to see better.
+          100,               //inrease 200 => 500 ms to see better.
           "$(printf 'f ins\r')",
           "$(printf '5\r')",
           "$(printf 'q\r')",
@@ -1240,7 +1240,7 @@ mod app_test {
          false,
           macro_fuzzy_enter_dir_go_back_then_repeat,
           "a-file",
-          0,               //inrease 200 => 500 ms to see better.
+          100,               //inrease 200 => 500 ms to see better.
           "$(printf 'f do\r')",
           "$(printf '2\r')",
           "$(printf '0\r')",
@@ -1258,7 +1258,7 @@ mod app_test {
          false,
           macro_go_back_fuzzy_enter_back_into_dir,
           "a-file",
-          0,               //inrease 200 => 500 ms to see better.
+          100,               //inrease 200 => 500 ms to see better.
           "$(printf '0\r')",
           "$(printf 'f sa\r')",
           "$(printf '2\r')",
@@ -1276,7 +1276,7 @@ mod app_test {
          false,
           macro_walk_in_park,
           "a-file",
-          0,               //inrease 200 => 500 ms to see better.
+          100,               //inrease 200 => 500 ms to see better.
           "$(printf '24\r')",
           "$(printf '1\r')",
           "$(printf 'f con\r')",
@@ -1289,6 +1289,24 @@ mod app_test {
           "c3e28f308c901173a895e437b14383121df6991f7ccec2a763332c43ea4c7108",
           ignore/*macro_use*/
     );
+
+     test!(
+           false, //list_all_bool
+           macro_bad_fuzzy_backspace,
+           "Makefile",
+           100,
+           "f itf",
+           "BackSpace",
+           "BackSpace",
+           "BackSpace",
+           "BackSpace",
+           "BackSpace",
+           "q\rq\r",
+           "macro_bad_fuzzy_backspace",
+           ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
+           "dd3c81714c9579295316517bdb6a7d28d59d6cbe6352ad7a725178b17abebca3",
+          ignore/*macro_use*/
+     );
 
     #[test]
     #[ignore]//docker
