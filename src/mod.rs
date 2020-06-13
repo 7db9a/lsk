@@ -64,7 +64,7 @@ pub mod app {
 pub struct LsKey {
     pub list: List,
     pub all: bool,
-    pub input: Option<String>,
+    pub input: Input,
     pub fuzzy_list: Option<List>,
     pub display: Option<(PathBuf, String)>,
     pub halt: bool,
@@ -579,7 +579,7 @@ impl LsKey {
     //}
 
     fn read_process_chars(&mut self) -> (Option<String>, bool) {
-        let mut input:Input = Input::new();
+        self.input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
@@ -589,18 +589,20 @@ impl LsKey {
 
         clear_display(&mut stdout);
 
-        let mut input_string: String = input.display.iter().collect();
+        let mut input_string: String = self.input.display.iter().collect();
         self.test_data_update(Some(input_string));
         display_files(self.clone(), b"", &mut stdout, (0, 3));
 
         for c in stdin.keys() {
             clear_display(&mut stdout);
 
-            input = input.clone().match_event(c.unwrap());
-            let mut input_string: String = input.display.iter().collect();
-            let input_len = input.display.iter().count();
+            self.input.match_event(c.unwrap());
+            let mut input_string: String = self.input.display.iter().collect();
+            let input_len = self.input.display.iter().count();
             let input_len = u16::try_from(input_len).ok().unwrap();
+            let input = self.input.clone();
             let _first = input.display.iter().nth(0);
+            let input = self.input.clone();
             let last = input.display.iter().last();
 
             let place = (0, 1);
@@ -619,8 +621,8 @@ impl LsKey {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
-                                 let cmd_res = cmd_read(&mut input.display, self);
-                                 input.display = cmd_res.0;
+                                 let cmd_res = cmd_read(&mut self.input.clone().display, self);
+                                 self.input.display = cmd_res.0;
                                  input_string = cmd_res.1;
                              }
                         },
@@ -645,12 +647,12 @@ impl LsKey {
                                 if let Some(x) = self.fuzzy_list.clone() {
                                     //self.list = x.clone();
                                     input_string = keys;
-                                    input.display = input_string.chars().collect();
+                                    self.input.display = input_string.chars().collect();
                                     // clear input and drop in the parsed key.
                                 }
                             } else {
 
-                                if input.display.iter().last() != Some(&'\n') {
+                                if self.input.display.iter().last() != Some(&'\n') {
                                     let ls_key = self.fuzzy_update(fuzzy_mode_input);
                                 }
                             }
@@ -665,9 +667,9 @@ impl LsKey {
             self.test_data_update(Some(input_string.clone()));
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
-            if input.display.iter().last() == Some(&'\n') {
-                input.display.pop();
-                let input_string: String = input.display.iter().collect();
+            if self.input.display.iter().last() == Some(&'\n') {
+                self.input.display.pop();
+                let input_string: String = self.input.display.iter().collect();
                 result = Some(input_string);
                 self.is_fuzzed = is_fuzzed;
                 if self.is_fuzzed {
@@ -676,7 +678,7 @@ impl LsKey {
             }
         }
 
-        (result, input.execute)
+        (result, self.input.execute)
     }
 }
 
@@ -787,7 +789,7 @@ impl Input {
         input
     }
 
-    pub fn match_event(mut self, c: termion::event::Key) -> Self {
+    pub fn match_event(&mut self, c: termion::event::Key) {
             self.unwiddle = false;
             match c {
                 Key::Char(c) => {
@@ -815,7 +817,6 @@ impl Input {
                 },
                 _ => {}
             }
-            self
     }
 
     fn defang_args(&self, args: Vec<String>) -> Option<Vec<String>> {
