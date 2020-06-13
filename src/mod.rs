@@ -506,7 +506,7 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.read_process_chars(self.list.clone());
+           let (some_list, input, _is_fuzzed, _execute) = self.read_process_chars(self.list.clone());
                execute = _execute;
                if let Some(list) = some_list {
                    if execute {
@@ -582,7 +582,7 @@ impl LsKey {
     //    result
     //}
 
-    fn read_process_chars(&mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool, Option<List>) {
+    fn read_process_chars(&mut self, list: List) -> (Option<list::List>, Option<String>, bool, bool) {
         let mut input:Input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
@@ -591,7 +591,6 @@ impl LsKey {
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
         let mut the_list: Option<list::List> = None;
-        let mut fuzzy_list: Option<list::List> = None;
 
         clear_display(&mut stdout);
 
@@ -648,13 +647,11 @@ impl LsKey {
                             let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
                             if let Some(keys) = some_keys {
-                                fuzzy_list = self.fuzzy_list.clone();
-                                if let Some(x) = fuzzy_list.clone() {
+                                if let Some(x) = self.fuzzy_list.clone() {
                                     //self.list = x.clone();
                                     input_string = keys;
                                     input.display = input_string.chars().collect();
                                     the_list = Some(x.clone());
-                                    fuzzy_list = Some(x);
                                     // clear input and drop in the parsed key.
                                 }
                             } else {
@@ -689,7 +686,7 @@ impl LsKey {
             the_list = Some(self.list.clone());
         }
 
-        (the_list, result, is_fuzzed, input.execute, fuzzy_list)
+        (the_list, result, is_fuzzed, input.execute)
     }
 }
 
