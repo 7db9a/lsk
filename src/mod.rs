@@ -506,7 +506,7 @@ impl LsKey {
         //If the is a fuzzy re-entry, we must reset is_fuzzed and halt to default.
         let mut execute = false;
         while !execute {
-           let (input, _is_fuzzed, _execute) = self.read_process_chars(self.list.clone());
+           let (input,_execute) = self.read_process_chars();
             execute = _execute;
            if execute {
                self.key_related_mode(Ok(input), self.is_fuzzed);
@@ -578,7 +578,7 @@ impl LsKey {
     //    result
     //}
 
-    fn read_process_chars(&mut self, list: List) -> (Option<String>, bool, bool) {
+    fn read_process_chars(&mut self) -> (Option<String>, bool) {
         let mut input:Input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
@@ -586,7 +586,6 @@ impl LsKey {
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
-        let mut the_list: Option<list::List> = None;
 
         clear_display(&mut stdout);
 
@@ -647,7 +646,6 @@ impl LsKey {
                                     //self.list = x.clone();
                                     input_string = keys;
                                     input.display = input_string.chars().collect();
-                                    the_list = Some(x.clone());
                                     // clear input and drop in the parsed key.
                                 }
                             } else {
@@ -678,11 +676,7 @@ impl LsKey {
             }
         }
 
-        if the_list.is_none() {
-            the_list = Some(self.list.clone());
-        }
-
-        (result, is_fuzzed, input.execute)
+        (result, input.execute)
     }
 }
 
