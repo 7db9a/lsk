@@ -247,7 +247,7 @@ mod tests {
     #[test]
     #[ignore]//docker
     fn get_non_hidden_paths_by_key() {
-        let path = "/tmp/lsk_tests/";
+        let path = "/tmp/lsk_tests/get_non_hidden_paths_by_key/";
 
         let mut fixture = Fixture::new()
             .add_dirpath(path.to_string())
@@ -280,8 +280,8 @@ mod tests {
 
         fixture.teardown(true);
 
-        assert_eq!(file_path_1, Path::new("/tmp/lsk_tests/a-dir").to_path_buf());
-        assert_eq!(file_path_2, Path::new("/tmp/lsk_tests/a-file").to_path_buf());
+        assert_eq!(file_path_1, Path::new("/tmp/lsk_tests/get_non_hidden_paths_by_key/a-dir").to_path_buf());
+        assert_eq!(file_path_2, Path::new("/tmp/lsk_tests/get_non_hidden_paths_by_key/a-file").to_path_buf());
         assert_eq!(file_path_3, None);
     }
 
