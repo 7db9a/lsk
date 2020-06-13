@@ -508,8 +508,6 @@ impl LsKey {
         while !execute {
            let (some_list, input, _is_fuzzed, _execute, fuzzy_list) = self.read_process_chars(self.list.clone());
                execute = _execute;
-               self.is_fuzzed = _is_fuzzed;
-               self.fuzzy_list = fuzzy_list;
                if let Some(list) = some_list {
                    if execute {
                        let new_list = list.clone();
@@ -663,7 +661,6 @@ impl LsKey {
 
                                 if input.display.iter().last() != Some(&'\n') {
                                     let ls_key = self.fuzzy_update(fuzzy_mode_input);
-                                    fuzzy_list = ls_key.fuzzy_list;
                                 }
                             }
 
@@ -788,6 +785,7 @@ pub struct Input {
     pub cmd_type: Option<CmdType>,
     pub display: Vec<char>,
     pub execute: bool,
+    pub unwiddle: bool, //i.e. backspacing
 }
 
 
@@ -797,11 +795,13 @@ impl Input {
         let input: Input = Default::default();
         let mut input: Input = Default::default();
         input.execute = true;
+        input.unwiddle = false;
 
         input
     }
 
     pub fn match_event(mut self, c: termion::event::Key) -> Self {
+            self.unwiddle = false;
             match c {
                 Key::Char(c) => {
                     match c {
@@ -819,6 +819,7 @@ impl Input {
                 Key::Up => println!("↑"),
                 Key::Down => println!("↓"),
                 Key::Backspace => {
+                    self.unwiddle = true;
                     if let Some(x) = self.display.pop() {
                         if self.display.iter().count() == 0 {
                             self.execute = false;
