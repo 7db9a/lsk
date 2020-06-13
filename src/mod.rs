@@ -66,6 +66,7 @@ pub struct LsKey {
     pub all: bool,
     pub input: Input,
     pub fuzzy_list: Option<List>,
+    pub pre_fuzz_list: Option<List>,
     pub display: Option<(PathBuf, String)>,
     pub halt: bool,
     pub is_fuzzed: bool,
@@ -640,6 +641,9 @@ impl LsKey {
                             }
                         },
                         Mode::Fuzzy(fuzzy_mode_input) => {
+                            if !is_fuzzed {
+                                self.pre_fuzz_list = Some(self.list.clone());
+                            }
                             let _show = self.display.clone();
                             let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
