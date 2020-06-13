@@ -507,16 +507,12 @@ impl LsKey {
         let mut execute = false;
         while !execute {
            let (some_list, input, _is_fuzzed, _execute) = self.read_process_chars(self.list.clone());
-               execute = _execute;
-               if let Some(list) = some_list {
-                   if execute {
-                       let new_list = list.clone();
-                       self.key_related_mode(list, Ok(input), self.is_fuzzed);
-                   } else {
-                       break
-                    }
-
-               }
+            execute = _execute;
+           if execute {
+               self.key_related_mode(self.list.clone(), Ok(input), self.is_fuzzed);
+           } else {
+               break
+           }
         }
     }
 
