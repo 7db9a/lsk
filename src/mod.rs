@@ -536,15 +536,13 @@ impl LsKey {
                     first = &'r';
                 }
 
-                let some_mode = mode_parse(input_string.clone());
+                let some_mode = self.mode_parse(input_string.clone());
 
                 if let Some(mode) = some_mode {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
                              if last == Some(&'\n') {
-                                 let cmd_res = cmd_read(&mut self.input.clone().display, self);
-                                 self.input.display = cmd_res.0;
-                                 input_string = cmd_res.1;
+                                 input_string = self.cmd_read();
                              }
                         },
                         Mode::Work => {
@@ -620,31 +618,59 @@ impl LsKey {
 
         (result, self.input.execute)
     }
-}
 
-fn cmd_read(input: &mut Vec<char>, ls_key: &mut LsKey) -> (Vec<char>, String) {
-     input.pop();
-     let input_string: String = input.iter().collect();
-     let cmd_mode = mode_parse(input_string.clone()).unwrap(); //safe
-     match cmd_mode {
-         Mode::Cmd(cmd_mode_input) => {
-             let input = Input::new();
-             let input = input.parse(cmd_mode_input);
-
-             match input.clone().cmd_type.unwrap() {
-                 CmdType::cmd => {
-                     ls_key.cmd_mode(input);
-                     ls_key.run_list_read(true);
-                 },
-                 _ => {}
+    pub fn mode_parse(&mut self, mut input: String) -> Option<Mode> {
+        let len = input.len();
+        let mode = if len >= 2 {
+             let mode: String = input.drain(..2).collect();
+             let mode = mode.as_str();
+             let fuzzy = "f ";
+             let cmd = "c ";
+             match mode {
+                 "f " => Some(Mode::Fuzzy(input.clone())),
+                 "c " => Some(Mode::Cmd(input.clone())),
+                 _ => None
              }
-             //break
-         }
-         _ => { }
-     }
+        } else if len > 1 {
+             let mode: String = input.drain(..1).collect();
+             let mode = mode.as_str();
+             match mode {
+                 "w" => Some(Mode::Work),
+                 _ => None
+             }
+        } else {
+            None
+        };
 
-     (input.to_vec(), input_string)
+        mode
+    }
+
+    fn cmd_read(&mut self) -> String {
+         self.input.display.pop();
+         let input_string: String = self.input.display.iter().collect();
+         let cmd_mode = self.mode_parse(input_string.clone()).unwrap(); //safe
+
+         match cmd_mode {
+             Mode::Cmd(cmd_mode_input) => {
+                 let input = Input::new();
+                 let input = input.parse(cmd_mode_input);
+
+                 match input.clone().cmd_type.unwrap() {
+                     CmdType::cmd => {
+                         self.cmd_mode(input);
+                         self.run_list_read(true);
+                     },
+                     _ => {}
+                 }
+                 //break
+             }
+             _ => { }
+         }
+
+        input_string
+    }
 }
+
 
 fn clear_display(stdout: &mut RawTerminal<StdoutLock>) {
     write!(
@@ -871,32 +897,6 @@ pub enum Mode {
     Work,
 }
 
-pub fn mode_parse(mut input: String) -> Option<Mode> {
-    let len = input.len();
-    let mode = if len >= 2 {
-         let mode: String = input.drain(..2).collect();
-         let mode = mode.as_str();
-         let fuzzy = "f ";
-         let cmd = "c ";
-         match mode {
-             "f " => Some(Mode::Fuzzy(input.clone())),
-             "c " => Some(Mode::Cmd(input.clone())),
-             _ => None
-         }
-    } else if len > 1 {
-         let mode: String = input.drain(..1).collect();
-         let mode = mode.as_str();
-         match mode {
-             "w" => Some(Mode::Work),
-             _ => None
-         }
-    } else {
-        None
-    };
-
-    mode
-}
-
 fn parse_keys(input: &str) -> Option<String> {
     let x = input;
     let mut y: Vec<&str> = x.split(" ").collect();
@@ -952,7 +952,7 @@ mod app_test {
     use std::process::Command;
     use std::env;
     use fixture::{Fixture, command_assistors};
-    use super::{Input, LsKey, CmdType, Mode, mode_parse};
+    use super::{Input, LsKey, CmdType, Mode};
     use super::*;
 
     macro_rules! test {
@@ -1402,23 +1402,24 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_mode_parse() {
+        let mut ls_key = LsKey::new("/tmp", false, false);
         let input_single = "f something".to_string();
-        let some_fuzzy_search_single = mode_parse(input_single.clone());
+        let some_fuzzy_search_single = ls_key.mode_parse(input_single.clone());
 
         let input_multi = "f something and more".to_string();
-        let some_fuzzy_search_multi = mode_parse(input_multi.clone());
+        let some_fuzzy_search_multi = ls_key.mode_parse(input_multi.clone());
 
         let input_lack = "f ".to_string();
-        let some_fuzzy_search_lack = mode_parse(input_lack.clone());
+        let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
 
         let input_invalid = "fd".to_string();
-        let some_fuzzy_search_invalid = mode_parse(input_lack.clone());
+        let some_fuzzy_search_invalid = ls_key.mode_parse(input_lack.clone());
 
         let input_lack_more = "f".to_string();
-        let some_fuzzy_search_lack_more = mode_parse(input_lack_more.clone());
+        let some_fuzzy_search_lack_more = ls_key.mode_parse(input_lack_more.clone());
 
         let input_wrong = "d something".to_string();
-        let some_fuzzy_search_wrong = mode_parse(input_wrong.clone());
+        let some_fuzzy_search_wrong = ls_key.mode_parse(input_wrong.clone());
 
         assert_eq!(
             some_fuzzy_search_invalid,
