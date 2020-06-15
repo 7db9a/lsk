@@ -29,13 +29,13 @@ pub mod app {
     pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) -> LsKey {
         if test {
             let mut path = path.as_ref().to_path_buf();
-            create_dir_all(path.clone()).expect("Failed to create directories.");
+            create_dir_all(&path).expect("Failed to create directories.");
             path.push(".lsk_test_output");
-            let mut file = std::fs::File::create(path.clone()).unwrap();
+            let mut file = std::fs::File::create(&path).unwrap();
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
-        ls_key.run_list_read(ls_key.clone().is_fuzzed);
+        ls_key.run_list_read(ls_key.is_fuzzed);
         let mut list = ls_key.list.clone();
 
         while ls_key.is_fuzzed {
@@ -52,7 +52,7 @@ pub mod app {
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            ls_key.run_list_read(ls_key.clone().is_fuzzed);
+            ls_key.run_list_read(ls_key.is_fuzzed);
             list = ls_key.list.clone();
         }
 
