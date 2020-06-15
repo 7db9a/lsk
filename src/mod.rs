@@ -1234,7 +1234,7 @@ mod app_test {
           "",
           "macro_go_back_fuzzy_enter_back_into_dir",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "5fb1505474abce6d3c2797fdb1777746bf78b29282f398b97a087cf278bcbc60",
+          "7d6e765d6e167e16e9c5eabb2e92ff1b7f48a5d0344357140605dded627c00a0",
           ignore/*macro_use*/
     );
 
