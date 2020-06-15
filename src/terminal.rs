@@ -31,8 +31,8 @@ pub mod parent_shell {
 	       // Send the message
            let text_iter = text.iter();
            let type_n_sleep = |text: String, delay: u32| {
-               //let few_ms = std::time::Duration::from_millis(100);
-               //std::thread::sleep(few_ms);
+               let few_ms = std::time::Duration::from_millis(100);
+               std::thread::sleep(few_ms);
                if text == format!(r#""BackSpace""#) {
                    send_key("BackSpace", delay);
                } else {
