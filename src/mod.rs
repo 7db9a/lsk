@@ -1399,48 +1399,56 @@ mod app_test {
         super::terminal::shell::spawn("cat".to_string(), vec!["Cargo.toml".to_string()]);
     }
 
-    #[test]
-    #[ignore]//docker
-    fn test_mode_parse() {
-       let input_single = "f something".to_string();
-       let some_fuzzy_search_single = mode_parse(input_single.clone());
+     #[test]
+     #[ignore]//docker
+     fn test_mode_parse() {
+        let input_single = "f something".to_string();
+        let some_fuzzy_search_single = mode_parse(input_single.clone());
 
-       let input_multi = "f something and more".to_string();
-       let some_fuzzy_search_multi = mode_parse(input_multi.clone());
+        let input_multi = "f something and more".to_string();
+        let some_fuzzy_search_multi = mode_parse(input_multi.clone());
 
-       let input_lack = "f ".to_string();
-       let some_fuzzy_search_lack = mode_parse(input_lack.clone());
+        let input_lack = "f ".to_string();
+        let some_fuzzy_search_lack = mode_parse(input_lack.clone());
 
-       let input_lack_more = "f".to_string();
-       let some_fuzzy_search_lack_more = mode_parse(input_lack_more.clone());
+        let input_invalid = "fd".to_string();
+        let some_fuzzy_search_invalid = mode_parse(input_lack.clone());
 
-       let input_wrong = "d something".to_string();
-       let some_fuzzy_search_wrong = mode_parse(input_wrong.clone());
+        let input_lack_more = "f".to_string();
+        let some_fuzzy_search_lack_more = mode_parse(input_lack_more.clone());
 
-       assert_eq!(
-           some_fuzzy_search_lack,
-           None
-       );
+        let input_wrong = "d something".to_string();
+        let some_fuzzy_search_wrong = mode_parse(input_wrong.clone());
 
-       assert_eq!(
-           some_fuzzy_search_lack_more,
-           None
-       );
+        assert_eq!(
+            some_fuzzy_search_invalid,
+            None
+        );
 
-       assert_eq!(
-           some_fuzzy_search_single,
-           Some(Mode::Fuzzy("something".to_string()))
-       );
+        assert_eq!(
+            some_fuzzy_search_lack_more,
+            None
+        );
 
-       assert_eq!(
-           some_fuzzy_search_multi,
-           Some(Mode::Fuzzy("something and more".to_string()))
+        assert_eq!(
+            some_fuzzy_search_single,
+            Some(Mode::Fuzzy("something".to_string()))
+        );
 
-       );
+        assert_eq!(
+            some_fuzzy_search_multi,
+            Some(Mode::Fuzzy("something and more".to_string()))
 
-       assert_eq!(
-           some_fuzzy_search_wrong,
-           None
-       );
-    }
+        );
+
+        assert_eq!(
+            some_fuzzy_search_wrong,
+            None
+        );
+
+        assert_eq!(
+            some_fuzzy_search_lack,
+            None
+        );
+     }
 }
