@@ -102,11 +102,6 @@ impl LsKey {
         let dirs = &self.list.dirs;
 
         let mut input_vec_str: Vec<&str> = input.split(" ").collect();
-        //let mut input_vec: Vec<String> = vec![];
-        //for x in input_vec_str.iter() {
-        //     input_vec.push(x.to_string())
-        //
-        //}
 
         if input_vec_str.iter().count() > 1{
             input_vec_str.pop();
@@ -240,11 +235,8 @@ impl LsKey {
                 } else {
                     let display = grid.fit_into_columns(1);
                     self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                    //println!("\n\n");
-                    //list::print_list_with_keys(list.clone());
                 }
             } else {
-                //println!("\n\n");
                 //list::print_list_with_keys(list.clone());
             }
     }
@@ -254,7 +246,6 @@ impl LsKey {
             let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
-            //let res = terminal::input_n_display::grid(entries_keyed);
             let res = terminal::input_n_display::grid(entries_keyed);
             let mut show = "".to_string();
             if let Some(r) = res {
@@ -262,17 +253,12 @@ impl LsKey {
                 let width = r.1;
                 let display = grid.fit_into_width(width);
                 if display.is_some() && !self.test {
-                     //println!("\n\n{}", d);
                      self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
                 } else {
                     let display = grid.fit_into_columns(1);
                      self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                    //println!("\n\n");
-                    //list::print_list_with_keys(list.clone());
                 }
             } else {
-                //println!("\n\n");
-                //list::print_list_with_keys(list.clone());
             }
 
             if !halt {
@@ -284,8 +270,6 @@ impl LsKey {
             let entries: Vec<PathBuf> = list::order_and_sort_list(&list, false);
 
             let entries_keyed: Vec<String> = list::key_entries(entries);
-            //let res = terminal::input_n_display::grid(entries_keyed);
-            //println!("{:#?}", entries_keyed);
             let res = terminal::input_n_display::grid(entries_keyed); // stops here!
             //println!("\n....made it!\n");
             let mut show = "".to_string();
@@ -294,8 +278,6 @@ impl LsKey {
                 let width = r.1;
                 let display = grid.fit_into_width(width);
                 if display.is_some() && !self.test {
-                     //println!("\n\n{}", d);
-                     //println!("\nmade it!\n");
                      let old_display = self.display.clone();
                      //self.display = Some((self.list.parent_path.clone(), d.to_string()));
                      //assert_eq!(self.display, Some((PathBuf::from(""), "".to_string())));
@@ -435,11 +417,8 @@ impl LsKey {
                      let split: Vec<&str> = input.as_read.split("vim").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"vim {}"#, cmd);
-                     //let output = terminal::shell::cmd(cmd.clone());
-                     //let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![]);
                      path_cache.switch_back();
-                     //self.run_list_read();
                  },
                  "zsh" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -450,11 +429,8 @@ impl LsKey {
                      let split: Vec<&str> = input.as_read.split("zsh").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"zsh {}"#, cmd);
-                     //let output = terminal::shell::cmd(cmd.clone());
-                     //let file_path = output.unwrap();
                      terminal::shell::spawn("zsh".to_string(), vec![]);
                      path_cache.switch_back();
-                     //self.run_list_read();
                  },
                  _ => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -463,7 +439,6 @@ impl LsKey {
                      path_cache.switch();
                      let output = terminal::shell::cmd(as_read.to_string()).unwrap();
                      path_cache.switch_back();
-                     //self.run_list_read();
                  }
              }
         }
@@ -567,20 +542,6 @@ impl LsKey {
         }
     }
 
-    //fn test_data_sum_to_single_hash(&mut self) -> [u8; 32] {
-    //    let mut complete_vec = self.input_vec.to_owned();
-    //    complete_vec.append(&mut self.output_vec);
-    //    let mut hasher = Sha256::new();
-    //    for i in complete_vec.iter() {
-    //        let str_i = std::str::from_utf8(i).unwrap();
-    //        hasher.input(str_i);
-    //    }
-
-    //    let result: [u8; 32] = hasher.result().as_slice().try_into().expect("Wrong length");
-
-    //    result
-    //}
-
     fn read_process_chars(&mut self) -> (Option<String>, bool) {
         self.input = Input::new();
         let stdin = stdin();
@@ -623,21 +584,6 @@ impl LsKey {
                     if self.input.full_backspace {
                        *self = orig_ls_key.clone();
                        is_fuzzed = false;
-                       //self.read_process_chars();
-                       //let path = self.list.parent_path.clone();
-                       //let path = path.to_str().unwrap();
-                       ////let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                       ////terminal::parent_shell::type_text(cmd, 0);
-                       //self.is_fuzzed = false;
-                       //self.input = Input::new();
-
-                       //self.input.match_event(c);
-                       //input_string = self.input.display.iter().collect();
-                       //input_len = self.input.display.iter().count().try_into().unwrap();
-                       //input = self.input.clone();
-                       //_first = input.display.iter().nth(0);
-                       //_input = self.input.clone();
-                       //last = _input.display.iter().last();
                     }
                 }
                 self.test_data_update(Some(input_string.clone()));
@@ -681,10 +627,8 @@ impl LsKey {
 
                             if let Some(keys) = some_keys {
                                 if let Some(x) = self.fuzzy_list.clone() {
-                                    //self.list = x.clone();
                                     input_string = keys;
                                     self.input.display = input_string.chars().collect();
-                                    // clear input and drop in the parsed key.
                                 }
                             } else {
 
@@ -715,20 +659,6 @@ impl LsKey {
                 if self.input.full_backspace {
                    *self = orig_ls_key.clone();
                    is_fuzzed = false;
-                    //self.read_process_chars();
-                   //let path = self.list.parent_path.clone();
-                   //let path = path.to_str().unwrap();
-                   ////let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
-                   ////terminal::parent_shell::type_text(cmd, 0);
-                   //self.is_fuzzed = false;
-                   //self.input = Input::new();
-
-                   //input_string = self.input.display.iter().collect();
-                   //input_len = self.input.display.iter().count().try_into().unwrap();
-                   //input = self.input.clone();
-                   //_first = input.display.iter().nth(0);
-                   //input = self.input.clone();
-                   //last = input.display.iter().last();
                 }
             }
 
