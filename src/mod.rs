@@ -217,30 +217,6 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn run_list_read_beta(&mut self) {
-            let list = self.list.clone();
-            let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
-
-            let entries_keyed: Vec<String> = list::key_entries(entries);
-            //let res = terminal::input_n_display::grid(entries_keyed);
-            let res = terminal::input_n_display::grid(entries_keyed);
-            let mut show = "".to_string();
-            if let Some(r) = res {
-                let grid = r.0;
-                let width = r.1;
-                let display = grid.fit_into_width(width);
-                if display.is_some() && !self.test {
-                     //println!("\n\n{}", d);
-                     self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
-                } else {
-                    let display = grid.fit_into_columns(1);
-                    self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                }
-            } else {
-                //list::print_list_with_keys(list.clone());
-            }
-    }
-
    pub fn run_list_read(&mut self, halt: bool) {
             let list = self.list.clone();
             let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
