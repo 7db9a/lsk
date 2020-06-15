@@ -240,38 +240,6 @@ impl LsKey {
             }
     }
 
-   pub fn fuzzy_update_list_read(&mut self, list: &List) -> Option<(PathBuf, String)> {
-            let entries: Vec<PathBuf> = list::order_and_sort_list(&list, false);
-
-            let entries_keyed: Vec<String> = list::key_entries(entries);
-            let res = terminal::input_n_display::grid(entries_keyed); // stops here!
-            //println!("\n....made it!\n");
-            let mut show = "".to_string();
-            if let Some(r) = res {
-                let grid = r.0;
-                let width = r.1;
-                let display = grid.fit_into_width(width);
-                if display.is_some() && !self.test {
-                     let old_display = self.display.clone();
-                     //self.display = Some((self.list.parent_path.clone(), d.to_string()));
-                     //assert_eq!(self.display, Some((PathBuf::from(""), "".to_string())));
-                     //assert_ne!(old_display, self.display);
-                     return Some((self.list.parent_path.clone(), display.unwrap().to_string())) // safe to unwrap.
-                     //println!("{:#?}", self.display);
-                } else {
-                    let display = grid.fit_into_columns(1);
-                    //self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                    //println!("\n\n");
-                    //list::print_list_with_keys(list.clone());
-                     return Some((self.list.parent_path.clone(), display.to_string()))
-                }
-            } else {
-                //println!("\n\n");
-                //list::print_list_with_keys(list.clone());
-                self.display.clone()
-            }
-    }
-
     fn return_file_by_key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
         let get_file = |key_string: String| {
              let key: usize = key_string.parse().unwrap();
@@ -905,7 +873,7 @@ pub enum Mode {
 
 pub fn mode_parse(mut input: String) -> Option<Mode> {
     let len = input.len();
-    let mode = if len > 2 {
+    let mode = if len >= 2 {
          let mode: String = input.drain(..2).collect();
          let mode = mode.as_str();
          let fuzzy = "f ";
@@ -915,7 +883,7 @@ pub fn mode_parse(mut input: String) -> Option<Mode> {
              "c " => Some(Mode::Cmd(input.clone())),
              _ => None
          }
-    } else if len == 2 {
+    } else if len > 1 {
          let mode: String = input.drain(..1).collect();
          let mode = mode.as_str();
          match mode {
@@ -1270,7 +1238,7 @@ mod app_test {
            "q\r",
            "macro_bad_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "833435049beca1e8a1ec2b4be68bd8062e0453d3759b1f86b2976ddfbad16576",
+           "01debe9dc917712d48360f2d58f19136f87921602b987da386240c078498c8f2",
            ignore/*macro_use*/
      );
 
