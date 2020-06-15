@@ -692,7 +692,7 @@ fn cmd_read(input: &mut Vec<char>, ls_key: &mut LsKey) -> (Vec<char>, String) {
              match input.clone().cmd_type.unwrap() {
                  CmdType::cmd => {
                      ls_key.cmd_mode(input);
-                     ls_key.run_list_read_beta();
+                     ls_key.run_list_read(true);
                  },
                  _ => {}
              }
