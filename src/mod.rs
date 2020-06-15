@@ -178,9 +178,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        let res =  self.fuzzy_update_list_read(&list);
-        //self.list = list;
-        self.display = res;
+        self.run_list_read(true);
         self.fuzzy_list = Some(list);
 
         self.clone()
