@@ -1083,10 +1083,15 @@ mod app_test {
 
                 match file256 {
                     Ok(h) => {
-                        assert_eq!(
-                            h.to_hex_string(),
-                            $file_hash.to_string()
-                        )
+                        // Bad partial backspace and enter.
+                        if $file_hash != "4c82e363031ff51dc989026f4b031c34fede59c38623af7c741989bb53dd4184" {
+                            assert_eq!(
+                                h.to_hex_string(),
+                                $file_hash.to_string()
+                            )
+                        } else {
+                             assert!(false)
+                        }
                     },
                     Err(..) => assert!(false)
                 }
