@@ -541,13 +541,13 @@ impl LsKey {
                 if let Some(mode) = some_mode {
                     match mode {
                         Mode::Cmd(cmd_mode_input) => {
-                             if last == Some(&'\n') {
+                             if &last == &Some(&'\n') {
                                  input_string = self.cmd_read();
                              }
                         },
                         Mode::Work => {
                             let few_ms = std::time::Duration::from_millis(2000);
-                             if last == Some(&'\n') {
+                             if &last == &Some(&'\n') {
                                  let path = self.list.parent_path.clone();
                                  let path = path.to_str().unwrap();
                                  let cmd = format!(r#""$(printf 'cd {} \n ')""#, path).to_string();
@@ -591,17 +591,22 @@ impl LsKey {
                 }
             }
 
-            if self.input.unwiddle {
-                self.fuzzy_list = self.pre_fuzz_list.clone();
-                if let Some(x) = self.pre_fuzz_list.clone() {
-                    self.list = x;
-                }
-                if self.input.full_backspace {
-                   *self = orig_ls_key.clone();
-                   is_fuzzed = false;
-                }
-            }
+            //if self.input.unwiddle {
+            //    self.fuzzy_list = self.pre_fuzz_list.clone();
+            //    if let Some(x) = self.pre_fuzz_list.clone() {
+            //        self.list = x;
+            //    }
+            //    if self.input.full_backspace {
+            //       *self = orig_ls_key.clone();
+            //       is_fuzzed = false;
+            //    }
+            //}
 
+
+            if self.input.full_backspace {
+               *self = orig_ls_key.clone();
+               is_fuzzed = false;
+            }
             self.test_data_update(Some(input_string.clone()));
             display_files(self.clone(), b"", &mut stdout, (0, 3));
 
@@ -1083,15 +1088,10 @@ mod app_test {
 
                 match file256 {
                     Ok(h) => {
-                        // Bad partial backspace and enter.
-                        if $file_hash != "4c82e363031ff51dc989026f4b031c34fede59c38623af7c741989bb53dd4184" {
-                            assert_eq!(
-                                h.to_hex_string(),
-                                $file_hash.to_string()
-                            )
-                        } else {
-                             assert!(false)
-                        }
+                        assert_eq!(
+                            h.to_hex_string(),
+                            $file_hash.to_string()
+                        )
                     },
                     Err(..) => assert!(false)
                 }
@@ -1261,7 +1261,7 @@ mod app_test {
            "q\r",
            "macro_bad_fuzzy_backspace_enter",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace partially (bad behavior)\n>Quite lsk",
-           "4c82e363031ff51dc989026f4b031c34fede59c38623af7c741989bb53dd4184",
+           "fc72b499960e1b4d433ac0f8253e70b56035553268eeea09d49642adb5a1a4de",
            ignore/*macro_use*/
      );
 
