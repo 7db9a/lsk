@@ -1413,7 +1413,7 @@ mod app_test {
         let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
 
         let input_invalid = "fd".to_string();
-        let some_fuzzy_search_invalid = ls_key.mode_parse(input_lack.clone());
+        let some_fuzzy_search_invalid = ls_key.mode_parse(input_invalid.clone());
 
         let input_lack_more = "f".to_string();
         let some_fuzzy_search_lack_more = ls_key.mode_parse(input_lack_more.clone());
