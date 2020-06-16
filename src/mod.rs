@@ -1226,7 +1226,7 @@ mod app_test {
 
      test!(
            false, //list_all_bool
-           macro_bad_fuzzy_backspace,
+           macro_fuzzy_backspace,
            "Makefile",
            100,
            "f itf",
@@ -1236,9 +1236,27 @@ mod app_test {
            "BackSpace",
            "BackSpace",
            "q\r",
-           "macro_bad_fuzzy_backspace",
+           "macro_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "01debe9dc917712d48360f2d58f19136f87921602b987da386240c078498c8f2",
+           "79fc9589b8631f59668a277ca5e8a8e5454b3f272617693d40f1efd95bcf04df",
+           ignore/*macro_use*/
+     );
+
+     test!(
+           false, //list_all_bool
+           macro_bad_fuzzy_backspace_enter,
+           "Makefile",
+           100,
+           "f itf",
+           "BackSpace",
+           "BackSpace",
+           "",
+           "",
+           "\r",
+           "q\r",
+           "macro_bad_fuzzy_backspace_enter",
+           ">Run lsk\n>OFuzzy widdle (2)\n>Backspace partially (bad behavior)\n>Quite lsk",
+           "4c82e363031ff51dc989026f4b031c34fede59c38623af7c741989bb53dd4184",
            ignore/*macro_use*/
      );
 
