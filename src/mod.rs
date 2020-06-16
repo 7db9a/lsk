@@ -1432,9 +1432,6 @@ mod app_test {
         let input_multi = "f something and more".to_string();
         let some_fuzzy_search_multi = ls_key.mode_parse(input_multi.clone());
 
-        let input_lack = "f ".to_string();
-        let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
-
         let input_invalid = "fd".to_string();
         let some_fuzzy_search_invalid = ls_key.mode_parse(input_invalid.clone());
 
@@ -1469,6 +1466,15 @@ mod app_test {
             some_fuzzy_search_wrong,
             None
         );
+     }
+
+     #[test]
+     #[ignore]//docker
+     fn test_bad_mode_parse() {
+        let mut ls_key = LsKey::new("/tmp", false, false);
+
+        let input_lack = "f ".to_string();
+        let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
 
         assert_eq!(
             some_fuzzy_search_lack,
