@@ -3,6 +3,8 @@ pub mod terminal;
 pub mod fuzzy;
 pub mod style;
 
+use list::FileType;
+
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 use std::fs::{create_dir_all, metadata, OpenOptions};
@@ -117,12 +119,12 @@ impl LsKey {
 
         let files_score: Vec<fuzzy::demo::Score> =
            files.iter()
-               .map(|file| fuzzy::demo::Score::Files(score_list(file.to_path_buf())))
+               .map(|file| fuzzy::demo::Score::Files(score_list(file.0.to_path_buf())))
                .collect();
 
         let dirs_score: Vec<fuzzy::demo::Score> =
            dirs.iter()
-               .map(|dir| fuzzy::demo::Score::Dirs(score_list(dir.to_path_buf())))
+               .map(|dir| fuzzy::demo::Score::Dirs(score_list(dir.0.to_path_buf())))
                .collect();
            //list.map(|x
 
@@ -186,11 +188,11 @@ impl LsKey {
     }
 
     pub fn scores_to_list(&mut self, mut scores: fuzzy::demo::Scores) -> list::List {
-        let files_list: Vec<PathBuf> = scores.files.iter().map(|score|
-            score.score().0
+        let files_list: Vec<(PathBuf, FileType)> = scores.files.iter().map(|score|
+            (score.score().0, FileType::File)
         ).collect();
-        let dirs_list: Vec<PathBuf> = scores.dirs.iter().map(|score|
-            score.score().0
+        let dirs_list: Vec<(PathBuf, FileType)> = scores.dirs.iter().map(|score|
+            (score.score().0, FileType::Dir)
         ).collect();
 
         let pre_fuzzy = self.list.clone();
@@ -218,9 +220,14 @@ impl LsKey {
 
    pub fn run_list_read(&mut self, halt: bool) {
             let list = self.list.clone();
-            let entries: Vec<PathBuf> = list::order_and_sort_list(&list, true);
-
-            let entries_keyed: Vec<String> = list::key_entries(entries);
+            let entries: Vec<(PathBuf, FileType)> = list::order_and_sort_list(&list, true);
+            let mut entries_string: Vec<String> = vec![];
+            for entry in entries.clone() {
+                let entry = entry.0.to_str().unwrap();
+                entries_string.push(entry.to_string());
+            }
+            let mut entries_keyed: Vec<String> = list::key_entries(entries_string);
+            entries_keyed.sort();
             let res = terminal::input_n_display::grid(entries_keyed);
             let mut show = "".to_string();
             if let Some(r) = res {

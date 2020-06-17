@@ -3,10 +3,16 @@ use std::fs::metadata;
 use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum FileType{
+    File,
+    Dir,
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct List {
-    pub files: Vec<PathBuf>,
-    pub dirs: Vec<PathBuf>,
+    pub files: Vec<(PathBuf, FileType)>,
+    pub dirs: Vec<(PathBuf, FileType)>,
     pub parent_path: PathBuf,
     pub path_history: Vec<PathBuf>
 }
@@ -76,7 +82,7 @@ impl List {
         if count > 0 {
             for entry in all_files.clone() {
                 //println!("{} [{}]", entry.display(), n);
-                let path = entry.to_path_buf();
+                let path = entry.0.to_path_buf();
                 let parent_file_name = file_or_dir_name(&self.parent_path);
                 if Some(&path) != parent_file_name.as_ref() {
                     if n == key {
@@ -138,12 +144,16 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                    if md.is_file() {
                        list = list.replace_shortest_path(path);
                        if let Some(p) = short_path {
-                           list.files.push(p);
+                           list.files.push(
+                               (p, FileType::File)
+                            );
                        }
                    } else if md.is_dir() {
                        list = list.replace_shortest_path(path);
                        if let Some(p) = short_path {
-                           list.dirs.push(p);
+                           list.dirs.push(
+                               (p, FileType::Dir)
+                           );
                        }
                    }
                 },
@@ -164,11 +174,11 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
     metadata(path).unwrap().is_dir()
 }
 
-pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
+//Colorize here.
+pub fn key_entries(entries: Vec<String>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
-        let entry = entry.to_str().unwrap();
         let entry = format!(r#"{} [{}]"#, entry, n);
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
@@ -178,38 +188,44 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<(PathBuf, FileType)> {
     let files = list.files.iter();
     let dirs = list.dirs.iter();
     let mut done = false;
 
-    let mut all_files: Vec<PathBuf> = vec![];
+    let mut all_files: Vec<(PathBuf, FileType)> = vec![];
 
     let previous_path = list.path_history.iter().last().unwrap();
 
-    all_files.push(previous_path.to_path_buf());
+    all_files.push(
+        (previous_path.to_path_buf(), FileType::Dir)
+    );
 
     while !done {
         if files.clone().count() > 0 {
             for entry in files.clone() {
                 //println!("{} [{}]", entry.display(), n);
-                all_files.push(entry.to_path_buf());
+                all_files.push(
+                    (entry.0.to_path_buf(), FileType::File)
+                );
             }
         }
         if dirs.clone().count() > 0 {
             for entry in dirs.clone() {
                 let parent_file_name = file_or_dir_name(&list.parent_path);
-                if Some(entry) != parent_file_name.as_ref() {
-                   all_files.push(entry.to_path_buf());
+                if Some(&entry.0) != parent_file_name.as_ref() {
+                    all_files.push(
+                        (entry.0.to_path_buf(), FileType::Dir)
+                    );
                 }
             }
         }
         done = true;
     }
 
-    if sort {
-        all_files.sort(); 
-    }
+    //if sort {
+    //    all_files.sort(); 
+    //}
 
     all_files
 }
@@ -218,7 +234,7 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
-        println!("{} [{}]", entry.display(), n);
+        println!("{} [{}]", entry.0.display(), n);
         n += 1;
     }
 
