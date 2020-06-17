@@ -220,20 +220,7 @@ impl LsKey {
 
    pub fn run_list_read(&mut self, halt: bool) {
             let list = self.list.clone();
-            let entries: Vec<(PathBuf, FileType)> = list::order_and_sort_list(&list, true);
-            let mut entries_string: Vec<String> = vec![];
-            for entry in entries.clone() {
-                let entry = entry.0.to_str().unwrap();
-                entries_string.push(entry.to_string());
-            }
-            entries_string.sort();
-
-            let previous_path = self.list.path_history.iter().last().unwrap();
-
-            entries_string.insert(
-                0,
-                previous_path.to_path_buf().into_os_string().into_string().unwrap()
-            );
+            let entries_string: Vec<String> = list::order_and_sort_list(&list, true);
             let mut entries_keyed: Vec<String> = list::key_entries(entries_string);
             let res = terminal::input_n_display::grid(entries_keyed);
             let mut show = "".to_string();

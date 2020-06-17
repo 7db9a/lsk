@@ -176,27 +176,25 @@ fn fuzzy_list() {
             //     parent_dir: Some("/tmp/lsk_tests/"),
             //     path_history: ["/tmp/lsk_tests/"]
             //}
-            format!("{}",
-                "List \
-                 {\n    \
-                     files: [\n        \"CREDITS\",\n    ],\n    \
-                     dirs: [\n        \"security\",\n        \"scripts\",\n        \"crypto\",\n        \"certs\",\n    ],\n    \
-                     parent_path: \"/tmp/lsk_tests/\",\n    \
-                     path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n\
-                 }"
-            )
+            //format!("{}",
+            //    "List \
+            //     {\n    \
+            //         files: [\n        \"CREDITS\",\n    ],\n    \
+            //         dirs: [\n        \"security\",\n        \"scripts\",\n        \"crypto\",\n        \"certs\",\n    ],\n    \
+            //         parent_path: \"/tmp/lsk_tests/\",\n    \
+            //         path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n\
+            //     }"
+            //)
+            format!(
+                  "{}",
+                 "List {\n    files: [\n        (\n            \"CREDITS\",\n            File,\n        ),\n    ],\n    dirs: [\n        (\n            \"security\",\n            Dir,\n        ),\n        (\n            \"scripts\",\n            Dir,\n        ),\n        (\n            \"crypto\",\n            Dir,\n        ),\n        (\n            \"certs\",\n            Dir,\n        ),\n    ],\n    parent_path: \"/tmp/lsk_tests/\",\n    path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n}"
+             )
         );
         assert_ne!(
             format!("{:#?}", list_original),
             //list_fuzzed
             format!("{}",
-                "List \
-                 {\n    \
-                     files: [\n        \"CREDITS\",\n    ],\n    \
-                     dirs: [\n        \"security\",\n        \"scripts\",\n        \"crypto\",\n        \"certs\",\n    ],\n    \
-                     parent_path: \"/tmp/lsk_tests/\",\n    \
-                     path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n\
-                 }"
+                 "List {\n    files: [\n        (\n            \"CREDITS\",\n            File,\n        ),\n    ],\n    dirs: [\n        (\n            \"security\",\n            Dir,\n        ),\n        (\n            \"scripts\",\n            Dir,\n        ),\n        (\n            \"crypto\",\n            Dir,\n        ),\n        (\n            \"certs\",\n            Dir,\n        ),\n    ],\n    parent_path: \"/tmp/lsk_tests/\",\n    path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n}"
             )
         );
 

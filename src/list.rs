@@ -74,22 +74,7 @@ impl List {
     }
 
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
-        let entries = order_and_sort_list(&self, sort);
-
-        let mut entries_string: Vec<String> = vec![];
-        for entry in entries.clone() {
-            let entry = entry.0.to_str().unwrap();
-            entries_string.push(entry.to_string());
-        }
-
-        entries_string.sort();
-
-        let previous_path = self.path_history.iter().last().unwrap();
-
-        entries_string.insert(
-            0,
-            previous_path.to_path_buf().into_os_string().into_string().unwrap()
-        );
+        let entries_string = order_and_sort_list(&self, sort);
 
         let all_files = entries_string.iter();
         let count =  all_files.clone().count();
@@ -190,7 +175,6 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
     metadata(path).unwrap().is_dir()
 }
 
-//Colorize here.
 pub fn key_entries(entries: Vec<String>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
@@ -204,7 +188,8 @@ pub fn key_entries(entries: Vec<String>) -> Vec<String> {
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<(PathBuf, FileType)> {
+//Colorize here.
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<(String)> {
     let files = list.files.iter();
     let dirs = list.dirs.iter();
     let mut done = false;
@@ -243,14 +228,29 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<(PathBuf, FileType)> 
     //    all_files.sort(); 
     //}
 
-    all_files
+    let mut entries_string: Vec<String> = vec![];
+    for entry in all_files.clone() {
+        let entry = entry.0.to_str().unwrap();
+        entries_string.push(entry.to_string());
+    }
+
+    entries_string.sort();
+
+    let previous_path = list.path_history.iter().last().unwrap();
+
+    entries_string.insert(
+        0,
+        previous_path.to_path_buf().into_os_string().into_string().unwrap()
+    );
+
+    entries_string
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
-        println!("{} [{}]", entry.0.display(), n);
+        println!("{} [{}]", entry, n);
         n += 1;
     }
 
