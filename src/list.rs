@@ -81,7 +81,15 @@ impl List {
             let entry = entry.0.to_str().unwrap();
             entries_string.push(entry.to_string());
         }
+
         entries_string.sort();
+
+        let previous_path = self.path_history.iter().last().unwrap();
+
+        entries_string.insert(
+            0,
+            previous_path.to_path_buf().into_os_string().into_string().unwrap()
+        );
 
         let all_files = entries_string.iter();
         let count =  all_files.clone().count();
@@ -203,11 +211,11 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<(PathBuf, FileType)> 
 
     let mut all_files: Vec<(PathBuf, FileType)> = vec![];
 
-    let previous_path = list.path_history.iter().last().unwrap();
+    //let previous_path = list.path_history.iter().last().unwrap();
 
-    all_files.push(
-        (previous_path.to_path_buf(), FileType::Dir)
-    );
+    //all_files.push(
+    //    (previous_path.to_path_buf(), FileType::Dir)
+    //);
 
     while !done {
         if files.clone().count() > 0 {

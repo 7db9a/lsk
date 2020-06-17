@@ -227,6 +227,13 @@ impl LsKey {
                 entries_string.push(entry.to_string());
             }
             entries_string.sort();
+
+            let previous_path = self.list.path_history.iter().last().unwrap();
+
+            entries_string.insert(
+                0,
+                previous_path.to_path_buf().into_os_string().into_string().unwrap()
+            );
             let mut entries_keyed: Vec<String> = list::key_entries(entries_string);
             let res = terminal::input_n_display::grid(entries_keyed);
             let mut show = "".to_string();
