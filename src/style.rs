@@ -197,7 +197,12 @@ mod test {
                 assert_eq!(lscs, $result.to_vec());
                 let style = Colour::Red.normal();
                 let other_style = Style::default().on(Yellow);
-                println!("{} {}", style.paint("hello"), other_style.paint("world"));
+                let red_string = Colour::Red.normal().paint("hello").to_string();
+                let blue_string = Colour::Blue.normal().paint("world").to_string();
+                //println!("{} {}", style.paint("hello"), other_style.paint("world"));
+                //println!("{}", color_string);
+                let strings = red_string + blue_string.as_str();
+                println!("{}", strings);
             }
         };
     }
