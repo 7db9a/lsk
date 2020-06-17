@@ -74,15 +74,23 @@ impl List {
     }
 
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
-        let all_files = order_and_sort_list(&self, sort);
-        let all_files = all_files.iter();
+        let entries = order_and_sort_list(&self, sort);
+
+        let mut entries_string: Vec<String> = vec![];
+        for entry in entries.clone() {
+            let entry = entry.0.to_str().unwrap();
+            entries_string.push(entry.to_string());
+        }
+        entries_string.sort();
+
+        let all_files = entries_string.iter();
         let count =  all_files.clone().count();
 
         let mut n = 0;
         if count > 0 {
             for entry in all_files.clone() {
                 //println!("{} [{}]", entry.display(), n);
-                let path = entry.0.to_path_buf();
+                let path = PathBuf::from(entry);
                 let parent_file_name = file_or_dir_name(&self.parent_path);
                 if Some(&path) != parent_file_name.as_ref() {
                     if n == key {

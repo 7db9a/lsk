@@ -226,8 +226,8 @@ impl LsKey {
                 let entry = entry.0.to_str().unwrap();
                 entries_string.push(entry.to_string());
             }
+            entries_string.sort();
             let mut entries_keyed: Vec<String> = list::key_entries(entries_string);
-            entries_keyed.sort();
             let res = terminal::input_n_display::grid(entries_keyed);
             let mut show = "".to_string();
             if let Some(r) = res {
