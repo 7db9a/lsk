@@ -201,7 +201,7 @@ fn fuzzy_list() {
 }
 
 #[test]
-#[ignore]//docker
+//#[ignore]//docker
 fn list_go_up_one_level() {
         let input = "cr";
         fixture::Fixture::new()
@@ -250,13 +250,8 @@ fn list_go_up_one_level() {
         assert_eq!(false, Path::new(path).exists());
 
         assert_eq!(
-            format!("{:#?}", list_up_level),
-            "List {\n    \
-                 files: [],\n    \
-                 dirs: [\n        \"lsk_tests\",\n        \"list_enter_dir\",\n    ],\n    \
-                 parent_path: \"/tmp/lsk_tests\",\n    \
-                 path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n\
-            }"
+            format!("{:?}", list_up_level),
+            "List { files: [], dirs: [(\"lsk_tests\", Dir), (\"list_enter_dir\", Dir)], parent_path: \"/tmp/lsk_tests\", path_history: [\"/tmp/lsk_tests/list_enter_dir/\", \"/tmp/lsk_tests\"] }"
         );
 
         assert_ne!(list_original, list_up_level);
