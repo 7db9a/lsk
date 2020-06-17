@@ -230,8 +230,16 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<(String)> {
 
     let mut entries_string: Vec<String> = vec![];
     for entry in all_files.clone() {
-        let entry = entry.0.to_str().unwrap();
-        entries_string.push(entry.to_string());
+        match entry.1 {
+            FileType::File => {
+                let entry = entry.0.to_str().unwrap();
+                entries_string.push(entry.to_string());
+            },
+            FileType::Dir => {
+                let entry = entry.0.to_str().unwrap();
+                entries_string.push(entry.to_string());
+            }
+        }
     }
 
     entries_string.sort();
