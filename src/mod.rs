@@ -1,6 +1,7 @@
 pub mod list;
 pub mod terminal;
 pub mod fuzzy;
+pub mod style;
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};

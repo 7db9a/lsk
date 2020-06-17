@@ -195,6 +195,9 @@ mod test {
                 let mut lscs = Vec::new();
                 LSColors($input).each_pair(|p| lscs.push( (p.key.clone(), p.to_style()) ));
                 assert_eq!(lscs, $result.to_vec());
+                let style = Colour::Red.normal();
+                let other_style = Style::default().on(Yellow);
+                println!("{} {}", style.paint("hello"), other_style.paint("world"));
             }
         };
     }
