@@ -201,7 +201,7 @@ fn fuzzy_list() {
 }
 
 #[test]
-//#[ignore]//docker
+#[ignore]//docker
 fn list_go_up_one_level() {
         let input = "cr";
         fixture::Fixture::new()
@@ -314,13 +314,8 @@ fn list_enter_into_dir() {
         assert_eq!(false, Path::new(path).exists());
 
         assert_eq!(
-            format!("{:#?}", list_enter_usr_dir),
-            "List {\n    \
-                 files: [\n        \"Kconfig\",\n        \"gen_init_cpio.c\",\n        \"Makefile\",\n        \"initramfs_data.S\",\n        \"gen_initramfs.sh\",\n        \"default_cpio_list\",\n    ],\n    \
-                 dirs: [\n        \"usr\",\n        \"include\",\n    ],\n    \
-                 parent_path: \"/tmp/lsk_tests/list_enter_dir/usr\",\n    \
-                 path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests/list_enter_dir/usr\",\n    ],\n\
-            }"
+            format!("{:?}", list_enter_usr_dir),
+            "List { files: [(\"Kconfig\", File), (\"gen_init_cpio.c\", File), (\"Makefile\", File), (\"initramfs_data.S\", File), (\"gen_initramfs.sh\", File), (\"default_cpio_list\", File)], dirs: [(\"usr\", Dir), (\"include\", Dir)], parent_path: \"/tmp/lsk_tests/list_enter_dir/usr\", path_history: [\"/tmp/lsk_tests/list_enter_dir/\", \"/tmp/lsk_tests/list_enter_dir/usr\"] }"
         );
 
         assert_ne!(list_original, list_enter_usr_dir);
