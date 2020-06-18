@@ -16,6 +16,26 @@ pub struct Entry {
     pub file_type: FileType,
 }
 
+
+pub fn _order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
+    let mut strings_vec: Vec<String> = vec![];
+    let mut paths_vec: Vec<PathBuf> = vec![a.path.clone(), b.path.clone()];
+    let mut paths_vec: Vec<PathBuf> = {
+        for path in paths_vec.iter() {
+            let path = path.clone();
+            let path_string = path.into_os_string().into_string().unwrap();
+            strings_vec.push(path_string);
+        }
+
+        strings_vec.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        vec![
+            a.path.clone(), b.path.clone()
+        ]
+    };
+
+    std::cmp::Ordering::Equal
+}
+
 pub fn order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
     let mut paths_vec: Vec<&PathBuf> = vec![&a.path, &b.path];
     paths_vec.sort();
