@@ -157,13 +157,11 @@ impl List {
             for entry in all_files.clone() {
                 //println!("{} [{}]", entry.display(), n);
                 let path = entry.to_path_buf();
-                let parent_file_name = file_or_dir_name(&self.parent_path);
-                if Some(&path) != parent_file_name.as_ref() {
-                    if n == key {
-                        return self.clone().full_entry_path(path);
-                    }
-                   n += 1;
+                //let parent_file_name = file_or_dir_name(&self.parent_path);
+                if n == key {
+                    return self.clone().full_entry_path(path);
                 }
+                n += 1;
             }
         }
 
@@ -268,8 +266,6 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
 
     let previous_path = list.path_history.iter().last().unwrap();
 
-    all_files.push(previous_path.to_path_buf());
-
     _all_files.append(&mut list.files.clone());
     _all_files.append(&mut list.dirs.clone());
 
@@ -293,6 +289,8 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     if sort {
         all_files = alphabetize_paths_vec(_all_files.clone());
     }
+
+    all_files.insert(0, previous_path.to_path_buf());
 
     all_files
 }
