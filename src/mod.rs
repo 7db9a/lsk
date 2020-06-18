@@ -1169,7 +1169,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
-          "bd66aa1bd558b61121327b8d2da2bbd70bcd6802ca0091f1176868dab3869071",
+          "ea92f4f14873cbf49379a52fea3093215b32db163a59c63425cd9e984b421f31",
           ignore/*macro_use*/
     );
 
