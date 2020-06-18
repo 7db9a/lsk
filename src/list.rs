@@ -250,15 +250,14 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
 
     all_files.push(previous_path.to_path_buf());
 
+    let mut _list = list.clone();
+    _list.files.append(&mut list.clone().dirs);
+    let mut _all_files = _list.clone().files;
+
+
     while !done {
-        if files.clone().count() > 0 {
-            for entry in files.clone() {
-                //println!("{} [{}]", entry.display(), n);
-                all_files.push(entry.to_path_buf());
-            }
-        }
-        if dirs.clone().count() > 0 {
-            for entry in dirs.clone() {
+        if _all_files.iter().count() > 0 {
+            for entry in _all_files.iter() {
                 let parent_file_name = file_or_dir_name(&list.parent_path);
                 if Some(entry) != parent_file_name.as_ref() {
                    all_files.push(entry.to_path_buf());
@@ -269,7 +268,7 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     }
 
     if sort {
-        all_files.sort(); 
+        all_files.sort();
     }
 
     all_files
