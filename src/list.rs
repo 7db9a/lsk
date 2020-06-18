@@ -17,11 +17,10 @@ pub struct Entry {
 }
 
 
-pub fn _order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
+pub fn _order_sort_entry(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
     let mut strings_vec: Vec<String> = vec![];
-    let mut paths_vec: Vec<PathBuf> = vec![a.path.clone(), b.path.clone()];
-    let mut alphabetize_paths_vec: Vec<PathBuf> = vec![];
-    let mut paths_vec: Vec<PathBuf> = {
+    let mut alphabetized_paths_vec: Vec<PathBuf> = {
+        let mut _alphabetized_paths_vec: Vec<PathBuf> = vec![];
         for path in paths_vec.iter() {
             let path = path.clone();
             let path_string = path.into_os_string().into_string().unwrap();
@@ -31,12 +30,12 @@ pub fn _order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
         strings_vec.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
 
         for string in strings_vec.iter() {
-            alphabetize_paths_vec.push(PathBuf::from(string));
+            _alphabetized_paths_vec.push(PathBuf::from(string));
         }
-        alphabetize_paths_vec
+        _alphabetized_paths_vec
     };
 
-    std::cmp::Ordering::Equal
+    alphabetized_paths_vec
 }
 
 pub fn order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
