@@ -1223,7 +1223,7 @@ mod app_test {
           "$(printf 'q\r')",
           "macro_walk_in_park",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "fe93dd8d32dcc7300b756792a7f6d42f009a4bb7b24ed3a21e0e679b61d038f6",
+          "f27e701adf4ce59991316a9975912791c6163072f0b9f250ac4fb971e40bb3d0",
           ignore/*macro_use*/
     );
 
