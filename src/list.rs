@@ -53,9 +53,27 @@ pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
     let a_hid =  a_path_string_first_char == ".".to_string();
     let b_hid =  b_path_string_first_char == ".".to_string();
 
-    if &a.path == &b.path {
+    if a_hid {
+         let mut _a_path_string = a_path_string.clone();
+         _a_path_string.drain(0..1);
+         a_path_string = _a_path_string;
+
+    }
+
+    if b_hid {
+         let mut _b_path_string = b_path_string.clone();
+         _b_path_string.drain(0..1);
+         b_path_string = _b_path_string;
+    }
+
+
+    let mut paths_vec: Vec<String> = vec![a_path_string.clone(), b_path_string.clone()];
+
+    paths_vec.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+
+    if &a_path_string == &b_path_string {
         std::cmp::Ordering::Equal
-    } else if paths_vec.iter().nth(0).unwrap() == &b.path {
+    } else if paths_vec.iter().nth(0).unwrap() == &b_path_string {
         std::cmp::Ordering::Greater
     } else {
          std::cmp::Ordering::Less
