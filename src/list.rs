@@ -42,6 +42,12 @@ pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
     let paths_vec: Vec<PathBuf> = vec![a.path.clone(), b.path.clone()];
     let mut paths_vec = alphabetize_paths_vec(paths_vec.clone());
 
+    let mut a_path_string = a.path.clone().into_os_string().into_string().unwrap();
+    let mut b_path_string = b.path.clone().into_os_string().into_string().unwrap();
+
+    let a_path_string_first_char = a_path_string.drain(1..a_path_string.len());
+    let b_path_string_first_char = b_path_string.drain(1..b_path_string.len());
+
     if &a.path == &b.path {
         std::cmp::Ordering::Equal
     } else if paths_vec.iter().nth(0).unwrap() == &b.path {
@@ -56,8 +62,13 @@ mod test_entries_sort {
     use super::*;
     #[test]
     fn sort_entries() {
-        let a = Entry {
+        let  a = Entry {
             path: PathBuf::from("/a"),
+            file_type: FileType::File
+        };
+
+        let  a_hid = Entry {
+            path: PathBuf::from("/.a"),
             file_type: FileType::File
         };
 
@@ -66,19 +77,18 @@ mod test_entries_sort {
             file_type: FileType::File
         };
 
-
         let c = Entry {
             path: PathBuf::from("/c"),
             file_type: FileType::File
         };
 
-        let mut entries = vec![b.clone(), a.clone(), c.clone()];
+        let mut entries = vec![b.clone(), a.clone(), c.clone(), a_hid.clone()];
 
         entries.sort_by(|a, b| alphabetize_entry(a, b));
 
         assert_eq!(
             entries,
-            vec![a, b, c]
+            vec![a_hid, a, b, c]
         )
     }
 }
