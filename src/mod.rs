@@ -1106,7 +1106,7 @@ mod app_test {
           macro_enter_file,
           "Makefile",
           100,               //$delay in milleseconds
-          "$(printf '3\r')", //$input1
+          "$(printf '5\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1161,7 +1161,7 @@ mod app_test {
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
           "$(printf 'f ins\r')",
-          "$(printf '5\r')",
+          "$(printf '4\r')",
           "$(printf 'q\r')",
           "",
           "",
