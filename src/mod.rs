@@ -1133,7 +1133,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-          "488a19bb1d0fdbefa492333e3b54f772ef5b5f2547e64f9e062cd81f6f48f34a",
+          "b2bd355d162d1e04058900d325436f48c7a80140c0a4b518f2c824528a75eba9",
           ignore/*macro_use*/
     );
 
@@ -1241,7 +1241,7 @@ mod app_test {
            "q\r",
            "macro_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "79fc9589b8631f59668a277ca5e8a8e5454b3f272617693d40f1efd95bcf04df",
+           "ce60bf37ccd7656d8aebfd95ffe23ec83b94057cd420f356b5daf257928c240c",
            ignore/*macro_use*/
      );
 
