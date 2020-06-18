@@ -86,7 +86,6 @@ mod test_entries_sort {
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct List {
     pub files: Vec<PathBuf>,
-    pub dirs: Vec<PathBuf>,
     pub parent_path: PathBuf,
     pub path_history: Vec<PathBuf>
 }
@@ -221,7 +220,7 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                    } else if md.is_dir() {
                        list = list.replace_shortest_path(path);
                        if let Some(p) = short_path {
-                           list.dirs.push(p);
+                           list.files.push(p);
                        }
                    }
                 },
@@ -258,7 +257,6 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
 
 pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     let files = list.files.iter();
-    let dirs = list.dirs.iter();
     let mut done = false;
 
     let mut all_files: Vec<PathBuf> = vec![];
@@ -267,7 +265,6 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     let previous_path = list.path_history.iter().last().unwrap();
 
     _all_files.append(&mut list.files.clone());
-    _all_files.append(&mut list.dirs.clone());
 
     //let mut _list = list.clone();
     //_list.files.append(&mut list.clone().dirs);
