@@ -627,21 +627,19 @@ impl LsKey {
     pub fn mode_parse(&mut self, mut input: String) -> Option<Mode> {
         let len = input.len();
         let mode = if len >= 2 {
-             let mode: String = input.drain(..2).collect();
-             let mode = mode.as_str();
-             let fuzzy = "f ";
-             let cmd = "c ";
-             match mode {
-                 "f " => Some(Mode::Fuzzy(input.clone())),
-                 "c " => Some(Mode::Cmd(input.clone())),
-                 _ => None
-             }
-        } else if len > 1 {
-             let mode: String = input.drain(..1).collect();
-             let mode = mode.as_str();
-             match mode {
-                 "w" => Some(Mode::Work),
-                 _ => None
+             let mode = input.as_str();
+             if mode == "w\n" {
+                 Some(Mode::Work)
+             } else {
+                  let mode: String = input.drain(..2).collect();
+                  let mode = mode.as_str();
+                  let fuzzy = "f ";
+                  let cmd = "c ";
+                  match mode {
+                      "f " => Some(Mode::Fuzzy(input.clone())),
+                      "c " => Some(Mode::Cmd(input.clone())),
+                      _ => None
+                  }
              }
         } else {
             None
