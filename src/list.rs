@@ -16,13 +16,35 @@ pub struct Entry {
     pub file_type: FileType,
 }
 
-pub fn order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
-    let mut paths_vec: Vec<&PathBuf> = vec![&a.path, &b.path];
-    paths_vec.sort();
+// Can't alphabetyize PathBuf case insensitively, so we convert to String then back again.
+pub fn alphabetize_paths_vec(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
+    let mut strings_vec: Vec<String> = vec![];
+    let mut alphabetized_paths_vec: Vec<PathBuf> = {
+        let mut _alphabetized_paths_vec: Vec<PathBuf> = vec![];
+        for path in paths_vec.iter() {
+            let path = path.clone();
+            let path_string = path.into_os_string().into_string().unwrap();
+            strings_vec.push(path_string);
+        }
+
+        strings_vec.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+
+        for string in strings_vec.iter() {
+            _alphabetized_paths_vec.push(PathBuf::from(string));
+        }
+        _alphabetized_paths_vec
+    };
+
+    alphabetized_paths_vec
+}
+
+pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
+    let paths_vec: Vec<PathBuf> = vec![a.path.clone(), b.path.clone()];
+    let mut paths_vec = alphabetize_paths_vec(paths_vec.clone());
 
     if &a.path == &b.path {
         std::cmp::Ordering::Equal
-    } else if *paths_vec.iter().nth(0).unwrap() == &b.path {
+    } else if paths_vec.iter().nth(0).unwrap() == &b.path {
         std::cmp::Ordering::Greater
     } else {
          std::cmp::Ordering::Less
@@ -40,7 +62,7 @@ mod test_entries_sort {
         };
 
         let b = Entry {
-            path: PathBuf::from("/b"),
+            path: PathBuf::from("/B"),
             file_type: FileType::File
         };
 
@@ -52,11 +74,8 @@ mod test_entries_sort {
 
         let mut entries = vec![b.clone(), a.clone(), c.clone()];
 
-        let entries_pre_sort = entries.clone();
+        entries.sort_by(|a, b| alphabetize_entry(a, b));
 
-        entries.sort_by(|a, b| order_sort_entry(a, b));
-
-        assert_ne!(entries_pre_sort, entries);
         assert_eq!(
             entries,
             vec![a, b, c]
@@ -250,15 +269,14 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
 
     all_files.push(previous_path.to_path_buf());
 
+    let mut _list = list.clone();
+    _list.files.append(&mut list.clone().dirs);
+    let mut _all_files = _list.clone().files;
+
+
     while !done {
-        if files.clone().count() > 0 {
-            for entry in files.clone() {
-                //println!("{} [{}]", entry.display(), n);
-                all_files.push(entry.to_path_buf());
-            }
-        }
-        if dirs.clone().count() > 0 {
-            for entry in dirs.clone() {
+        if _all_files.iter().count() > 0 {
+            for entry in _all_files.iter() {
                 let parent_file_name = file_or_dir_name(&list.parent_path);
                 if Some(entry) != parent_file_name.as_ref() {
                    all_files.push(entry.to_path_buf());
@@ -269,7 +287,7 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     }
 
     if sort {
-        all_files.sort(); 
+        all_files.sort();
     }
 
     all_files
