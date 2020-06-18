@@ -264,14 +264,18 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     let mut done = false;
 
     let mut all_files: Vec<PathBuf> = vec![];
+    let mut _all_files: Vec<PathBuf> = vec![];
 
     let previous_path = list.path_history.iter().last().unwrap();
 
     all_files.push(previous_path.to_path_buf());
 
-    let mut _list = list.clone();
-    _list.files.append(&mut list.clone().dirs);
-    let mut _all_files = _list.clone().files;
+    _all_files.append(&mut list.files.clone());
+    _all_files.append(&mut list.dirs.clone());
+
+    //let mut _list = list.clone();
+    //_list.files.append(&mut list.clone().dirs);
+    //let mut _all_files = _list.clone().files;
 
 
     while !done {
@@ -287,7 +291,7 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     }
 
     if sort {
-        all_files.sort();
+        all_files = alphabetize_paths_vec(_all_files.clone());
     }
 
     all_files
