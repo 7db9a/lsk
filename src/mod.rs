@@ -1106,7 +1106,7 @@ mod app_test {
           macro_enter_file,
           "Makefile",
           100,               //$delay in milleseconds
-          "$(printf '3\r')", //$input1
+          "$(printf '5\r')", //$input1
           "$(printf ':q\r')",//$input2
           "$(printf 'q\r')", //$input3
           "",                //$input4
@@ -1115,7 +1115,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "e636b86d6467fc7880254f18611971bb9f04e9d7f1414dd6bd1c13ead34b6b25",
+          "2c52fc7366951cf539c81b2c21137a54dd9f21121a09490af01aadb628cc862d",
           ignore/*macro_use*/
     );
 
@@ -1133,7 +1133,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-          "488a19bb1d0fdbefa492333e3b54f772ef5b5f2547e64f9e062cd81f6f48f34a",
+          "b2bd355d162d1e04058900d325436f48c7a80140c0a4b518f2c824528a75eba9",
           ignore/*macro_use*/
     );
 
@@ -1151,7 +1151,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-          "4bef50862a1ed8de21816d8be493431407fef8a3ebbfa1b4158893eab3595347",
+          "b8aabc2bb2385af9ecae8120848b85bfaa94a0fba8888c14e6d67f795b01ef56",
           ignore/*macro_use*/
     );
 
@@ -1161,7 +1161,7 @@ mod app_test {
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
           "$(printf 'f ins\r')",
-          "$(printf '5\r')",
+          "$(printf '4\r')",
           "$(printf 'q\r')",
           "",
           "",
@@ -1169,7 +1169,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
-          "bd66aa1bd558b61121327b8d2da2bbd70bcd6802ca0091f1176868dab3869071",
+          "ea92f4f14873cbf49379a52fea3093215b32db163a59c63425cd9e984b421f31",
           ignore/*macro_use*/
     );
 
@@ -1187,7 +1187,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
-          "0772a3d2c38baff9f72eca9369a81cc5e75781f7309e823d00d2c72f6c8ad845",
+          "19bd7ea2103f9f146d0636f3d27ac13066ec1fd95f2eee69874276db5e88b866",
           ignore/*macro_use*/
     );
 
@@ -1205,7 +1205,7 @@ mod app_test {
           "",
           "macro_go_back_fuzzy_enter_back_into_dir",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "7d6e765d6e167e16e9c5eabb2e92ff1b7f48a5d0344357140605dded627c00a0",
+          "a1e2a78d035a62436260ae3dee9b9fd82297ab9b96a1b4e5f026524341dc87f4",
           ignore/*macro_use*/
     );
 
@@ -1223,7 +1223,7 @@ mod app_test {
           "$(printf 'q\r')",
           "macro_walk_in_park",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "fe93dd8d32dcc7300b756792a7f6d42f009a4bb7b24ed3a21e0e679b61d038f6",
+          "f27e701adf4ce59991316a9975912791c6163072f0b9f250ac4fb971e40bb3d0",
           ignore/*macro_use*/
     );
 
@@ -1241,7 +1241,7 @@ mod app_test {
            "q\r",
            "macro_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "79fc9589b8631f59668a277ca5e8a8e5454b3f272617693d40f1efd95bcf04df",
+           "ce60bf37ccd7656d8aebfd95ffe23ec83b94057cd420f356b5daf257928c240c",
            ignore/*macro_use*/
      );
 
@@ -1259,7 +1259,7 @@ mod app_test {
            "q\r",
            "macro_bad_fuzzy_backspace_enter",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace partially (bad behavior)\n>Quite lsk",
-           "fc72b499960e1b4d433ac0f8253e70b56035553268eeea09d49642adb5a1a4de",
+           "51575dbf71c64bd4885d5614b6d05358ab5cf85eaf2ec7dfcf47f249baa971d7",
            ignore/*macro_use*/
      );
 
