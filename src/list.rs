@@ -74,11 +74,8 @@ mod test_entries_sort {
 
         let mut entries = vec![b.clone(), a.clone(), c.clone()];
 
-        let entries_pre_sort = entries.clone();
-
         entries.sort_by(|a, b| order_sort_entry(a, b));
 
-        assert_ne!(entries_pre_sort, entries);
         assert_eq!(
             entries,
             vec![a, b, c]
