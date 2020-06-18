@@ -17,7 +17,7 @@ pub struct Entry {
 }
 
 
-pub fn _order_sort_entry(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
+pub fn alphabetize_paths_vec(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
     let mut strings_vec: Vec<String> = vec![];
     let mut alphabetized_paths_vec: Vec<PathBuf> = {
         let mut _alphabetized_paths_vec: Vec<PathBuf> = vec![];
@@ -39,12 +39,12 @@ pub fn _order_sort_entry(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
 }
 
 pub fn order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
-    let mut paths_vec: Vec<&PathBuf> = vec![&a.path, &b.path];
-    paths_vec.sort();
+    let paths_vec: Vec<PathBuf> = vec![a.path.clone(), b.path.clone()];
+    let mut paths_vec = alphabetize_paths_vec(paths_vec.clone());
 
     if &a.path == &b.path {
         std::cmp::Ordering::Equal
-    } else if *paths_vec.iter().nth(0).unwrap() == &b.path {
+    } else if paths_vec.iter().nth(0).unwrap() == &b.path {
         std::cmp::Ordering::Greater
     } else {
          std::cmp::Ordering::Less
