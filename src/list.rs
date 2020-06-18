@@ -40,7 +40,7 @@ mod test_entries_sort {
         };
 
         let b = Entry {
-            path: PathBuf::from("/b"),
+            path: PathBuf::from("/B"),
             file_type: FileType::File
         };
 
