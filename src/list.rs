@@ -3,6 +3,67 @@ use std::fs::metadata;
 use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum FileType {
+    File,
+    Dir,
+}
+
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Entry {
+    pub path: PathBuf,
+    pub file_type: FileType,
+}
+
+pub fn order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
+    let mut paths_vec: Vec<&PathBuf> = vec![&a.path, &b.path];
+    paths_vec.sort();
+
+    if &a.path == &b.path {
+        std::cmp::Ordering::Equal
+    } else if *paths_vec.iter().nth(0).unwrap() == &b.path {
+        std::cmp::Ordering::Greater
+    } else {
+         std::cmp::Ordering::Less
+    }
+}
+
+#[cfg(test)]
+mod test_entries_sort {
+    use super::*;
+    #[test]
+    fn sort_entries() {
+        let a = Entry {
+            path: PathBuf::from("/a"),
+            file_type: FileType::File
+        };
+
+        let b = Entry {
+            path: PathBuf::from("/b"),
+            file_type: FileType::File
+        };
+
+
+        let c = Entry {
+            path: PathBuf::from("/c"),
+            file_type: FileType::File
+        };
+
+        let mut entries = vec![b.clone(), a.clone(), c.clone()];
+
+        let entries_pre_sort = entries.clone();
+
+        entries.sort_by(|a, b| order_sort_entry(a, b));
+
+        assert_ne!(entries_pre_sort, entries);
+        assert_eq!(
+            entries,
+            vec![a, b, c]
+        )
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct List {
     pub files: Vec<PathBuf>,
