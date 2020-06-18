@@ -45,8 +45,13 @@ pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
     let mut a_path_string = a.path.clone().into_os_string().into_string().unwrap();
     let mut b_path_string = b.path.clone().into_os_string().into_string().unwrap();
 
-    let a_path_string_first_char = a_path_string.drain(1..a_path_string.len());
-    let b_path_string_first_char = b_path_string.drain(1..b_path_string.len());
+    let mut a_path_string_first_char = a_path_string.clone();
+    let mut b_path_string_first_char = b_path_string.clone();
+    b_path_string_first_char.drain(1..b_path_string.len());
+    a_path_string_first_char.drain(1..a_path_string.len());
+
+    let a_hid =  a_path_string_first_char == ".".to_string();
+    let b_hid =  b_path_string_first_char == ".".to_string();
 
     if &a.path == &b.path {
         std::cmp::Ordering::Equal
