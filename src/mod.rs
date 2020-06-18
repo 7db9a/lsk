@@ -99,7 +99,6 @@ impl LsKey {
 
     fn fuzzy_score(&mut self, mut input: String) -> fuzzy::demo::Scores {
         let files = &self.list.files;
-        let dirs = &self.list.dirs;
 
         let mut input_vec_str: Vec<&str> = input.split(" ").collect();
 
@@ -119,24 +118,15 @@ impl LsKey {
                .map(|file| fuzzy::demo::Score::Files(score_list(file.to_path_buf())))
                .collect();
 
-        let dirs_score: Vec<fuzzy::demo::Score> =
-           dirs.iter()
-               .map(|dir| fuzzy::demo::Score::Dirs(score_list(dir.to_path_buf())))
-               .collect();
-           //list.map(|x
-
         let files = files_score;
-        let dirs = dirs_score;
 
         fuzzy::demo::Scores {
             files,
-            dirs
         }
     }
 
     fn fuzzy_rank(&mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
         scores.files.sort_by(|a, b| fuzzy::demo::order(a, b));
-        scores.dirs.sort_by(|a, b| fuzzy::demo::order(a, b));
 
         scores
     }
@@ -144,7 +134,6 @@ impl LsKey {
     // Filter out no-scores.
     fn fuzzy_filter(&mut self, mut scores: fuzzy::demo::Scores) -> fuzzy::demo::Scores {
          let mut files_vec: Vec<fuzzy::demo::Score> = vec![];
-         let mut dirs_vec: Vec<fuzzy::demo::Score> = vec![];
          for score in scores.files.iter() {
              let path = score.score().0;
              let score = score.score().1;
@@ -156,20 +145,8 @@ impl LsKey {
              }
          }
 
-         for score in scores.dirs.iter() {
-             let path = score.score().0;
-             let score = score.score().1;
-
-             let thing = (path, score.clone());
-
-             if score.is_some() {
-                  dirs_vec.push(fuzzy::demo::Score::Dirs(thing));
-             }
-         }
-
          fuzzy::demo::Scores {
              files: files_vec,
-             dirs: dirs_vec
          }
     }
 
@@ -188,14 +165,10 @@ impl LsKey {
         let files_list: Vec<PathBuf> = scores.files.iter().map(|score|
             score.score().0
         ).collect();
-        let dirs_list: Vec<PathBuf> = scores.dirs.iter().map(|score|
-            score.score().0
-        ).collect();
 
         let pre_fuzzy = self.list.clone();
 
         self.list.files = files_list;
-        self.list.dirs = dirs_list;
 
         //assert_ne!(pre_fuzzy, self.list);
         self.list.clone()

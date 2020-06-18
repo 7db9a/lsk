@@ -8,14 +8,12 @@ pub mod demo {
     #[derive(Debug, Clone, PartialEq)]
     pub enum Score {
          Files((PathBuf, Option<(i64, Vec<usize>)>)),
-         Dirs((PathBuf, Option<(i64, Vec<usize>)>)),
     }
 
     impl Score {
         pub fn score(&self) -> (PathBuf, Option<(i64, Vec<usize>)>) {
             match self.clone() {
                 Score::Files(score) => score,
-                Score::Dirs(score) => score,
             }
         }
     }
@@ -23,7 +21,6 @@ pub mod demo {
     #[derive(Debug, Clone, PartialEq)]
     pub struct Scores {
         pub files: Vec<Score>,
-        pub dirs: Vec<Score>
     }
 
     pub fn score(compare_to: &str, guess: &str) -> Option<(i64, Vec<usize>)> {
@@ -88,11 +85,6 @@ mod tests {
                      super::demo::Score::Files((PathBuf::from(file_c), res_c.clone())),
                      super::demo::Score::Files((PathBuf::from(file_d), res_d.clone())),
                  ],
-
-            dirs: vec![
-                     super::demo::Score::Files((PathBuf::from(file_a), res_a.clone())),
-                     super::demo::Score::Files((PathBuf::from(file_b), res_b.clone())),
-                 ]
         };
 
         let pre_sort = scores.clone();
