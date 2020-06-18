@@ -287,7 +287,7 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
     }
 
     if sort {
-        all_files = alphabetize_paths_vec(_all_files.clone());
+        all_files = alphabetize_paths_vec(all_files.clone());
     }
 
     all_files.insert(0, previous_path.to_path_buf());
