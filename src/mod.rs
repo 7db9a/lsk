@@ -79,7 +79,7 @@ pub fn order_sort_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
 
     if &a.path == &b.path {
         std::cmp::Ordering::Equal
-    } else if *paths_vec.iter().nth(0).unwrap() == &a.path {
+    } else if *paths_vec.iter().nth(0).unwrap() == &b.path {
         std::cmp::Ordering::Greater
     } else {
          std::cmp::Ordering::Less
