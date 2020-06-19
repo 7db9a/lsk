@@ -378,14 +378,24 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                            if let Some(p) = short_path {
 
                                if Some(p.clone()) != parent_file_name {
-                                   list.files.push(p);
+                                   list.files.push(
+                                       Entry {
+                                           path: p,
+                                           file_type: FileType::File
+                                       }
+                                    );
                                }
                            }
                        } else if md.is_dir() {
                            list = list.replace_shortest_path(path);
                            if let Some(p) = short_path {
                                if Some(p.clone()) != parent_file_name {
-                                   list.files.push(p);
+                                   list.files.push(
+                                       Entry {
+                                           path: p,
+                                           file_type: FileType::Dir
+                                       }
+                                    );
                                }
                            }
                        }
