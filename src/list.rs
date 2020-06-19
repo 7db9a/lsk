@@ -303,7 +303,7 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     Ok(())
 }
 
-pub mod demo {
+pub mod fuzzy_score {
     use super::{FileType, Entry};
     use fuzzy_matcher;
     use std::path::PathBuf;
@@ -354,15 +354,15 @@ mod fuzzy_tests {
     #[test]
     #[ignore]//docker
     fn score() {
-        let res = super::demo::score("abc", "abx");
+        let res = super::fuzzy_score::score("abc", "abx");
         assert_eq!(res, None);
-        let (score, indices) = super::demo::score("axbycz", "xyz").unwrap();
+        let (score, indices) = super::fuzzy_score::score("axbycz", "xyz").unwrap();
         assert_eq!(indices, [1, 3, 5]);
         assert_eq!(score, 39);
-        let (score, indices) = super::demo::score("axbycz", "abc").unwrap();
+        let (score, indices) = super::fuzzy_score::score("axbycz", "abc").unwrap();
         assert_eq!(indices, [0, 2, 4]);
         assert_eq!(score, 55);
-        let (score, indices) = super::demo::score("unignore_play_test", "uigp").unwrap();
+        let (score, indices) = super::fuzzy_score::score("unignore_play_test", "uigp").unwrap();
         assert_eq!(indices, [0, 2, 3, 9]);
         assert_eq!(score, 78);
     }
@@ -378,14 +378,14 @@ mod fuzzy_tests {
         let dir_a = "dirxyzabc";
         let dir_b = "dirxzabc";
 
-        let res_a = super::demo::score(file_a, guess);
-        let res_b = super::demo::score(file_b, guess);
-        let res_c = super::demo::score(file_c, guess);
-        let res_d = super::demo::score(file_d, guess);
+        let res_a = super::fuzzy_score::score(file_a, guess);
+        let res_b = super::fuzzy_score::score(file_b, guess);
+        let res_c = super::fuzzy_score::score(file_c, guess);
+        let res_d = super::fuzzy_score::score(file_d, guess);
 
-        let mut scores = super::demo::Scores {
+        let mut scores = super::fuzzy_score::Scores {
             files: vec![
-                     super::demo::Score::Files(
+                     super::fuzzy_score::Score::Files(
                          (
                              Entry {
                                  path: PathBuf::from(file_a),
@@ -394,7 +394,7 @@ mod fuzzy_tests {
                              res_a.clone()
                          )
                      ),
-                     super::demo::Score::Files(
+                     super::fuzzy_score::Score::Files(
                          (
                              Entry {
                                  path: PathBuf::from(file_b),
@@ -403,7 +403,7 @@ mod fuzzy_tests {
                              res_b.clone()
                          )
                      ),
-                     super::demo::Score::Files(
+                     super::fuzzy_score::Score::Files(
                          (
                              Entry {
                                  path: PathBuf::from(file_c),
@@ -412,7 +412,7 @@ mod fuzzy_tests {
                              res_c.clone()
                          )
                      ),
-                     super::demo::Score::Files(
+                     super::fuzzy_score::Score::Files(
                          (
                              Entry {
                                  path: PathBuf::from(file_d),
@@ -425,13 +425,13 @@ mod fuzzy_tests {
         };
 
         let pre_sort = scores.clone();
-        scores.files.sort_by(|a, b| demo::order(a, b));
+        scores.files.sort_by(|a, b| fuzzy_score::order(a, b));
         let post_sort = scores.clone();
         assert_ne!(
             pre_sort,
             post_sort
         );
-        //scores.dirs.sort_by(|a, b| demo::order(a, b));
+        //scores.dirs.sort_by(|a, b| fuzzy_score::order(a, b));
 
         assert_ne!(
             pre_sort.files,

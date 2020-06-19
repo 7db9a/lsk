@@ -2,7 +2,7 @@ pub mod list;
 pub mod terminal;
 pub mod fuzzy;
 
-use list::{Entry, FileType, demo};
+use list::{Entry, FileType, fuzzy_score};
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
@@ -99,7 +99,7 @@ impl LsKey {
         ls_key
     }
 
-    fn fuzzy_score(&mut self, mut input: String) -> list::demo::Scores {
+    fn fuzzy_score(&mut self, mut input: String) -> list::fuzzy_score::Scores {
         let files = &self.list.files;
 
         let mut input_vec_str: Vec<&str> = input.split(" ").collect();
@@ -111,13 +111,13 @@ impl LsKey {
         let score_list = |entry: Entry| {
             (
              entry.clone(),
-             list::demo::score(entry.path.to_str().unwrap(), &input)
+             list::fuzzy_score::score(entry.path.to_str().unwrap(), &input)
             )
         };
 
-        let files_score: Vec<list::demo::Score> =
+        let files_score: Vec<list::fuzzy_score::Score> =
            files.iter()
-               .map(|file| list::demo::Score::Files(score_list(
+               .map(|file| list::fuzzy_score::Score::Files(score_list(
                                 Entry {
                                     path: file.path.to_path_buf(),
                                     file_type: file.file_type.clone()
@@ -129,20 +129,20 @@ impl LsKey {
 
         let files = files_score;
 
-        list::demo::Scores {
+        list::fuzzy_score::Scores {
             files,
         }
     }
 
-    fn fuzzy_rank(&mut self, mut scores: list::demo::Scores) -> list::demo::Scores {
-        scores.files.sort_by(|a, b| list::demo::order(a, b));
+    fn fuzzy_rank(&mut self, mut scores: list::fuzzy_score::Scores) -> list::fuzzy_score::Scores {
+        scores.files.sort_by(|a, b| list::fuzzy_score::order(a, b));
 
         scores
     }
 
     // Filter out no-scores.
-    fn fuzzy_filter(&mut self, mut scores: list::demo::Scores) -> list::demo::Scores {
-         let mut files_vec: Vec<list::demo::Score> = vec![];
+    fn fuzzy_filter(&mut self, mut scores: list::fuzzy_score::Scores) -> list::fuzzy_score::Scores {
+         let mut files_vec: Vec<list::fuzzy_score::Score> = vec![];
          for score in scores.files.iter() {
              let path = score.score().0;
              let score = score.score().1;
@@ -150,11 +150,11 @@ impl LsKey {
              let thing = (path, score.clone());
 
              if score.is_some() {
-                  files_vec.push(list::demo::Score::Files(thing));
+                  files_vec.push(list::fuzzy_score::Score::Files(thing));
              }
          }
 
-         list::demo::Scores {
+         list::fuzzy_score::Scores {
              files: files_vec,
          }
     }
@@ -171,7 +171,7 @@ impl LsKey {
     }
 
 
-    pub fn scores_to_list(&mut self, mut scores: list::demo::Scores) -> list::List {
+    pub fn scores_to_list(&mut self, mut scores: list::fuzzy_score::Scores) -> list::List {
         let files_list: Vec<Entry> = scores.files.iter().map(|score|
             Entry {
                 path: score.score().0.path,
