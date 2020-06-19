@@ -2,6 +2,8 @@ use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
+use ansi_term::{Colour, Style};
+use ansi_term::Colour::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileType {
@@ -264,8 +266,18 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
-        let entry = entry.path.to_str().unwrap();
-        let entry = format!(r#"{} [{}]"#, entry, n);
+        let entry = match entry.file_type {
+            FileType::File => {
+                let entry = entry.path.to_str().unwrap();
+                let entry = format!(r#"{} [{}]"#, entry, n);
+                Colour::White.bold().paint(entry).to_string()
+            },
+            FileType::Dir => {
+                let entry = entry.path.to_str().unwrap();
+                let entry = format!(r#"{} [{}]"#, entry, n);
+                Colour::Blue.bold().paint(entry).to_string()
+            },
+        };
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
         n += 1;
