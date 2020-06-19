@@ -170,9 +170,13 @@ impl LsKey {
         self.clone()
     }
 
+
     pub fn scores_to_list(&mut self, mut scores: list::demo::Scores) -> list::List {
-        let files_list: Vec<PathBuf> = scores.files.iter().map(|score|
-            score.score().0
+        let files_list: Vec<Entry> = scores.files.iter().map(|score|
+            Entry {
+                path: score.score().0.path,
+                file_type: score.score().0.file_type
+            }
         ).collect();
 
         let pre_fuzzy = self.list.clone();
