@@ -120,7 +120,7 @@ impl LsKey {
                .map(|file| list::demo::Score::Files(score_list(
                                 Entry {
                                     path: file.path.to_path_buf(),
-                                    file_type: file.file_type
+                                    file_type: file.file_type.clone()
                                 }
                            )
                        )
