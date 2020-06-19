@@ -53,6 +53,7 @@ pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
 
 
 pub mod demo {
+    use super::{FileType, Entry};
     use fuzzy_matcher;
     use std::path::PathBuf;
     use fuzzy_matcher::FuzzyMatcher;
