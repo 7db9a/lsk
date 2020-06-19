@@ -61,11 +61,11 @@ pub mod demo {
 
     #[derive(Debug, Clone, PartialEq)]
     pub enum Score {
-         Files((PathBuf, Option<(i64, Vec<usize>)>)),
+         Files((Entry, Option<(i64, Vec<usize>)>)),
     }
 
     impl Score {
-        pub fn score(&self) -> (PathBuf, Option<(i64, Vec<usize>)>) {
+        pub fn score(&self) -> (Entry, Option<(i64, Vec<usize>)>) {
             match self.clone() {
                 Score::Files(score) => score,
             }
@@ -83,8 +83,8 @@ pub mod demo {
     }
 
     pub fn order(a: &Score, b: &Score) -> std::cmp::Ordering {
-        let a_score = a.score().0;
-        let b_score = b.score().0;
+        let a_score = a.score().0.path;
+        let b_score = b.score().0.path;
 
         if a_score == b_score {
             std::cmp::Ordering::Equal
@@ -135,16 +135,40 @@ mod fuzzy_tests {
         let mut scores = super::demo::Scores {
             files: vec![
                      super::demo::Score::Files(
-                         (PathBuf::from(file_a), res_a.clone())
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_a),
+                                 file_type: FileType::File
+                             },
+                             res_a.clone()
+                         )
                      ),
                      super::demo::Score::Files(
-                         (PathBuf::from(file_b), res_b.clone())
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_b),
+                                 file_type: FileType::File
+                             },
+                             res_b.clone()
+                         )
                      ),
                      super::demo::Score::Files(
-                         (PathBuf::from(file_c), res_c.clone())
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_c),
+                                 file_type: FileType::File
+                             },
+                             res_c.clone()
+                         )
                      ),
                      super::demo::Score::Files(
-                         (PathBuf::from(file_d), res_d.clone())
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_d),
+                                 file_type: FileType::File
+                             },
+                             res_d.clone()
+                         )
                      ),
                  ],
         };
@@ -169,17 +193,17 @@ mod fuzzy_tests {
         );
 
         assert_eq!(
-            scores.files.iter().nth(0).unwrap().score().0,
+            scores.files.iter().nth(0).unwrap().score().0.path,
             PathBuf::from("xyza")
         );
 
         assert_eq!(
-            scores.files.iter().nth(1).unwrap().score().0,
+            scores.files.iter().nth(1).unwrap().score().0.path,
             PathBuf::from("xyazabc")
         );
 
         assert_eq!(
-            scores.files.iter().nth(2).unwrap().score().0,
+            scores.files.iter().nth(2).unwrap().score().0.path,
             PathBuf::from("xayb")
         )
     }
