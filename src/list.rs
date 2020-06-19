@@ -266,7 +266,14 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
-        let entry = entry.path.to_str().unwrap();
+        let entry = match entry.file_type {
+            FileType::File => {
+                entry.path.to_str().unwrap()
+            },
+            FileType::Dir => {
+                entry.path.to_str().unwrap()
+            },
+        };
         let entry = format!(r#"{} [{}]"#, entry, n);
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
