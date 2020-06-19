@@ -369,27 +369,29 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
             let previous_path = list.path_history.iter().last().unwrap();
             let parent_file_name = file_or_dir_name(&list.parent_path);
 
-            if Some(entry.to_path_buf()) != parent_file_name {
                 match metadata(entry) {
                     Ok(md) => {
                        let path = entry.to_path_buf();
                        let short_path = file_or_dir_name(&path);
                        if md.is_file() {
-
                            list = list.replace_shortest_path(path);
                            if let Some(p) = short_path {
-                               list.files.push(p);
+
+                               if Some(p.clone()) != parent_file_name {
+                                   list.files.push(p);
+                               }
                            }
                        } else if md.is_dir() {
                            list = list.replace_shortest_path(path);
                            if let Some(p) = short_path {
-                               list.files.push(p);
+                               if Some(p.clone()) != parent_file_name {
+                                   list.files.push(p);
+                               }
                            }
                        }
                     },
                     Err(_) => ()
                 }
-            }
         },
         Err(_) => ()
     }
@@ -420,37 +422,11 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
 }
 
 pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
-    let files = list.files.iter();
-    let mut done = false;
-
-    let mut all_files: Vec<PathBuf> = vec![];
-    let mut _all_files: Vec<PathBuf> = vec![];
-
+    let mut all_files = list.files.clone();
     let previous_path = list.path_history.iter().last().unwrap();
-
-    _all_files.append(&mut list.files.clone());
-
-    //let mut _list = list.clone();
-    //_list.files.append(&mut list.clone().dirs);
-    //let mut _all_files = _list.clone().files;
-
-
-    while !done {
-        if _all_files.iter().count() > 0 {
-            for entry in _all_files.iter() {
-                let parent_file_name = file_or_dir_name(&list.parent_path);
-                if Some(entry) != parent_file_name.as_ref() {
-                   all_files.push(entry.to_path_buf());
-                }
-            }
-        }
-        done = true;
-    }
-
     if sort {
         all_files = alphabetize_paths_vec(all_files.clone());
     }
-
     all_files.insert(0, previous_path.to_path_buf());
 
     all_files
