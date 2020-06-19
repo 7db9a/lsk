@@ -268,13 +268,16 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     for entry in entries.clone() {
         let entry = match entry.file_type {
             FileType::File => {
-                entry.path.to_str().unwrap()
+                let entry = entry.path.to_str().unwrap();
+                let entry = format!(r#"{} [{}]"#, entry, n);
+                Colour::White.normal().paint(entry).to_string()
             },
             FileType::Dir => {
-                entry.path.to_str().unwrap()
+                let entry = entry.path.to_str().unwrap();
+                let entry = format!(r#"{} [{}]"#, entry, n);
+                Colour::Blue.normal().paint(entry).to_string()
             },
         };
-        let entry = format!(r#"{} [{}]"#, entry, n);
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
         n += 1;
