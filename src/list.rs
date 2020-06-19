@@ -421,7 +421,7 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
-        let entry = entry.0.to_str().unwrap();
+        let entry = entry.path.to_str().unwrap();
         let entry = format!(r#"{} [{}]"#, entry, n);
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
@@ -453,7 +453,7 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
-        println!("{} [{}]", entry.0.display(), n);
+        println!("{} [{}]", entry.path.display(), n);
         n += 1;
     }
 
