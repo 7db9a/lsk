@@ -5,5 +5,4 @@ sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/mod.rs
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/terminal.rs
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/list.rs
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/bin/main.rs
-sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' src/fuzzy.rs
 sed -i 's/\#\[ignore\]\/\/host/\/\/#[ignore]\/\/host/g' tests/list_files.rs

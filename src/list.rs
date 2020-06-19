@@ -51,6 +51,7 @@ pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
     }
 }
 
+
 #[cfg(test)]
 mod test_entries_sort {
     use super::*;
@@ -85,7 +86,7 @@ mod test_entries_sort {
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct List {
-    pub files: Vec<PathBuf>,
+    pub files: Vec<Entry>,
     pub parent_path: PathBuf,
     pub path_history: Vec<PathBuf>
 }
@@ -155,7 +156,7 @@ impl List {
         if count > 0 {
             for entry in all_files.clone() {
                 //println!("{} [{}]", entry.display(), n);
-                let path = entry.to_path_buf();
+                let path = entry.path.to_path_buf();
                 //let parent_file_name = file_or_dir_name(&self.parent_path);
                 if n == key {
                     return self.clone().full_entry_path(path);
@@ -208,24 +209,42 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
     match entry {
         Ok(entry) => {
             let entry = entry.path();
-            match metadata(entry) {
-                Ok(md) => {
-                   let path = entry.to_path_buf();
-                   let short_path = file_or_dir_name(&path);
-                   if md.is_file() {
-                       list = list.replace_shortest_path(path);
-                       if let Some(p) = short_path {
-                           list.files.push(p);
+            let previous_path = list.path_history.iter().last().unwrap();
+            let parent_file_name = file_or_dir_name(&list.parent_path);
+
+                match metadata(entry) {
+                    Ok(md) => {
+                       let path = entry.to_path_buf();
+                       let short_path = file_or_dir_name(&path);
+                       if md.is_file() {
+                           list = list.replace_shortest_path(path);
+                           if let Some(p) = short_path {
+
+                               if Some(p.clone()) != parent_file_name {
+                                   list.files.push(
+                                       Entry {
+                                           path: p,
+                                           file_type: FileType::File
+                                       }
+                                    );
+                               }
+                           }
+                       } else if md.is_dir() {
+                           list = list.replace_shortest_path(path);
+                           if let Some(p) = short_path {
+                               if Some(p.clone()) != parent_file_name {
+                                   list.files.push(
+                                       Entry {
+                                           path: p,
+                                           file_type: FileType::Dir
+                                       }
+                                    );
+                               }
+                           }
                        }
-                   } else if md.is_dir() {
-                       list = list.replace_shortest_path(path);
-                       if let Some(p) = short_path {
-                           list.files.push(p);
-                       }
-                   }
-                },
-                Err(_) => ()
-            }
+                    },
+                    Err(_) => ()
+                }
         },
         Err(_) => ()
     }
@@ -241,11 +260,11 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
     metadata(path).unwrap().is_dir()
 }
 
-pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
+pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
-        let entry = entry.to_str().unwrap();
+        let entry = entry.path.to_str().unwrap();
         let entry = format!(r#"{} [{}]"#, entry, n);
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
@@ -255,39 +274,20 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
-    let files = list.files.iter();
-    let mut done = false;
-
-    let mut all_files: Vec<PathBuf> = vec![];
-    let mut _all_files: Vec<PathBuf> = vec![];
-
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
+    let mut all_files = list.files.clone();
     let previous_path = list.path_history.iter().last().unwrap();
-
-    _all_files.append(&mut list.files.clone());
-
-    //let mut _list = list.clone();
-    //_list.files.append(&mut list.clone().dirs);
-    //let mut _all_files = _list.clone().files;
-
-
-    while !done {
-        if _all_files.iter().count() > 0 {
-            for entry in _all_files.iter() {
-                let parent_file_name = file_or_dir_name(&list.parent_path);
-                if Some(entry) != parent_file_name.as_ref() {
-                   all_files.push(entry.to_path_buf());
-                }
-            }
-        }
-        done = true;
-    }
-
     if sort {
-        all_files = alphabetize_paths_vec(all_files.clone());
+        all_files.sort_by(|a, b| alphabetize_entry(a, b));
+        //all_files = alphabetize_paths_vec(all_files.clone());
     }
-
-    all_files.insert(0, previous_path.to_path_buf());
+    all_files.insert(
+        0,
+        Entry {
+            path: previous_path.to_path_buf(),
+            file_type: FileType::Dir
+        }
+    );
 
     all_files
 }
@@ -296,12 +296,170 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
-        println!("{} [{}]", entry.display(), n);
+        println!("{} [{}]", entry.path.display(), n);
         n += 1;
     }
 
     Ok(())
 }
+
+pub mod fuzzy_score {
+    use super::{FileType, Entry};
+    use fuzzy_matcher;
+    use std::path::PathBuf;
+    use fuzzy_matcher::FuzzyMatcher;
+    use fuzzy_matcher::skim::SkimMatcherV2;
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum Score {
+         Files((Entry, Option<(i64, Vec<usize>)>)),
+    }
+
+    impl Score {
+        pub fn score(&self) -> (Entry, Option<(i64, Vec<usize>)>) {
+            match self.clone() {
+                Score::Files(score) => score,
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct Scores {
+        pub files: Vec<Score>,
+    }
+
+    pub fn score(compare_to: &str, guess: &str) -> Option<(i64, Vec<usize>)> {
+        let matcher = SkimMatcherV2::default();
+        matcher.fuzzy_indices(compare_to, guess)
+    }
+
+    pub fn order(a: &Score, b: &Score) -> std::cmp::Ordering {
+        let a_score = a.score().0.path;
+        let b_score = b.score().0.path;
+
+        if a_score == b_score {
+            std::cmp::Ordering::Equal
+        } else if a_score > b_score {
+            std::cmp::Ordering::Less
+        } else {
+            std::cmp::Ordering::Greater
+        }
+    }
+}
+
+#[cfg(test)]
+mod fuzzy_tests {
+    use std::path::PathBuf;
+    use super::*;
+    #[test]
+    #[ignore]//docker
+    fn score() {
+        let res = super::fuzzy_score::score("abc", "abx");
+        assert_eq!(res, None);
+        let (score, indices) = super::fuzzy_score::score("axbycz", "xyz").unwrap();
+        assert_eq!(indices, [1, 3, 5]);
+        assert_eq!(score, 39);
+        let (score, indices) = super::fuzzy_score::score("axbycz", "abc").unwrap();
+        assert_eq!(indices, [0, 2, 4]);
+        assert_eq!(score, 55);
+        let (score, indices) = super::fuzzy_score::score("unignore_play_test", "uigp").unwrap();
+        assert_eq!(indices, [0, 2, 3, 9]);
+        assert_eq!(score, 78);
+    }
+
+    #[test]
+    #[ignore]//docker
+    fn sort_score() {
+        let guess = "xyz";
+        let file_a = "xayb";
+        let file_b = "xyazabc";
+        let file_c = "xyza";
+        let file_d = "afd";
+        let dir_a = "dirxyzabc";
+        let dir_b = "dirxzabc";
+
+        let res_a = super::fuzzy_score::score(file_a, guess);
+        let res_b = super::fuzzy_score::score(file_b, guess);
+        let res_c = super::fuzzy_score::score(file_c, guess);
+        let res_d = super::fuzzy_score::score(file_d, guess);
+
+        let mut scores = super::fuzzy_score::Scores {
+            files: vec![
+                     super::fuzzy_score::Score::Files(
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_a),
+                                 file_type: FileType::File
+                             },
+                             res_a.clone()
+                         )
+                     ),
+                     super::fuzzy_score::Score::Files(
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_b),
+                                 file_type: FileType::File
+                             },
+                             res_b.clone()
+                         )
+                     ),
+                     super::fuzzy_score::Score::Files(
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_c),
+                                 file_type: FileType::File
+                             },
+                             res_c.clone()
+                         )
+                     ),
+                     super::fuzzy_score::Score::Files(
+                         (
+                             Entry {
+                                 path: PathBuf::from(file_d),
+                                 file_type: FileType::File
+                             },
+                             res_d.clone()
+                         )
+                     ),
+                 ],
+        };
+
+        let pre_sort = scores.clone();
+        scores.files.sort_by(|a, b| fuzzy_score::order(a, b));
+        let post_sort = scores.clone();
+        assert_ne!(
+            pre_sort,
+            post_sort
+        );
+        //scores.dirs.sort_by(|a, b| fuzzy_score::order(a, b));
+
+        assert_ne!(
+            pre_sort.files,
+            post_sort.files
+        );
+
+        assert_eq!(
+             scores.files.iter().count(),
+             4
+        );
+
+        assert_eq!(
+            scores.files.iter().nth(0).unwrap().score().0.path,
+            PathBuf::from("xyza")
+        );
+
+        assert_eq!(
+            scores.files.iter().nth(1).unwrap().score().0.path,
+            PathBuf::from("xyazabc")
+        );
+
+        assert_eq!(
+            scores.files.iter().nth(2).unwrap().score().0.path,
+            PathBuf::from("xayb")
+        )
+    }
+}
+
 
 
 #[cfg(test)]
