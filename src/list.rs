@@ -366,23 +366,29 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
     match entry {
         Ok(entry) => {
             let entry = entry.path();
-            match metadata(entry) {
-                Ok(md) => {
-                   let path = entry.to_path_buf();
-                   let short_path = file_or_dir_name(&path);
-                   if md.is_file() {
-                       list = list.replace_shortest_path(path);
-                       if let Some(p) = short_path {
-                           list.files.push(p);
+            let previous_path = list.path_history.iter().last().unwrap();
+            let parent_file_name = file_or_dir_name(&list.parent_path);
+
+            if Some(entry.to_path_buf()) != parent_file_name {
+                match metadata(entry) {
+                    Ok(md) => {
+                       let path = entry.to_path_buf();
+                       let short_path = file_or_dir_name(&path);
+                       if md.is_file() {
+
+                           list = list.replace_shortest_path(path);
+                           if let Some(p) = short_path {
+                               list.files.push(p);
+                           }
+                       } else if md.is_dir() {
+                           list = list.replace_shortest_path(path);
+                           if let Some(p) = short_path {
+                               list.files.push(p);
+                           }
                        }
-                   } else if md.is_dir() {
-                       list = list.replace_shortest_path(path);
-                       if let Some(p) = short_path {
-                           list.files.push(p);
-                       }
-                   }
-                },
-                Err(_) => ()
+                    },
+                    Err(_) => ()
+                }
             }
         },
         Err(_) => ()
