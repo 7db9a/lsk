@@ -270,12 +270,12 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
             FileType::File => {
                 let entry = entry.path.to_str().unwrap();
                 let entry = format!(r#"{} [{}]"#, entry, n);
-                Colour::White.normal().paint(entry).to_string()
+                Colour::White.bold().paint(entry).to_string()
             },
             FileType::Dir => {
                 let entry = entry.path.to_str().unwrap();
                 let entry = format!(r#"{} [{}]"#, entry, n);
-                Colour::Blue.normal().paint(entry).to_string()
+                Colour::Blue.bold().paint(entry).to_string()
             },
         };
         entries_keyed.push(entry);
