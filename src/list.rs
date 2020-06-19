@@ -2,6 +2,8 @@ use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
+use ansi_term::{Colour, Style};
+use ansi_term::Colour::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileType {
