@@ -243,7 +243,7 @@ mod test_entries_sort {
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct List {
-    pub files: Vec<PathBuf>,
+    pub files: Vec<Entry>,
     pub parent_path: PathBuf,
     pub path_history: Vec<PathBuf>
 }
@@ -313,7 +313,7 @@ impl List {
         if count > 0 {
             for entry in all_files.clone() {
                 //println!("{} [{}]", entry.display(), n);
-                let path = entry.to_path_buf();
+                let path = entry.path.to_path_buf();
                 //let parent_file_name = file_or_dir_name(&self.parent_path);
                 if n == key {
                     return self.clone().full_entry_path(path);
@@ -407,11 +407,11 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
     metadata(path).unwrap().is_dir()
 }
 
-pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
+pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
-        let entry = entry.to_str().unwrap();
+        let entry = entry.0.to_str().unwrap();
         let entry = format!(r#"{} [{}]"#, entry, n);
         entries_keyed.push(entry);
         //println!("{} [{}]", entry.display(), n);
@@ -421,13 +421,20 @@ pub fn key_entries(entries: Vec<PathBuf>) -> Vec<String> {
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<PathBuf> {
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
     let mut all_files = list.files.clone();
     let previous_path = list.path_history.iter().last().unwrap();
     if sort {
-        all_files = alphabetize_paths_vec(all_files.clone());
+        all_files.sort_by(|a, b| alphabetize_entry(a, b));
+        //all_files = alphabetize_paths_vec(all_files.clone());
     }
-    all_files.insert(0, previous_path.to_path_buf());
+    all_files.insert(
+        0,
+        Entry {
+            path: previous_path.to_path_buf(),
+            file_type: FileType::Dir
+        }
+    );
 
     all_files
 }
@@ -436,7 +443,7 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
     let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
-        println!("{} [{}]", entry.display(), n);
+        println!("{} [{}]", entry.0.display(), n);
         n += 1;
     }
 
