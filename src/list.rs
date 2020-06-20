@@ -288,10 +288,10 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
                     let mut entry_string = entry_str.to_string();
                     if entry_str != "/" {
                           entry_string = format!("../{}", entry_str);
+                          Colour::Blue.bold().paint(entry_string).to_string()
                     } else {
-                        entry_string = format!(r#"{} [{}]"#, entry_str, n);
+                        "/".to_string()
                     }
-                    Colour::Blue.bold().paint(entry_string).to_string()
                 } else {
                     let entry_str = entry.path.to_str().unwrap();
                     let entry = format!(r#"{} [{}]"#, entry_str, n);
@@ -299,7 +299,9 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
                 }
             },
         };
-        entries_keyed.push(entry);
+        if entry != "/".to_string() {
+             entries_keyed.push(entry);
+        }
         n += 1;
     }
 
