@@ -612,6 +612,8 @@ impl LsKey {
             }
         }
 
+        write!(screen, "{}", termion::cursor::Show).unwrap();
+
         (result, self.input.execute)
     }
 
