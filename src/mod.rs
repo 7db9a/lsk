@@ -1244,7 +1244,7 @@ mod app_test {
            "q\r",
            "macro_bad_fuzzy_backspace_enter",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace partially (bad behavior)\n>Quite lsk",
-           "874e4d76d1c0d8e3a18fbc5595f675cf695e9ba0841d723fba93bf28937c44fc",
+           "cbce709ccb1d782baa4ff20f80076d5f315c683b108e4ecd05a4ba51bd872570",
            ignore/*macro_use*/
      );
 
