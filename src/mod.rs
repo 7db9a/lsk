@@ -473,21 +473,22 @@ impl LsKey {
         self.input = Input::new();
         let stdin = stdin();
         let stdout = stdout();
-        let mut stdout = stdout.lock().into_raw_mode().unwrap();
+        let stdout = stdout.lock().into_raw_mode().unwrap();
+        let mut screen: AlternateScreen<RawTerminal<StdoutLock>> = AlternateScreen::from(stdout);
         let mut stdin = stdin.lock();
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
         let orig_ls_key = self.clone();
 
-        clear_display(&mut stdout);
+        clear_display(&mut screen);
 
         let mut input_string: String = self.input.display.iter().collect();
         self.test_data_update(Some(input_string));
-        display_files(self.clone(), b"", &mut stdout, (0, 3));
+        display_files(self.clone(), b"", &mut screen, (0, 3));
 
         for c in stdin.keys() {
             self.input.full_backspace;
-            clear_display(&mut stdout);
+            clear_display(&mut screen);
             let c = c.unwrap();
 
             self.input.match_event(c);
@@ -514,7 +515,7 @@ impl LsKey {
                     }
                 }
                 self.test_data_update(Some(input_string.clone()));
-                display_input(input_string.clone(), &mut stdout, place);
+                display_input(input_string.clone(), &mut screen, place);
 
                 let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
@@ -532,7 +533,7 @@ impl LsKey {
                                  //Clear the command from the lsk console after executing.
                                  input_string = "".to_string();
                                  self.input.display = input_string.chars().collect();
-                                 clear_display(&mut stdout);
+                                 clear_display(&mut screen);
                              }
                         },
                         Mode::Work => {
@@ -598,7 +599,7 @@ impl LsKey {
                is_fuzzed = false;
             }
             self.test_data_update(Some(input_string.clone()));
-            display_files(self.clone(), b"", &mut stdout, (0, 3));
+            display_files(self.clone(), b"", &mut screen, (0, 3));
 
             if self.input.display.iter().last() == Some(&'\n') {
                 self.input.display.pop();
@@ -665,56 +666,56 @@ impl LsKey {
 }
 
 
-fn clear_display(stdout: &mut RawTerminal<StdoutLock>) {
+fn clear_display(screen: &mut AlternateScreen<RawTerminal<StdoutLock>>) {
     write!(
-        stdout,
+        screen,
         "{}",
         termion::clear::All
     ).unwrap();
-    stdout.flush().unwrap();
+    screen.flush().unwrap();
 }
 
-fn display_input(input_string: String, stdout: &mut RawTerminal<StdoutLock>, position: (u16, u16)) {
-    write!(stdout,
+fn display_input(input_string: String, screen: &mut AlternateScreen<RawTerminal<StdoutLock>>, position: (u16, u16)) {
+    write!(screen,
         "{}{}{}{}", format!("{}", input_string.as_str()
         ),
        termion::clear::AfterCursor,
        termion::cursor::Goto((position.0), (position.1 + 1)),
        termion::cursor::Hide,
     ).unwrap();
-    stdout.flush().unwrap();
+    screen.flush().unwrap();
 }
 
-fn display_files(ls_key: LsKey, some_stuff: &[u8], stdout: &mut RawTerminal<StdoutLock>, position: (u16, u16)) {
+fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<RawTerminal<StdoutLock>>, position: (u16, u16)) {
      let show = ls_key.clone().display;
      if let Some(x) = show {
          if x.0 == ls_key.list.parent_path {
               //into_raw_mode requires carriage returns.
               let display = str::replace(x.1.as_str(), "\n", "\n\r");
               write!(
-                  stdout,
+                  screen,
                   "{}{}{}\n", format!("{}", std::str::from_utf8(&some_stuff).unwrap()),
                   termion::cursor::Goto(position.0, position.1),
                   termion::cursor::Hide,
 
               ).unwrap();
-              stdout.flush().unwrap();
+              screen.flush().unwrap();
 
-              write!(stdout,
+              write!(screen,
                   "{}{}{}{}", format!("{}", display.as_str()
                   ),
                  termion::clear::AfterCursor,
                  termion::cursor::Goto((position.0), (position.1 + 1)),
                  termion::cursor::Hide,
               ).unwrap();
-              stdout.flush().unwrap();
+              screen.flush().unwrap();
 
               write!(
-                  stdout,
+                  screen,
                   "{}",
                   termion::cursor::Goto(0, 3),
               ).unwrap();
-              stdout.flush().unwrap();
+              screen.flush().unwrap();
          }
      }
 }

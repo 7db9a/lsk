@@ -82,7 +82,7 @@ pub mod input_n_display {
 
     pub fn alternate_screen() {
         {
-            let mut screen = AlternateScreen::from(stdout());
+            let mut screen: AlternateScreen<Stdout> = AlternateScreen::from(stdout());
             write!(screen, "Writing to alternat(iv)e screen!").unwrap();
             screen.flush().unwrap();
         }
