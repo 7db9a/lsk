@@ -1118,7 +1118,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file_list_all",
           ">Run lsk\n>Open hidden file by key (2)\n>Quite vim\n>Quite lsk",
-          "9233ad1817466a694c0ab9f7e532d02534fca66a4c5184b9b3607c3df4809026",
+          "e539e2c5a37d677c59fd71ca1739ae398ed467fc9dd506ec2512533f5d070ae4",
           ignore/*macro_use*/
     );
 
