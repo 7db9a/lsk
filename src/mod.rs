@@ -1100,7 +1100,7 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "3cf09fb0f77ec3df74748075be1e006fb1ffe8a20307dd05a6a0e2c7a30dbced",
+          "99150c8a4c5960ee34cfbbb8393a65a9fe1c544394c1d02bf6a0a5cf0ad9b6a9",
           ignore/*macro_use*/
     );
 
