@@ -262,6 +262,13 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
     metadata(path).unwrap().is_dir()
 }
 
+//pub fn go_back_compoenent_display() {
+//    let _previous_path = previous_path.as_path();
+//    let components = _previous_path.components();
+//    let component = components.last().unwrap();
+//    let last = component.as_os_str();
+//}
+
 pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
@@ -273,13 +280,28 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
                 Colour::White.bold().paint(entry).to_string()
             },
             FileType::Dir => {
-                let entry = entry.path.to_str().unwrap();
-                let entry = format!(r#"{} [{}]"#, entry, n);
-                Colour::Blue.bold().paint(entry).to_string()
+                if n == 0 {
+                    let _path = entry.path.clone();
+                    let _path = _path.as_path();
+                    let os_str = _path.iter().last().unwrap();
+                    let mut entry_str = os_str.to_str().unwrap();
+                    let mut entry_string = entry_str.to_string();
+                    if entry_str != "/" {
+                          entry_string = format!("../{}", entry_str);
+                          Colour::Blue.bold().paint(entry_string).to_string()
+                    } else {
+                        "/".to_string()
+                    }
+                } else {
+                    let entry_str = entry.path.to_str().unwrap();
+                    let entry = format!(r#"{} [{}]"#, entry_str, n);
+                    Colour::Blue.bold().paint(entry).to_string()
+                }
             },
         };
-        entries_keyed.push(entry);
-        //println!("{} [{}]", entry.display(), n);
+        if entry != "/".to_string() {
+             entries_keyed.push(entry);
+        }
         n += 1;
     }
 
