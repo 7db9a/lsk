@@ -1226,7 +1226,7 @@ mod app_test {
            "q\r",
            "macro_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "eb82d1f17d08015cf4244a7241c3d17039bed7037bcd00a3e2acf716340aa535",
+           "cef9ca29708d0077c26750ac76a443cc02c637a9d9bf49dd3bdc990f1fcf4447",
            ignore/*macro_use*/
      );
 
