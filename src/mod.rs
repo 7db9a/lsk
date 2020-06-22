@@ -528,6 +528,11 @@ impl LsKey {
                         Mode::Cmd(cmd_mode_input) => {
                              if &last == &Some(&'\n') {
                                  input_string = self.cmd_read();
+
+                                 //Clear the command from the lsk console after executing.
+                                 input_string = "".to_string();
+                                 self.input.display = input_string.chars().collect();
+                                 clear_display(&mut stdout);
                              }
                         },
                         Mode::Work => {
