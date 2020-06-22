@@ -1136,7 +1136,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-          "912f6aecc9ab8105e24c2631a3d916eb1e1f7873a4d22e3aa4c19f954a9c8748",
+          "0ba01081b893ec3fd0e7dcff4577c565c058ce7d8d49d0f601fe7a05dd1e9005",
           ignore/*macro_use*/
     );
 
@@ -1154,7 +1154,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
-          "ced6a8b1f874ca773459baf202dec1ae5d39191dd849bcc8031e39ef66b4e2e0",
+          "ffd4c27b3132750622f8c2075064800bec6ae5d8a3654391a1a2aa548bd4a002",
           ignore/*macro_use*/
     );
 
@@ -1172,7 +1172,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
-          "73da1f3600db979ae22639bff5689adfdaf870d1942df4e28b1e8f09e5715f3d",
+          "3438acd815476b946b6196934d31af5b96a240949bd15a2a6d9e3f0b77b505f3",
           ignore/*macro_use*/
     );
 
@@ -1190,7 +1190,7 @@ mod app_test {
           "",
           "macro_go_back_fuzzy_enter_back_into_dir",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "bb7c5963738ffbaffc5c2c05fe5655e3a865abbda693c91759a94b201f810abd",
+          "2541172a470e8c8ea31f451292eec20999a2a788d60fc0dc3465f743e37b2bed",
           ignore/*macro_use*/
     );
 
