@@ -448,7 +448,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_a),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_a.clone()
                          )
@@ -457,7 +458,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_b),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_b.clone()
                          )
@@ -466,7 +468,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_c),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_c.clone()
                          )
@@ -475,7 +478,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_d),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_d.clone()
                          )
