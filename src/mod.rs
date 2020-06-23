@@ -313,7 +313,20 @@ impl LsKey {
                      let output = terminal::shell::cmd(cmd.clone());
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                 }
+                 },
+                 "fzc" => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.parent_path.as_path()
+                     );
+                     let split: Vec<&str> = input.as_read.split("fzc").collect();
+                     let cmd = split.iter().last().unwrap();
+                     let cmd = format!(r#"fzc {}"#, cmd);
+                     //let output = terminal::shell::cmd(cmd.clone());
+                     //let file_path = output.unwrap();
+                     //
+                     terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
+                     //terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                 },
                  _ => {
                       terminal::shell::spawn(cmd.to_string(), args);
                  }
@@ -357,6 +370,17 @@ impl LsKey {
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"zsh {}"#, cmd);
                      terminal::shell::spawn("zsh".to_string(), vec![]);
+                     path_cache.switch_back();
+                 },
+                 "fzc" => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.parent_path.as_path()
+                     );
+                     path_cache.switch();
+                     //let output = terminal::shell::cmd("fzc".to_string());
+                     //let file_path = output.unwrap();
+                     //
+                     terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
                      path_cache.switch_back();
                  },
                  _ => {
