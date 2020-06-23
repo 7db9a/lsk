@@ -269,7 +269,7 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
 //    let last = component.as_os_str();
 //}
 
-pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
+pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<String> {
     let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
