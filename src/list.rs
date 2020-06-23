@@ -62,18 +62,21 @@ mod test_entries_sort {
     fn sort_entries() {
         let a = Entry {
             path: PathBuf::from("/a"),
-            file_type: FileType::File
+            file_type: FileType::File,
+            key: None,
         };
 
         let b = Entry {
             path: PathBuf::from("/B"),
-            file_type: FileType::File
+            file_type: FileType::File,
+            key: None,
         };
 
 
         let c = Entry {
             path: PathBuf::from("/c"),
-            file_type: FileType::File
+            file_type: FileType::File,
+            key: None,
         };
 
         let mut entries = vec![b.clone(), a.clone(), c.clone()];
@@ -330,11 +333,21 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
 
     let count = all_files.iter().count();
     
-    all_files.iter().map(|mut x|
-        (0..count).for_each(|n| x.key = Some(n))
-    );
+    //all_files.iter().map(|mut x|
+    //    (0..count).for_each(|n| all_files.into_iter().nth(n).unwrap().key = Some(n))
+    //);
+    //
+    
+    let mut n = 0;
+    let mut final_all_files: Vec<Entry> = vec![];
+    for mut x in all_files.into_iter() {
+        x.key = Some(n);
+        final_all_files.push(x.clone());
+    }
 
-    all_files
+    //(0..count).for_each(|n| (all_files.iter().nth(n).unwrap().key = Some(n)));
+
+    final_all_files
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
