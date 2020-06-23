@@ -90,7 +90,8 @@ mod test_entries_sort {
 pub struct List {
     pub files: Vec<Entry>,
     pub parent_path: PathBuf,
-    pub path_history: Vec<PathBuf>
+    pub path_history: Vec<PathBuf>,
+    pub filter: Vec<usize>
 }
 
 impl List {
