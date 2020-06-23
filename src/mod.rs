@@ -119,7 +119,8 @@ impl LsKey {
                .map(|file| list::fuzzy_score::Score::Files(score_list(
                                 Entry {
                                     path: file.path.to_path_buf(),
-                                    file_type: file.file_type.clone()
+                                    file_type: file.file_type.clone(),
+                                    key: file.key
                                 }
                            )
                        )
@@ -174,7 +175,8 @@ impl LsKey {
         let files_list: Vec<Entry> = scores.files.iter().map(|score|
             Entry {
                 path: score.score().0.path,
-                file_type: score.score().0.file_type
+                file_type: score.score().0.file_type,
+                key: score.score().0.key
             }
         ).collect();
 

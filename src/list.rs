@@ -16,6 +16,7 @@ pub enum FileType {
 pub struct Entry {
     pub path: PathBuf,
     pub file_type: FileType,
+    pub key: Option<usize>
 }
 
 // Can't alphabetyize PathBuf case insensitively, so we convert to String then back again.
@@ -227,7 +228,8 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                                    list.files.push(
                                        Entry {
                                            path: p,
-                                           file_type: FileType::File
+                                           file_type: FileType::File,
+                                           key: None
                                        }
                                     );
                                }
@@ -239,7 +241,8 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                                    list.files.push(
                                        Entry {
                                            path: p,
-                                           file_type: FileType::Dir
+                                           file_type: FileType::Dir,
+                                           key: None
                                        }
                                     );
                                }
@@ -320,8 +323,15 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
         0,
         Entry {
             path: previous_path.to_path_buf(),
-            file_type: FileType::Dir
+            file_type: FileType::Dir,
+            key: None
         }
+    );
+
+    let count = all_files.iter().count();
+    
+    all_files.iter().map(|mut x|
+        (0..count).for_each(|n| x.key = Some(n))
     );
 
     all_files
