@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# $1 is the number of lines to display.
+# $1 is fuzzy command tool (e.g. fzf or fzy).
 fuzzy_zsh_history() {
-    cat $HOME/.zsh_history | cut -c 16- | fzf
+    cat $HOME/.zsh_history | cut -c 16- | $1
 }
 
 if [ "$1" = "zsh" ]; then
-    fuzzy_zsh_history
+    fuzzy_zsh_history $2
 fi
