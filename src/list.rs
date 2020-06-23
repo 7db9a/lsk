@@ -343,9 +343,10 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
     for mut x in all_files.into_iter() {
         x.key = Some(n);
         final_all_files.push(x.clone());
+        n += 1;
     }
 
-    //(0..count).for_each(|n| (all_files.iter().nth(n).unwrap().key = Some(n)));
+    //(0..count).for_each(|n| (all_files.iter().nth(n).unwrap() = Some(n)));
 
     final_all_files
 }
