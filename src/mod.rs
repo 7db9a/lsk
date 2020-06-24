@@ -204,7 +204,7 @@ impl LsKey {
 
    pub fn run_list_read(&mut self, halt: bool) {
             let list = self.list.clone();
-            let entries: Vec<Entry> = list::order_and_sort_list(&list, true);
+            let entries: Vec<Entry> = list::order_and_sort_list(&list, None, true);
 
             let entries_keyed: Vec<String> = list::key_entries(entries, None);
             let res = terminal::input_n_display::grid(entries_keyed);

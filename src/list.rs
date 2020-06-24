@@ -183,7 +183,7 @@ impl List {
     }
 
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
-        let all_files = order_and_sort_list(&self, sort);
+        let all_files = order_and_sort_list(&self, None, sort);
         let all_files = all_files.iter();
 
         for entry in all_files.clone() {
@@ -339,7 +339,7 @@ pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<Strin
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
+pub fn order_and_sort_list(list: &List, filter_list: Option<Vec<usize>>, sort: bool) -> Vec<Entry> {
     let mut all_files = list.files.clone();
     let previous_path = list.path_history.iter().last().unwrap();
     if sort {
@@ -370,13 +370,27 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
         n += 1;
     }
 
+    // Filter entries
+    if let Some(fl) = filter_list {
+
+        //let few_ms = std::time::Duration::from_millis(1000);
+        //std::thread::sleep(few_ms);
+        let find_in_range = final_all_files.clone().into_iter().filter(|x|
+            !fl.iter().find(|n| &x.key.unwrap() == *n).is_some()
+        );
+
+
+        let files: Vec<Entry> = find_in_range.collect();
+        final_all_files = files;
+    }
+
     //(0..count).for_each(|n| (all_files.iter().nth(n).unwrap() = Some(n)));
 
     final_all_files
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
-    let all_files = order_and_sort_list(&list, true);
+    let all_files = order_and_sort_list(&list, None, true);
     let mut n = 0;
     for entry in all_files {
         println!("{} [{}]", entry.path.display(), n);
