@@ -154,6 +154,34 @@ impl List {
         self
     }
 
+    pub fn order_and_sort_list(&mut self, sort: bool) {
+        let mut all_files = self.files.clone();
+        let previous_path = self.path_history.iter().last().unwrap();
+        if sort {
+            all_files.sort_by(|a, b| alphabetize_entry(a, b));
+        }
+        all_files.insert(
+            0,
+            Entry {
+                path: previous_path.to_path_buf(),
+                file_type: FileType::Dir,
+                key: None
+            }
+        );
+    
+        let count = all_files.iter().count();
+        
+        let mut n = 0;
+        let mut final_all_files: Vec<Entry> = vec![];
+        for mut x in all_files.into_iter() {
+            x.key = Some(n);
+            final_all_files.push(x.clone());
+            n += 1;
+        }
+    
+        self.files = final_all_files;
+    }
+
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
         let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
