@@ -157,18 +157,15 @@ impl List {
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
         let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
-        let count =  all_files.clone().count();
 
-        let mut n = 0;
-        if count > 0 {
-            for entry in all_files.clone() {
-                //println!("{} [{}]", entry.display(), n);
+        for entry in all_files.clone() {
+            //println!("{} [{}]", entry.display(), n);
+            //p
+            let n = entry.key.unwrap();
+            //let parent_file_name = file_or_dir_name(&self.parent_path);
+            if n == key {
                 let path = entry.path.to_path_buf();
-                //let parent_file_name = file_or_dir_name(&self.parent_path);
-                if n == key {
-                    return self.clone().full_entry_path(path);
-                }
-                n += 1;
+                return self.clone().full_entry_path(path);
             }
         }
 
