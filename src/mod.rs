@@ -752,6 +752,7 @@ fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<
 pub enum CmdType {
     single_key,
     multiple_keys,
+    filter_keys,
     cmd,
 }
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -841,6 +842,37 @@ impl Input {
             Some(false)
         };
 
+        let is_filter = {
+            let mut res = false;
+            let mut input_vec_str: Vec<&str> = input.split("-").collect();
+
+            if input_vec_str.iter().count() > 1 {
+                if input_vec_str.clone().pop() != Some("") {
+                    //if input_vec_str == vec!["1", "5"] {
+                    //    let few_ms = std::time::Duration::from_millis(1000);
+                    //    std::thread::sleep(few_ms);
+                    //}
+                    for i in input_vec_str.into_iter() {
+                        let key: Result<(usize), std::num::ParseIntError> = i.parse();
+                        if !key.is_ok() {
+                            res = false;
+                            break;
+                        } else {
+                            res = true;
+                        }
+
+                    }
+                }
+            }
+
+            //if res {
+            //    let few_ms = std::time::Duration::from_millis(1000);
+            //    std::thread::sleep(few_ms);
+            //}
+
+            res
+        };
+
 
         let are_all_keys = if let Some(c) = cmd.clone() {
              if c == "r".to_string() {
@@ -860,15 +892,24 @@ impl Input {
 
         let cmd_type = if are_all_keys {
             CmdType::multiple_keys
+        } else if is_filter {
+            CmdType::filter_keys
         } else if let Some(k) = is_key {
             if k {
                 CmdType::single_key
             } else {
                 CmdType::cmd
             }
+        } else if is_filter {
+            CmdType::filter_keys
         } else {
             CmdType::cmd
         };
+
+            //if cmd_type == CmdType::filter_keys {
+            //    let few_ms = std::time::Duration::from_millis(1000);
+            //    std::thread::sleep(few_ms);
+            //}
 
         self.cmd = cmd;
         self.args = args;
