@@ -36,7 +36,7 @@ pub mod app {
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
-        ls_key.run_list_read(ls_key.is_fuzzed);
+        ls_key.run_list_read(ls_key.is_fuzzed, false);
         let mut list = ls_key.list.clone();
 
         while ls_key.is_fuzzed {
@@ -53,7 +53,7 @@ pub mod app {
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            ls_key.run_list_read(ls_key.is_fuzzed);
+            ls_key.run_list_read(ls_key.is_fuzzed, false);
             list = ls_key.list.clone();
         }
 
@@ -164,7 +164,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        self.run_list_read(true);
+        self.run_list_read(true, self.list.filter.is_some());
         self.fuzzy_list = Some(list);
 
         self.clone()
@@ -202,9 +202,9 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn run_list_read(&mut self, halt: bool) {
-            let list = self.list.clone();
-            let entries: Vec<Entry> = list::order_and_sort_list(&list, None, true);
+   pub fn run_list_read(&mut self, halt: bool, filter: bool) {
+            let mut list = self.list.clone();
+            let entries = list.clone().order_and_sort_list(true, filter);
 
             let entries_keyed: Vec<String> = list::key_entries(entries, None);
             let res = terminal::input_n_display::grid(entries_keyed);
@@ -259,6 +259,33 @@ impl LsKey {
         }
     }
 
+    pub fn filter_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
+        let mut input_string: String = self.input.display.iter().collect();
+        let mut input_vec_str: Vec<&str> = input_string.split("-").collect();
+        let mut key_vec: Vec<usize> = vec![];
+        for i in input_vec_str.into_iter() {
+            let key: Result<(usize), std::num::ParseIntError> = i.parse();
+            if !key.is_ok() {
+                key_vec.push(key.unwrap());
+                break;
+            }
+
+        }
+        let start = key_vec.clone().into_iter().nth(0).unwrap();
+        let end = key_vec.clone().into_iter().nth(2).unwrap();
+        let range = (start..end);
+
+        let mut filter_vec: Vec<usize> = vec![];
+
+        range.into_iter().for_each(|i|
+            filter_vec.push(i)
+        );
+
+        self.list.filter = Some(filter_vec);
+        let filter = true;
+        self.run_list_read(is_fuzzed, filter);
+    }
+
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
@@ -269,7 +296,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self.update(list);
                  self.halt = false;
-                 self.run_list_read(is_fuzzed);
+                 self.run_list_read(is_fuzzed, self.list.filter.is_some());
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -282,7 +309,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self.update(list);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed);
+                      self.run_list_read(is_fuzzed, self.list.filter.is_some());
                   } else {
                       let file_path =
                           file_pathbuf
@@ -290,7 +317,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed);
+                      self.run_list_read(is_fuzzed, self.list.filter.is_some());
                   }
             }
         }
@@ -415,6 +442,9 @@ impl LsKey {
                                 * then type_text_spawn(text_vec);
                             */
                             self.return_file_by_key_mode(self.list.clone(), input, is_fuzzed);
+                        },
+                        CmdType::filter_keys => {
+                            self.filter_mode(self.list.clone(), input, is_fuzzed);
                         },
                         _ => ()
                     }
@@ -680,7 +710,7 @@ impl LsKey {
                  match input.clone().cmd_type.unwrap() {
                      CmdType::cmd => {
                          self.cmd_mode(input);
-                         self.run_list_read(true);
+                         self.run_list_read(true, self.list.filter.is_some());
                      },
                      _ => {}
                  }

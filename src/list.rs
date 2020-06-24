@@ -95,7 +95,7 @@ pub struct List {
     pub files: Vec<Entry>,
     pub parent_path: PathBuf,
     pub path_history: Vec<PathBuf>,
-    pub filter: Vec<usize>
+    pub filter: Option<Vec<usize>>
 }
 
 impl List {
@@ -154,7 +154,7 @@ impl List {
         self
     }
 
-    pub fn order_and_sort_list(&mut self, sort: bool) {
+    pub fn order_and_sort_list(self, sort: bool, filter: bool) -> Vec<Entry> {
         let mut all_files = self.files.clone();
         let previous_path = self.path_history.iter().last().unwrap();
         if sort {
@@ -171,6 +171,7 @@ impl List {
     
         let count = all_files.iter().count();
         
+        // Add keys
         let mut n = 0;
         let mut final_all_files: Vec<Entry> = vec![];
         for mut x in all_files.into_iter() {
@@ -178,12 +179,23 @@ impl List {
             final_all_files.push(x.clone());
             n += 1;
         }
-    
-        self.files = final_all_files;
+
+        // Filter entries
+        if filter {
+            let find_in_range = self.files.clone().into_iter().filter(|x|
+                !self.filter.as_ref().unwrap().iter().find(|n| &x.key.unwrap() == *n).is_some()
+            );
+
+
+            let files: Vec<Entry> = find_in_range.collect();
+            final_all_files = files;
+        }
+
+        final_all_files
     }
 
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
-        let all_files = order_and_sort_list(&self, None, sort);
+        let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
 
         for entry in all_files.clone() {
@@ -339,7 +351,7 @@ pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<Strin
     entries_keyed
 }
 
-pub fn order_and_sort_list(list: &List, filter_list: Option<Vec<usize>>, sort: bool) -> Vec<Entry> {
+pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
     let mut all_files = list.files.clone();
     let previous_path = list.path_history.iter().last().unwrap();
     if sort {
@@ -370,27 +382,13 @@ pub fn order_and_sort_list(list: &List, filter_list: Option<Vec<usize>>, sort: b
         n += 1;
     }
 
-    // Filter entries
-    if let Some(fl) = filter_list {
-
-        //let few_ms = std::time::Duration::from_millis(1000);
-        //std::thread::sleep(few_ms);
-        let find_in_range = final_all_files.clone().into_iter().filter(|x|
-            !fl.iter().find(|n| &x.key.unwrap() == *n).is_some()
-        );
-
-
-        let files: Vec<Entry> = find_in_range.collect();
-        final_all_files = files;
-    }
-
     //(0..count).for_each(|n| (all_files.iter().nth(n).unwrap() = Some(n)));
 
     final_all_files
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
-    let all_files = order_and_sort_list(&list, None, true);
+    let all_files = order_and_sort_list(&list, true);
     let mut n = 0;
     for entry in all_files {
         println!("{} [{}]", entry.path.display(), n);
