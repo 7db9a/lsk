@@ -277,9 +277,9 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
 //}
 
 pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<String> {
-    let mut n = 0;
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
+        let n = entry.key.unwrap();
         let entry = match entry.file_type {
             FileType::File => {
                 let entry = entry.path.to_str().unwrap();
@@ -309,7 +309,6 @@ pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<Strin
         if entry != "/".to_string() {
              entries_keyed.push(entry);
         }
-        n += 1;
     }
 
     entries_keyed
