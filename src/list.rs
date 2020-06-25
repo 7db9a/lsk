@@ -197,12 +197,12 @@ impl List {
            fn filter_closure(x: &Entry, filter: &Option<Vec<usize>>) -> bool {
                if let Some(fl) = filter {
                    if let Some(key) = x.key {
-                       !fl.iter().find(|n| &key == *n).is_some()
+                       fl.iter().find(|n| &key == *n).is_some()
                    } else {
-                       false
+                       true
                    }
                } else {
-                   false
+                   true
                }
            }
 
