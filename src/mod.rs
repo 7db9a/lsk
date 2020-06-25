@@ -259,20 +259,19 @@ impl LsKey {
         }
     }
 
-    pub fn filter_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
+    pub fn filter_mode(&mut self, mut list: List, input: Input, is_fuzzed: bool) {
         let mut input_string: String = self.input.display.iter().collect();
         let mut input_vec_str: Vec<&str> = input_string.split("-").collect();
         let mut key_vec: Vec<usize> = vec![];
         for i in input_vec_str.into_iter() {
             let key: Result<(usize), std::num::ParseIntError> = i.parse();
-            if !key.is_ok() {
+            if key.is_ok() {
                 key_vec.push(key.unwrap());
-                break;
             }
 
         }
         let start = key_vec.clone().into_iter().nth(0).unwrap();
-        let end = key_vec.clone().into_iter().nth(2).unwrap();
+        let end = key_vec.clone().into_iter().nth(1).unwrap() + 1;
         let range = (start..end);
 
         let mut filter_vec: Vec<usize> = vec![];
@@ -281,9 +280,15 @@ impl LsKey {
             filter_vec.push(i)
         );
 
-        self.list.filter = Some(filter_vec);
+        //if filter_vec == vec![1, 2, 3, 4, 5] {
+        //    let few_ms = std::time::Duration::from_millis(1000);
+        //    std::thread::sleep(few_ms);
+        //}
+
+        list.filter = Some(filter_vec);
         let filter = true;
-        self.run_list_read(is_fuzzed, filter);
+        self.update(list);
+        self.run_list_read(false, filter);
     }
 
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
@@ -431,6 +436,7 @@ impl LsKey {
                     let input = Input::new();
                     let input = input.parse(i);
                     // Safe to unwrap.
+                    //
                     match input.clone().cmd_type.unwrap() {
                         CmdType::single_key => {
                             self.key_mode(self.list.clone(), input, is_fuzzed);

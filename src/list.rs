@@ -168,9 +168,9 @@ impl List {
                 key: None
             }
         );
-    
+
         let count = all_files.iter().count();
-        
+
         // Add keys
         let mut n = 0;
         let mut final_all_files: Vec<Entry> = vec![];
@@ -180,15 +180,55 @@ impl List {
             n += 1;
         }
 
+        //let few_ms = std::time::Duration::from_millis(1000);
+        //std::thread::sleep(few_ms);
+
         // Filter entries
         if filter {
-            let find_in_range = self.files.clone().into_iter().filter(|x|
-                !self.filter.as_ref().unwrap().iter().find(|n| &x.key.unwrap() == *n).is_some()
-            );
 
+
+            let entry_test = Entry {
+                path: PathBuf::from("entry_test"),
+                file_type: FileType::File,
+                key: Some(3)
+
+            };
+
+           fn filter_closure(x: &Entry, filter: &Option<Vec<usize>>) -> bool {
+               if let Some(fl) = filter {
+                   if let Some(key) = x.key {
+                       !fl.iter().find(|n| &key == *n).is_some()
+                   } else {
+                       false
+                   }
+               } else {
+                   false
+               }
+           }
+
+           let find_in_range = final_all_files.clone().into_iter().filter(|x|
+               // !filter.as_ref().unwrap().iter().find(|n| &x.key.unwrap() == *n).is_some()
+               filter_closure(x, &self.filter)
+           );
 
             let files: Vec<Entry> = find_in_range.collect();
+
+            let entry_test = Entry {
+                path: PathBuf::from("entry_test"),
+                file_type: FileType::File,
+                key: Some(3)
+
+            };
+
+            if files != vec![entry_test] {
+                //let few_ms = std::time::Duration::from_millis(1000);
+                //std::thread::sleep(few_ms);
+            } else {
+                //let few_ms = std::time::Duration::from_millis(1000);
+                //std::thread::sleep(few_ms);
+            }
             final_all_files = files;
+        } else {
         }
 
         final_all_files
@@ -368,12 +408,12 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
     );
 
     let count = all_files.iter().count();
-    
+
     //all_files.iter().map(|mut x|
     //    (0..count).for_each(|n| all_files.into_iter().nth(n).unwrap().key = Some(n))
     //);
     //
-    
+
     let mut n = 0;
     let mut final_all_files: Vec<Entry> = vec![];
     for mut x in all_files.into_iter() {
