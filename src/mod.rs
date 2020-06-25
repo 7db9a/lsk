@@ -204,7 +204,7 @@ impl LsKey {
 
    pub fn run_list_read(&mut self, halt: bool, filter: bool) {
             let mut list = self.list.clone();
-            let entries = list.clone().order_and_sort_list(true, filter);
+            let entries = list.clone().order_and_sort_list(true, filter, self.list.filter.clone());
 
             let entries_keyed: Vec<String> = list::key_entries(entries, None);
             let res = terminal::input_n_display::grid(entries_keyed);
@@ -284,11 +284,10 @@ impl LsKey {
         //    let few_ms = std::time::Duration::from_millis(1000);
         //    std::thread::sleep(few_ms);
         //}
-
-        list.filter = Some(filter_vec);
+        self.list.filter = Some(filter_vec);
         let filter = true;
-        self.update(list);
-        self.run_list_read(false, filter);
+        //self.update(self.list.clone());
+        self.run_list_read(false, true);
     }
 
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
