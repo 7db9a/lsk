@@ -1358,6 +1358,24 @@ mod app_test {
            ignore/*macro_use*/
      );
 
+     test!(
+           false, //list_all_bool
+           macro_file_range,
+           "Makefile",
+           700,
+           "20-25\r",
+           "24\r",
+           "1\r",
+           "11\r",
+           "",
+           ":q\r",
+           "q\r",
+           "macro_file_range",
+           ">Run lsk\n>List range 20-25\n>Enter rust dir\nEnter redox dir\n>Open filesystem.toml\n>Quite Vim\n>Quite lsk",
+           "f5f1e7f641b5f348080ca2f86c0dffa8530cfab308cd9ec61d4cb9b8fa4cf3b7",
+           ignore/*macro_use*/
+     );
+
     #[test]
     #[ignore]//docker
     fn parse() {
