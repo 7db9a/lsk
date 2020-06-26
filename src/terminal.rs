@@ -279,7 +279,7 @@ pub mod input_n_display {
    //     //}
    // }
 
-    pub fn grid(entries: Vec<String>) -> Option<(Grid, usize)> {
+    pub fn grid(entries: Vec<String>) -> Option<(Grid, usize, usize)> {
         let mut grid = Grid::new(GridOptions {
                 filling:     Filling::Spaces(3),
                 direction:   Direction::LeftToRight,
@@ -301,7 +301,7 @@ pub mod input_n_display {
               let w = usize::from(r.0);
               let h = usize::from(r.1);
 
-              Some((grid, w))
+              Some((grid, w, h))
           },
           Err(_) => {
               None
