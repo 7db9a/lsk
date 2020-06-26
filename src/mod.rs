@@ -1362,7 +1362,7 @@ mod app_test {
            false, //list_all_bool
            macro_file_range,
            "Makefile",
-           700,
+           100,
            "20-25\r",
            "24\r",
            "1\r",
@@ -1373,6 +1373,24 @@ mod app_test {
            "macro_file_range",
            ">Run lsk\n>List range 20-25\n>Enter rust dir\nEnter redox dir\n>Open filesystem.toml\n>Quite Vim\n>Quite lsk",
            "f5f1e7f641b5f348080ca2f86c0dffa8530cfab308cd9ec61d4cb9b8fa4cf3b7",
+           ignore/*macro_use*/
+     );
+
+     test!(
+           true, //list_all_bool
+           macro_list_all_fuzzy_file_range,
+           "Makefile",
+           100,
+           "f m\r",
+           "1-10\r",
+           "10\r",
+           "9\r",
+           ":q\r",
+           "0\r",
+           "q\r",
+           "macro_list_all_all_file_range",
+           ">Run lsk\n>List all\n>Fuzzy search 'm'\n>List range 1-10\n>Enter mk dir\n>Open qemu.mk\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
+           "c3e7bfb6e9b3051368bca98785942b60a120cd14096b0d38e5f63e1d7be1974d",
            ignore/*macro_use*/
      );
 
