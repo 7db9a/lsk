@@ -36,7 +36,7 @@ pub mod app {
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
-        ls_key.run_list_read(ls_key.is_fuzzed);
+        ls_key.run_list_read(ls_key.is_fuzzed, false);
         let mut list = ls_key.list.clone();
 
         while ls_key.is_fuzzed {
@@ -53,7 +53,7 @@ pub mod app {
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            ls_key.run_list_read(ls_key.is_fuzzed);
+            ls_key.run_list_read(ls_key.is_fuzzed, false);
             list = ls_key.list.clone();
         }
 
@@ -119,7 +119,8 @@ impl LsKey {
                .map(|file| list::fuzzy_score::Score::Files(score_list(
                                 Entry {
                                     path: file.path.to_path_buf(),
-                                    file_type: file.file_type.clone()
+                                    file_type: file.file_type.clone(),
+                                    key: file.key
                                 }
                            )
                        )
@@ -163,7 +164,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        self.run_list_read(true);
+        self.run_list_read(true, self.list.filter.is_some());
         self.fuzzy_list = Some(list);
 
         self.clone()
@@ -174,7 +175,8 @@ impl LsKey {
         let files_list: Vec<Entry> = scores.files.iter().map(|score|
             Entry {
                 path: score.score().0.path,
-                file_type: score.score().0.file_type
+                file_type: score.score().0.file_type,
+                key: score.score().0.key
             }
         ).collect();
 
@@ -200,11 +202,11 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn run_list_read(&mut self, halt: bool) {
-            let list = self.list.clone();
-            let entries: Vec<Entry> = list::order_and_sort_list(&list, true);
+   pub fn run_list_read(&mut self, halt: bool, filter: bool) {
+            let mut list = self.list.clone();
+            let entries = list.clone().order_and_sort_list(true, filter, self.list.filter.clone());
 
-            let entries_keyed: Vec<String> = list::key_entries(entries);
+            let entries_keyed: Vec<String> = list::key_entries(entries, None);
             let res = terminal::input_n_display::grid(entries_keyed);
             let mut show = "".to_string();
             if let Some(r) = res {
@@ -257,6 +259,61 @@ impl LsKey {
         }
     }
 
+    pub fn filter_mode(&mut self, mut list: List, input: Input, is_fuzzed: bool) {
+        let mut input_string: String = self.input.display.iter().collect();
+        let mut input_vec_str: Vec<&str> = input_string.split("-").collect();
+        let mut key_vec: Vec<usize> = vec![];
+
+        // Does it end in "-"?
+        let last = input_vec_str.iter().last();
+        let mut open_range = false;
+        if let Some(l) = last {
+            if l == &"" {
+                open_range = true;
+           }
+        }
+
+        // Only want to deal with integers if it's an open range.
+        if open_range {
+           input_vec_str.pop();
+        }
+
+        // Make sure it'sall integers.
+        for i in input_vec_str.into_iter() {
+            let key: Result<(usize), std::num::ParseIntError> = i.parse();
+            if key.is_ok() {
+                key_vec.push(key.unwrap());
+            }
+
+        }
+
+        let mut end: usize = 0;
+        let start = key_vec.clone().into_iter().nth(0).unwrap();
+
+        if open_range {
+            end =  list.files.iter().count() + 1;
+        } else {
+            end = key_vec.clone().into_iter().nth(1).unwrap() + 1;
+        }
+
+        let range = (start..end);
+
+        let mut filter_vec: Vec<usize> = vec![];
+
+        range.into_iter().for_each(|i|
+            filter_vec.push(i)
+        );
+
+        //if filter_vec == vec![1, 2, 3, 4, 5] {
+        //    let few_ms = std::time::Duration::from_millis(1000);
+        //    std::thread::sleep(few_ms);
+        //}
+        self.list.filter = Some(filter_vec);
+        let filter = true;
+        //self.update(self.list.clone());
+        self.run_list_read(false, true);
+    }
+
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
         let key: usize = input.cmd.unwrap().parse().unwrap();
         match key {
@@ -267,7 +324,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self.update(list);
                  self.halt = false;
-                 self.run_list_read(is_fuzzed);
+                 self.run_list_read(is_fuzzed, self.list.filter.is_some());
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -280,7 +337,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self.update(list);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed);
+                      self.run_list_read(is_fuzzed, self.list.filter.is_some());
                   } else {
                       let file_path =
                           file_pathbuf
@@ -288,7 +345,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed);
+                      self.run_list_read(is_fuzzed, self.list.filter.is_some());
                   }
             }
         }
@@ -402,6 +459,7 @@ impl LsKey {
                     let input = Input::new();
                     let input = input.parse(i);
                     // Safe to unwrap.
+                    //
                     match input.clone().cmd_type.unwrap() {
                         CmdType::single_key => {
                             self.key_mode(self.list.clone(), input, is_fuzzed);
@@ -413,6 +471,9 @@ impl LsKey {
                                 * then type_text_spawn(text_vec);
                             */
                             self.return_file_by_key_mode(self.list.clone(), input, is_fuzzed);
+                        },
+                        CmdType::filter_keys => {
+                            self.filter_mode(self.list.clone(), input, is_fuzzed);
                         },
                         _ => ()
                     }
@@ -678,7 +739,7 @@ impl LsKey {
                  match input.clone().cmd_type.unwrap() {
                      CmdType::cmd => {
                          self.cmd_mode(input);
-                         self.run_list_read(true);
+                         self.run_list_read(true, self.list.filter.is_some());
                      },
                      _ => {}
                  }
@@ -750,6 +811,7 @@ fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<
 pub enum CmdType {
     single_key,
     multiple_keys,
+    filter_keys,
     cmd,
 }
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -839,6 +901,45 @@ impl Input {
             Some(false)
         };
 
+        let is_filter = {
+            let mut res = false;
+            let mut input_vec_str: Vec<&str> = input.split("-").collect();
+
+            // Make sure it's more than one item (it's range of values).
+            if input_vec_str.iter().count() > 1 {
+                res = true;
+            }
+
+            if res {
+                // Does it end in "-"?
+                let last = input_vec_str.iter().last();
+                let mut open_range = false;
+                if let Some(l) = last {
+                    if l == &"" {
+                        open_range = true;
+                   }
+                }
+
+                // Only want to deal with integers if it's an open range.
+                if open_range {
+                   input_vec_str.pop();
+                }
+
+                // Make sure it'sall integers.
+                for i in input_vec_str.into_iter() {
+                    let key: Result<(usize), std::num::ParseIntError> = i.parse();
+                    if !key.is_ok() {
+                        res = false;
+                        break;
+                    } else {
+                        res = true;
+                    }
+                }
+            } // if res
+
+            res
+        };
+
 
         let are_all_keys = if let Some(c) = cmd.clone() {
              if c == "r".to_string() {
@@ -858,15 +959,24 @@ impl Input {
 
         let cmd_type = if are_all_keys {
             CmdType::multiple_keys
+        } else if is_filter {
+            CmdType::filter_keys
         } else if let Some(k) = is_key {
             if k {
                 CmdType::single_key
             } else {
                 CmdType::cmd
             }
+        } else if is_filter {
+            CmdType::filter_keys
         } else {
             CmdType::cmd
         };
+
+            //if cmd_type == CmdType::filter_keys {
+            //    let few_ms = std::time::Duration::from_millis(1000);
+            //    std::thread::sleep(few_ms);
+            //}
 
         self.cmd = cmd;
         self.args = args;
@@ -1278,6 +1388,61 @@ mod app_test {
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace partially (bad behavior)\n>Quite lsk",
            "cbce709ccb1d782baa4ff20f80076d5f315c683b108e4ecd05a4ba51bd872570",
            ignore/*macro_use*/
+     );
+
+     test!(
+           false, //list_all_bool
+           macro_file_range,
+           "Makefile",
+           100,
+           "20-25\r",
+           "24\r",
+           "1\r",
+           "11\r",
+           "",
+           ":q\r",
+           "q\r",
+           "macro_file_range",
+           ">Run lsk\n>List range 20-25\n>Enter rust dir\nEnter redox dir\n>Open filesystem.toml\n>Quite Vim\n>Quite lsk",
+           "f5f1e7f641b5f348080ca2f86c0dffa8530cfab308cd9ec61d4cb9b8fa4cf3b7",
+           ignore/*macro_use*/
+     );
+
+     test!(
+           true, //list_all_bool
+           macro_list_all_fuzzy_file_range,
+           "Makefile",
+           100,
+           "f m\r",
+           "1-10\r",
+           "10\r",
+           "9\r",
+           ":q\r",
+           "0\r",
+           "q\r",
+           "macro_list_all_all_file_range",
+           ">Run lsk\n>List all\n>Fuzzy search 'm'\n>List range 1-10\n>Enter mk dir\n>Open qemu.mk\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
+           "c3e7bfb6e9b3051368bca98785942b60a120cd14096b0d38e5f63e1d7be1974d",
+           ignore/*macro_use*/
+     );
+
+     test!(
+           true, //list_all_bool
+           macro_list_all_fuzzy_range_open_ended,
+           "Makefile",
+           100,
+           "f i\r",
+           "5-17\n",
+           "7-\r",
+           "17\r",
+           ":q\r",
+           "",
+           "q\r",
+           "macro_list_all_fuzzy_range_open_ended",
+           ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open last one, key 17\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
+           "ca6aa5131806db21e21a6f1ac39a201959a3fb36c43d998a38013fd9ecef0e9f",
+           macro_use
+           //ignore/*macro_use*/
      );
 
     #[test]

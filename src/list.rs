@@ -16,6 +16,7 @@ pub enum FileType {
 pub struct Entry {
     pub path: PathBuf,
     pub file_type: FileType,
+    pub key: Option<usize>
 }
 
 // Can't alphabetyize PathBuf case insensitively, so we convert to String then back again.
@@ -61,18 +62,21 @@ mod test_entries_sort {
     fn sort_entries() {
         let a = Entry {
             path: PathBuf::from("/a"),
-            file_type: FileType::File
+            file_type: FileType::File,
+            key: None,
         };
 
         let b = Entry {
             path: PathBuf::from("/B"),
-            file_type: FileType::File
+            file_type: FileType::File,
+            key: None,
         };
 
 
         let c = Entry {
             path: PathBuf::from("/c"),
-            file_type: FileType::File
+            file_type: FileType::File,
+            key: None,
         };
 
         let mut entries = vec![b.clone(), a.clone(), c.clone()];
@@ -90,7 +94,8 @@ mod test_entries_sort {
 pub struct List {
     pub files: Vec<Entry>,
     pub parent_path: PathBuf,
-    pub path_history: Vec<PathBuf>
+    pub path_history: Vec<PathBuf>,
+    pub filter: Option<Vec<usize>>
 }
 
 impl List {
@@ -149,21 +154,98 @@ impl List {
         self
     }
 
+    pub fn order_and_sort_list(self, sort: bool, filter: bool, filter_vec: Option<Vec<usize>>) -> Vec<Entry> {
+        let mut all_files = self.files.clone();
+        let previous_path = self.path_history.iter().last().unwrap();
+        if sort {
+            all_files.sort_by(|a, b| alphabetize_entry(a, b));
+        }
+        all_files.insert(
+            0,
+            Entry {
+                path: previous_path.to_path_buf(),
+                file_type: FileType::Dir,
+                key: None
+            }
+        );
+
+        let count = all_files.iter().count();
+
+        // Add keys
+        let mut n = 0;
+        let mut final_all_files: Vec<Entry> = vec![];
+        for mut x in all_files.into_iter() {
+            x.key = Some(n);
+            final_all_files.push(x.clone());
+            n += 1;
+        }
+
+        //let few_ms = std::time::Duration::from_millis(1000);
+        //std::thread::sleep(few_ms);
+
+        // Filter entries
+        if filter {
+
+
+            let entry_test = Entry {
+                path: PathBuf::from("entry_test"),
+                file_type: FileType::File,
+                key: Some(3)
+
+            };
+
+           fn filter_closure(x: &Entry, filter: &Option<Vec<usize>>) -> bool {
+               if let Some(fl) = filter {
+                   if let Some(key) = x.key {
+                       fl.iter().find(|n| &key == *n).is_some()
+                   } else {
+                       true
+                   }
+               } else {
+                   true
+               }
+           }
+
+           let find_in_range = final_all_files.clone().into_iter().filter(|x|
+               // !filter.as_ref().unwrap().iter().find(|n| &x.key.unwrap() == *n).is_some()
+               filter_closure(x, &filter_vec)
+           );
+
+            let files: Vec<Entry> = find_in_range.collect();
+
+            let entry_test = Entry {
+                path: PathBuf::from("entry_test"),
+                file_type: FileType::File,
+                key: Some(3)
+
+            };
+
+            if files != vec![entry_test] {
+                //let few_ms = std::time::Duration::from_millis(1000);
+                //std::thread::sleep(few_ms);
+            } else {
+                //let few_ms = std::time::Duration::from_millis(1000);
+                //std::thread::sleep(few_ms);
+            }
+            final_all_files = files;
+        } else {
+        }
+
+        final_all_files
+    }
+
     pub fn get_file_by_key(&self, key: usize, sort: bool) -> Option<PathBuf> {
         let all_files = order_and_sort_list(&self, sort);
         let all_files = all_files.iter();
-        let count =  all_files.clone().count();
 
-        let mut n = 0;
-        if count > 0 {
-            for entry in all_files.clone() {
-                //println!("{} [{}]", entry.display(), n);
+        for entry in all_files.clone() {
+            //println!("{} [{}]", entry.display(), n);
+            //p
+            let n = entry.key.unwrap();
+            //let parent_file_name = file_or_dir_name(&self.parent_path);
+            if n == key {
                 let path = entry.path.to_path_buf();
-                //let parent_file_name = file_or_dir_name(&self.parent_path);
-                if n == key {
-                    return self.clone().full_entry_path(path);
-                }
-                n += 1;
+                return self.clone().full_entry_path(path);
             }
         }
 
@@ -226,7 +308,8 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                                    list.files.push(
                                        Entry {
                                            path: p,
-                                           file_type: FileType::File
+                                           file_type: FileType::File,
+                                           key: None
                                        }
                                     );
                                }
@@ -238,7 +321,8 @@ fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result
                                    list.files.push(
                                        Entry {
                                            path: p,
-                                           file_type: FileType::Dir
+                                           file_type: FileType::Dir,
+                                           key: None
                                        }
                                     );
                                }
@@ -269,10 +353,10 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
 //    let last = component.as_os_str();
 //}
 
-pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
-    let mut n = 0;
+pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<String> {
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
+        let n = entry.key.unwrap();
         let entry = match entry.file_type {
             FileType::File => {
                 let entry = entry.path.to_str().unwrap();
@@ -302,7 +386,6 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
         if entry != "/".to_string() {
              entries_keyed.push(entry);
         }
-        n += 1;
     }
 
     entries_keyed
@@ -319,11 +402,29 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
         0,
         Entry {
             path: previous_path.to_path_buf(),
-            file_type: FileType::Dir
+            file_type: FileType::Dir,
+            key: None
         }
     );
 
-    all_files
+    let count = all_files.iter().count();
+
+    //all_files.iter().map(|mut x|
+    //    (0..count).for_each(|n| all_files.into_iter().nth(n).unwrap().key = Some(n))
+    //);
+    //
+
+    let mut n = 0;
+    let mut final_all_files: Vec<Entry> = vec![];
+    for mut x in all_files.into_iter() {
+        x.key = Some(n);
+        final_all_files.push(x.clone());
+        n += 1;
+    }
+
+    //(0..count).for_each(|n| (all_files.iter().nth(n).unwrap() = Some(n)));
+
+    final_all_files
 }
 
 pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
@@ -423,7 +524,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_a),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_a.clone()
                          )
@@ -432,7 +534,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_b),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_b.clone()
                          )
@@ -441,7 +544,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_c),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_c.clone()
                          )
@@ -450,7 +554,8 @@ mod fuzzy_tests {
                          (
                              Entry {
                                  path: PathBuf::from(file_d),
-                                 file_type: FileType::File
+                                 file_type: FileType::File,
+                                 key: None
                              },
                              res_d.clone()
                          )
