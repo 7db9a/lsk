@@ -1428,7 +1428,7 @@ mod app_test {
 
      test!(
            true, //list_all_bool
-           macro_list_all_fuzzy_range_open_ended,
+           macro_list_all_fuzzy_undo_open_range,
            "Makefile",
            100,
            "f i\r",
@@ -1436,13 +1436,12 @@ mod app_test {
            "7-\r",
            "17\r",
            ":q\r",
-           "",
+           "1-\n",
            "q\r",
-           "macro_list_all_fuzzy_range_open_ended",
-           ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open last one, key 17\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
-           "ca6aa5131806db21e21a6f1ac39a201959a3fb36c43d998a38013fd9ecef0e9f",
-           macro_use
-           //ignore/*macro_use*/
+           "macro_list_all_fuzzy_undo_open_range",
+           ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open last one, key 17\n>Quite Vim\n>List entire range, 1-\n>Quite lsk",
+           "a4884dc18df5b571708e292e90a9a26b9de11294a0215945c850804a9413900d",
+           ignore/*macro_use*/
      );
 
     #[test]
