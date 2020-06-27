@@ -207,13 +207,14 @@ impl LsKey {
             let mut grid_incr = 1;
             let mut list_incr = 1;
             let mut list_filter = self.list.filter.clone();
+            if let Some(ls) = list_filter.clone() {
+            }
             let mut list = self.list.clone();
             let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
             let entries_count = entries.iter().count();
             while go {
                 let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
                 let entries_keyed: Vec<String> = list::key_entries(entries, None);
-
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 let mut show = "".to_string();
                 if let Some(r) = res {
@@ -246,12 +247,19 @@ impl LsKey {
                     } else {
                         let display = grid.fit_into_columns(1);
                          let row_count = display.row_count();
-                         if (row_count + 10) > height {
+                         if (row_count + 3) > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
-                             //
+
+                             let mut start = 0;
+                             let mut end = entries_count - list_incr;
+                             if let Some(ls) = list_filter.clone() {
+                                 start = ls.clone().into_iter().nth(0).unwrap();
+                                 end = ls.into_iter().last().unwrap();
+                             }
+
                              list_incr += 1;
-                             let range = 1..(entries_count - list_incr);
+                             let range = start..(end - list_incr);
 
                              let mut filter_vec: Vec<usize> = vec![];
 
