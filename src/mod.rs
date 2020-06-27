@@ -232,7 +232,7 @@ impl LsKey {
                     if display.is_some() && !self.test {
                          let display = display.unwrap(); // Safe to unwrap.
                          let row_count = display.row_count();
-                         if (row_count + 3) > height {
+                         if (row_count + 4) > height {
                              //panic!("Can't fit list into screen.");
                              //
                              let range = 1..(entries_count - grid_incr);
@@ -254,12 +254,11 @@ impl LsKey {
                     } else {
                          let display = grid.fit_into_columns(1);
                          let row_count = display.row_count();
-                         if (row_count + 15) > height {
+                         if row_count + 7 > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
 
-                             list_incr += 1;
-                             let range = start..(end - list_incr);
+                             let range = start..(row_count - list_incr);
 
                              let mut filter_vec: Vec<usize> = vec![];
 
