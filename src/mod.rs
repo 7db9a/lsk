@@ -203,11 +203,11 @@ impl LsKey {
     }
 
    pub fn run_list_read(&mut self, halt: bool, filter: bool) {
-            let mut list = self.list.clone();
             let mut go = true;
             let mut incr = 1;
+            let mut list_filter = self.list.filter.clone();
             while go {
-                let entries = list.clone().order_and_sort_list(true, filter, self.list.filter.clone());
+                let entries = self.list.clone().order_and_sort_list(true, filter, list_filter.clone());
 
                 let entries_keyed: Vec<String> = list::key_entries(entries, None);
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
@@ -218,28 +218,28 @@ impl LsKey {
                     let width = r.1;
                     let height = r.2;
                     let display = grid.fit_into_width(width);
-                    if display.is_some() && !self.test {
-                         let display = display.unwrap(); // Safe to unwrap.
-                         let row_count = display.row_count();
-                         if row_count > height {
-                             //panic!("Can't fit list into screen.");
-                             //
-                             let range = 1..(entries_count - incr);
+                    //if display.is_some() && !self.test {
+                    //     let display = display.unwrap(); // Safe to unwrap.
+                    //     let row_count = display.row_count();
+                    //     if row_count > height {
+                    //         //panic!("Can't fit list into screen.");
+                    //         //
+                    //         let range = 1..(entries_count - incr);
 
-                             let mut filter_vec: Vec<usize> = vec![];
+                    //         let mut filter_vec: Vec<usize> = vec![];
 
-                             range.into_iter().for_each(|i|
-                                 filter_vec.push(i)
-                             );
+                    //         range.into_iter().for_each(|i|
+                    //             filter_vec.push(i)
+                    //         );
 
-                             self.list.filter = Some(filter_vec);
+                    //         list_filter = Some(filter_vec);
 
-                             incr += 1;
-                         } else {
-                            go = false; 
-                         }
-                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                    } else {
+                    //         incr += 1;
+                    //     } else {
+                    //        go = false; 
+                    //     }
+                    //     self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                    //} else {
                         let display = grid.fit_into_columns(1);
                          let row_count = display.row_count();
                          if row_count > height {
@@ -253,14 +253,14 @@ impl LsKey {
                                  filter_vec.push(i)
                              );
 
-                             self.list.filter = Some(filter_vec);
+                             list_filter = Some(filter_vec);
 
                              incr += 1;
                          } else {
                             go = false; 
                          }
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                    }
+                    //}
                 } else {
                     go = false;
                 }
