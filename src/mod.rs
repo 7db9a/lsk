@@ -204,16 +204,18 @@ impl LsKey {
 
    pub fn run_list_read(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
-            let mut incr = 1;
+            let mut grid_incr = 1;
+            let mut list_incr = 1;
             let mut list_filter = self.list.filter.clone();
             let mut list = self.list.clone();
+            let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
+            let entries_count = entries.iter().count();
             while go {
                 let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
 
                 let entries_keyed: Vec<String> = list::key_entries(entries, None);
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 let mut show = "".to_string();
-                let entries_count = entries_keyed.iter().count();
                 if let Some(r) = res {
                     let grid = r.0;
                     let width = r.1;
@@ -225,7 +227,7 @@ impl LsKey {
                          if (row_count + 3) > height {
                              //panic!("Can't fit list into screen.");
                              //
-                             let range = 1..(entries_count - incr);
+                             let range = 1..(entries_count - grid_incr);
 
                              let mut filter_vec: Vec<usize> = vec![];
 
@@ -236,7 +238,7 @@ impl LsKey {
                              list_filter = Some(filter_vec);
                              filter = true;
 
-                             incr += 1;
+                             grid_incr += 1;
                          } else {
                             go = false; 
                          }
@@ -244,11 +246,12 @@ impl LsKey {
                     } else {
                         let display = grid.fit_into_columns(1);
                          let row_count = display.row_count();
-                         if (row_count + 3) > height {
+                         if (row_count) > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
                              //
-                             let range = 1..(entries_count - incr);
+                             list_incr += 1;
+                             let range = 1..(entries_count - list_incr);
 
                              let mut filter_vec: Vec<usize> = vec![];
 
@@ -259,7 +262,7 @@ impl LsKey {
                              list_filter = Some(filter_vec);
                              filter = true;
 
-                             incr += 1;
+                             list_incr += 1;
                          } else {
                             go = false; 
                          }
