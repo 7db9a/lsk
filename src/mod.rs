@@ -212,8 +212,8 @@ impl LsKey {
             let entries_count = entries.iter().count();
             while go {
                 let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
-
                 let entries_keyed: Vec<String> = list::key_entries(entries, None);
+
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 let mut show = "".to_string();
                 if let Some(r) = res {
