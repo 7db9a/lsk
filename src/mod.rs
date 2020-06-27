@@ -212,18 +212,19 @@ impl LsKey {
             if let Some(r) = res {
                 let grid = r.0;
                 let width = r.1;
+                let height = r.2;
                 let display = grid.fit_into_width(width);
                 if display.is_some() && !self.test {
                      let display = display.unwrap(); // Safe to unwrap.
                      let row_count = display.row_count();
-                     if row_count > r.2 {
+                     if row_count > height {
                          panic!("Can't fit list into screen.");
                      }
                      self.display = Some((self.list.parent_path.clone(), display.to_string()));
                 } else {
                     let display = grid.fit_into_columns(1);
                      let row_count = display.row_count();
-                     if row_count > r.2 {
+                     if row_count > height {
                          panic!("Can't fit list into screen.");
                      }
                      self.display = Some((self.list.parent_path.clone(), display.to_string()));
