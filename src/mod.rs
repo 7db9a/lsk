@@ -222,6 +222,13 @@ impl LsKey {
                     let width = r.1;
                     let height = r.2;
                     let display = grid.fit_into_width(width);
+
+                    let mut start = 0;
+                    let mut end = entries_count - list_incr;
+                    if let Some(ls) = list_filter.clone() {
+                        start = ls.clone().into_iter().nth(0).unwrap();
+                        end = ls.into_iter().last().unwrap();
+                    }
                     if display.is_some() && !self.test {
                          let display = display.unwrap(); // Safe to unwrap.
                          let row_count = display.row_count();
@@ -245,18 +252,11 @@ impl LsKey {
                          }
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
                     } else {
-                        let display = grid.fit_into_columns(1);
+                         let display = grid.fit_into_columns(1);
                          let row_count = display.row_count();
-                         if (row_count + 3) > height {
+                         if (row_count + 15) > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
-
-                             let mut start = 0;
-                             let mut end = entries_count - list_incr;
-                             if let Some(ls) = list_filter.clone() {
-                                 start = ls.clone().into_iter().nth(0).unwrap();
-                                 end = ls.into_iter().last().unwrap();
-                             }
 
                              list_incr += 1;
                              let range = start..(end - list_incr);
