@@ -122,7 +122,7 @@ impl List {
         self
     }
 
-    pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
+    pub fn list_skip_hidden(mut self) -> Result<Self, std::io::Error> {
         let mut list: List = Default::default();
         let walker = WalkDir::new(&self.parent_path).max_depth(1).into_iter();
         for entry in walker.filter_entry(|e| !list.clone().skip(e)) {
@@ -132,7 +132,7 @@ impl List {
         Ok(self)
     }
 
-    pub fn list_include_hidden(mut self) -> Result<(Self), std::io::Error> {
+    pub fn list_include_hidden(mut self) -> Result<Self, std::io::Error> {
         let mut _list: List = Default::default();
         for entry in WalkDir::new(&self.parent_path).max_depth(1) {
                 self = list_maker(entry, self)?;
@@ -288,7 +288,7 @@ fn file_or_dir_name(path: &PathBuf) -> Option<PathBuf> {
     }
 }
 
-fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result<(List), std::io::Error> {
+fn list_maker(entry: Result<DirEntry, WalkDirError>, mut list: List) -> Result<List, std::io::Error> {
     match entry {
         Ok(entry) => {
             let entry = entry.path();
@@ -438,9 +438,8 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
 }
 
 pub mod fuzzy_score {
-    use super::{FileType, Entry};
+    use super::Entry;
     use fuzzy_matcher;
-    use std::path::PathBuf;
     use fuzzy_matcher::FuzzyMatcher;
     use fuzzy_matcher::skim::SkimMatcherV2;
 
