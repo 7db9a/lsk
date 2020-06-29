@@ -202,24 +202,90 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn run_list_read(&mut self, halt: bool, filter: bool) {
+   pub fn run_list_read(&mut self, halt: bool, mut filter: bool) {
+            let mut go = true;
+            let mut grid_incr = 1;
+            let mut list_incr = 1;
+            let mut list_filter = self.list.filter.clone();
+            if let Some(ls) = list_filter.clone() {
+            }
             let mut list = self.list.clone();
-            let entries = list.clone().order_and_sort_list(true, filter, self.list.filter.clone());
+            let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
+            let mut entries_count = entries.iter().count();
 
-            let entries_keyed: Vec<String> = list::key_entries(entries, None);
-            let res = terminal::input_n_display::grid(entries_keyed);
-            let mut show = "".to_string();
-            if let Some(r) = res {
-                let grid = r.0;
-                let width = r.1;
-                let display = grid.fit_into_width(width);
-                if display.is_some() && !self.test {
-                     self.display = Some((self.list.parent_path.clone(), display.unwrap().to_string())); // safe to unwrap
-                } else {
-                    let display = grid.fit_into_columns(1);
-                     self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                }
+            let mut start = 0;
+            let mut end = entries_count;
+            if let Some(ls) = list_filter.clone() {
+                start = ls.clone().into_iter().nth(0).unwrap();
+                end = ls.into_iter().last().unwrap();
             } else {
+            }
+            let mut grid_loops = 0;
+            let mut list_loops = 0;
+            let mut grid_row_count = 0;
+            let mut list_row_count = 0;
+            while go {
+                let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
+                let entries_keyed: Vec<String> = list::key_entries(entries.clone(), None);
+                 entries_count = entries_keyed.clone().iter().count();
+                let res = terminal::input_n_display::grid(entries_keyed.clone());
+                let mut show = "".to_string();
+                if let Some(r) = res {
+                    let grid = r.0;
+                    let width = r.1;
+                    let height = r.2;
+                    let display = grid.fit_into_width(width);
+                    if display.is_some() && !self.test {
+                         let display = display.unwrap(); // Safe to unwrap.
+                         grid_row_count = display.row_count();
+                         if (grid_row_count + 4) > height {
+                             //panic!("Can't fit list into screen.");
+                             //
+                             let range = start..end;
+
+                             let mut filter_vec: Vec<usize> = vec![];
+
+                             range.into_iter().for_each(|i|
+                                 filter_vec.push(i)
+                             );
+
+                             list_filter = Some(filter_vec);
+                             filter = true;
+
+                             end = end - 1;
+                         } else {
+                            go = false; 
+                         }
+                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                         grid_loops += 1;
+                    } else {
+                         let display = grid.fit_into_columns(1);
+                         list_row_count = display.row_count();
+                         if (list_row_count + 5) > height {
+                             //panic!("Can't fit list into screen.");
+                             //panic!("Can't fit list into screen.");
+
+                             let range = start..(end);
+
+                             let mut filter_vec: Vec<usize> = vec![];
+
+                             range.into_iter().for_each(|i|
+                                 filter_vec.push(i)
+                             );
+
+                             list_filter = Some(filter_vec);
+                             filter = true;
+
+                             end = end - 1;
+                         } else {
+                            go = false; 
+                         }
+                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                         list_loops += 1;
+                    }
+                } else {
+                    go = false;
+                }
             }
 
             if !halt {
