@@ -50,7 +50,6 @@ pub mod parent_shell {
     }
 }
 pub mod input_n_display {
-    use std::path::{Path, PathBuf};
     use std::convert::TryFrom;
     use termion::input::TermRead;
     use termion::event::Key;
@@ -63,7 +62,7 @@ pub mod input_n_display {
     use std::thread;
     use std::time::Duration;
 
-    pub fn read() -> Result<(Option<String>), std::io::Error> {
+    pub fn read() -> Result<Option<String>, std::io::Error> {
         let stdout = stdout();
         let mut stdout = stdout.lock();
         let stdin = stdin();
@@ -190,7 +189,7 @@ pub mod input_n_display {
             let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
             if let Some(mut first) = _first {
-                let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
+                let key: Result<usize, std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
                     first = &'r';
                 } else {
@@ -346,7 +345,7 @@ pub mod input_n_display {
 }
 
 pub mod shell {
-    use cmd_lib::{run_fun, info};
+    use cmd_lib::run_fun;
 
     pub fn spawn(cmd: String, args: Vec<String>) {
         std::process::Command::new(cmd)
@@ -357,7 +356,7 @@ pub mod shell {
             .expect("unrecoverable failure to execute shell process.");
     }
 
-    pub fn cmd(cmd: String) -> Result<(String), std::io::Error> {
+    pub fn cmd(cmd: String) -> Result<String, std::io::Error> {
         run_fun!("{}", cmd)
     }
 }
