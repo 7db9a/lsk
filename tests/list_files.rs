@@ -177,7 +177,7 @@ fn fuzzy_list() {
             //     path_history: ["/tmp/lsk_tests/"]
             //}
             format!("{}",
-                    "List {\n    files: [\n        Entry {\n            path: \"security\",\n            file_type: Dir,\n        },\n        Entry {\n            path: \"scripts\",\n            file_type: Dir,\n        },\n        Entry {\n            path: \"crypto\",\n            file_type: Dir,\n        },\n        Entry {\n            path: \"certs\",\n            file_type: Dir,\n        },\n        Entry {\n            path: \"CREDITS\",\n            file_type: File,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests/\",\n    path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n}"
+                    "List {\n    files: [\n        Entry {\n            path: \"security\",\n            file_type: Dir,\n            key: None,\n        },\n        Entry {\n            path: \"scripts\",\n            file_type: Dir,\n            key: None,\n        },\n        Entry {\n            path: \"crypto\",\n            file_type: Dir,\n            key: None,\n        },\n        Entry {\n            path: \"certs\",\n            file_type: Dir,\n            key: None,\n        },\n        Entry {\n            path: \"CREDITS\",\n            file_type: File,\n            key: None,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests/\",\n    path_history: [\n        \"/tmp/lsk_tests/\",\n    ],\n    filter: None,\n}"
             )
         );
         assert_ne!(
@@ -247,7 +247,7 @@ fn list_go_up_one_level() {
 
         assert_eq!(
             format!("{:#?}", list_up_level),
-            "List {\n    files: [\n        Entry {\n            path: \"list_enter_dir\",\n            file_type: Dir,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests\",\n    path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n}"
+            "List {\n    files: [\n        Entry {\n            path: \"list_enter_dir\",\n            file_type: Dir,\n            key: None,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests\",\n    path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n    filter: None,\n}"
         );
 
         assert_ne!(list_original, list_up_level);
@@ -311,7 +311,7 @@ fn list_enter_into_dir() {
 
         assert_eq!(
             format!("{:#?}", list_enter_usr_dir),
-            "List {\n    files: [\n        Entry {\n            path: \"Kconfig\",\n            file_type: File,\n        },\n        Entry {\n            path: \"gen_init_cpio.c\",\n            file_type: File,\n        },\n        Entry {\n            path: \"include\",\n            file_type: Dir,\n        },\n        Entry {\n            path: \"Makefile\",\n            file_type: File,\n        },\n        Entry {\n            path: \"initramfs_data.S\",\n            file_type: File,\n        },\n        Entry {\n            path: \"gen_initramfs.sh\",\n            file_type: File,\n        },\n        Entry {\n            path: \"default_cpio_list\",\n            file_type: File,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests/list_enter_dir/usr\",\n    path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests/list_enter_dir/usr\",\n    ],\n}"
+            "List {\n    files: [\n        Entry {\n            path: \"Kconfig\",\n            file_type: File,\n            key: None,\n        },\n        Entry {\n            path: \"gen_init_cpio.c\",\n            file_type: File,\n            key: None,\n        },\n        Entry {\n            path: \"include\",\n            file_type: Dir,\n            key: None,\n        },\n        Entry {\n            path: \"Makefile\",\n            file_type: File,\n            key: None,\n        },\n        Entry {\n            path: \"initramfs_data.S\",\n            file_type: File,\n            key: None,\n        },\n        Entry {\n            path: \"gen_initramfs.sh\",\n            file_type: File,\n            key: None,\n        },\n        Entry {\n            path: \"default_cpio_list\",\n            file_type: File,\n            key: None,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests/list_enter_dir/usr\",\n    path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests/list_enter_dir/usr\",\n    ],\n    filter: None,\n}"
         );
 
         assert_ne!(list_original, list_enter_usr_dir);
@@ -369,7 +369,7 @@ fn list_enter_into_fuzzed_dir() {
 
         assert_eq!(
             format!("{:#?}", list_up_level),
-            "List {\n    files: [\n        Entry {\n            path: \"list_enter_dir\",\n            file_type: Dir,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests\",\n    path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n}"
+            "List {\n    files: [\n        Entry {\n            path: \"list_enter_dir\",\n            file_type: Dir,\n            key: None,\n        },\n    ],\n    parent_path: \"/tmp/lsk_tests\",\n    path_history: [\n        \"/tmp/lsk_tests/list_enter_dir/\",\n        \"/tmp/lsk_tests\",\n    ],\n    filter: None,\n}"
         );
 
         assert_ne!(list_original, list_up_level);
