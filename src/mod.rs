@@ -261,7 +261,7 @@ impl LsKey {
                     } else {
                          let display = grid.fit_into_columns(1);
                          list_row_count = display.row_count();
-                         if list_row_count + 7 > height {
+                         if (list_row_count + 5) > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
 
