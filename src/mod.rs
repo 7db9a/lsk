@@ -211,7 +211,7 @@ impl LsKey {
             }
             let mut list = self.list.clone();
             let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
-            let entries_count = entries.iter().count();
+            let mut entries_count = entries.iter().count();
 
             let mut start = 0;
             let mut end = entries_count;
@@ -220,9 +220,14 @@ impl LsKey {
                 end = ls.into_iter().last().unwrap();
             } else {
             }
+            let mut grid_loops = 0;
+            let mut list_loops = 0;
+            let mut grid_row_count = 0;
+            let mut list_row_count = 0;
             while go {
                 let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
-                let entries_keyed: Vec<String> = list::key_entries(entries, None);
+                let entries_keyed: Vec<String> = list::key_entries(entries.clone(), None);
+                 entries_count = entries_keyed.clone().iter().count();
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 let mut show = "".to_string();
                 if let Some(r) = res {
@@ -232,8 +237,8 @@ impl LsKey {
                     let display = grid.fit_into_width(width);
                     if display.is_some() && !self.test {
                          let display = display.unwrap(); // Safe to unwrap.
-                         let row_count = display.row_count();
-                         if (row_count + 4) > height {
+                         grid_row_count = display.row_count();
+                         if (grid_row_count + 4) > height {
                              //panic!("Can't fit list into screen.");
                              //
                              let range = start..end;
@@ -252,14 +257,15 @@ impl LsKey {
                             go = false; 
                          }
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                         grid_loops += 1;
                     } else {
                          let display = grid.fit_into_columns(1);
-                         let row_count = display.row_count();
-                         if row_count + 11 > height {
+                         list_row_count = display.row_count();
+                         if list_row_count + 7 > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
 
-                             let range = start..end;
+                             let range = start..(end);
 
                              let mut filter_vec: Vec<usize> = vec![];
 
@@ -275,6 +281,7 @@ impl LsKey {
                             go = false; 
                          }
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                         list_loops += 1;
                     }
                 } else {
                     go = false;
