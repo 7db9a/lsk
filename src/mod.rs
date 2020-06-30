@@ -213,11 +213,15 @@ impl LsKey {
             let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
             let mut entries_count = entries.iter().count();
 
-            let mut start = 0;
-            let mut end = entries_count;
+            let mut start_list = 0;
+            let mut end_list = entries_count;
+            let mut start_grid = start_list;
+            let mut end_grid = end_list;
             if let Some(ls) = list_filter.clone() {
-                start = ls.clone().into_iter().nth(0).unwrap();
-                end = ls.into_iter().last().unwrap();
+                start_list = ls.clone().into_iter().nth(0).unwrap();
+                end_list = ls.into_iter().last().unwrap();
+                start_grid = start_list;
+                end_grid = end_list;
             } else {
             }
             let mut grid_loops = 0;
@@ -241,7 +245,7 @@ impl LsKey {
                          if (grid_row_count + 4) > height {
                              //panic!("Can't fit list into screen.");
                              //
-                             let range = start..end;
+                             let range = start_grid..end_grid;
 
                              let mut filter_vec: Vec<usize> = vec![];
 
@@ -252,7 +256,7 @@ impl LsKey {
                              list_filter = Some(filter_vec);
                              filter = true;
 
-                             end = end - 1;
+                             end_grid = end_grid - 1;
                          } else {
                             go = false; 
                          }
@@ -265,7 +269,7 @@ impl LsKey {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
 
-                             let range = start..(end);
+                             let range = start_list..end_list;
 
                              let mut filter_vec: Vec<usize> = vec![];
 
@@ -276,7 +280,7 @@ impl LsKey {
                              list_filter = Some(filter_vec);
                              filter = true;
 
-                             end = end - 1;
+                             end_list = end_list - 1;
                          } else {
                             go = false; 
                          }
