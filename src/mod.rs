@@ -304,7 +304,7 @@ impl LsKey {
         }
     }
 
-    pub fn filter_mode(&mut self, mut list: List, is_fuzzed: bool) {
+    pub fn filter_mode(&mut self, mut list: List) {
         let mut input_string: String = self.input.display.iter().collect();
         let mut input_vec_str: Vec<&str> = input_string.split("-").collect();
         let mut key_vec: Vec<usize> = vec![];
@@ -368,11 +368,6 @@ impl LsKey {
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
                   if metadata(file_pathbuf.clone()).unwrap().is_dir() {
-                      let file_path =
-                          file_pathbuf
-                          .to_str().unwrap()
-                          .to_string();
-
                       let list = self.list.clone().update(file_pathbuf);
                       self.update(list);
                       self.halt = false;
@@ -411,9 +406,6 @@ impl LsKey {
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                  },
                  "fzc" => {
-                     let mut path_cache = command_assistors::PathCache::new(
-                         self.list.parent_path.as_path()
-                     );
                      let split: Vec<&str> = input.as_read.split("fzc").collect();
                      let cmd = split.iter().last().unwrap();
                      let cmd = format!(r#"fzc {}"#, cmd);
@@ -512,7 +504,7 @@ impl LsKey {
                             self.return_file_by_key_mode(input, is_fuzzed);
                         },
                         CmdType::FilterKeys => {
-                            self.filter_mode(self.list.clone(), is_fuzzed);
+                            self.filter_mode(self.list.clone());
                         },
                         _ => ()
                     }
