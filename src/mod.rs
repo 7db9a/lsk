@@ -13,7 +13,7 @@ use termion::raw::{IntoRawMode, RawTerminal};
 use std::io::{ Write, stdout, stdin, StdoutLock};
 use std::convert::TryFrom;
 use termion::screen::AlternateScreen;
-use sha2::{Sha256, Digest};
+use sha2::Digest;
 use easy_hasher::easy_hasher::*;
 
 pub mod app {
@@ -644,7 +644,6 @@ impl LsKey {
                              }
                         },
                         Mode::Work => {
-                            let few_ms = std::time::Duration::from_millis(2000);
                              if &last == &Some(&'\n') {
                                  let path = self.list.parent_path.clone();
                                  let path = path.to_str().unwrap();
@@ -664,10 +663,8 @@ impl LsKey {
                             let some_keys = parse_keys(fuzzy_mode_input.as_str());
 
                             if let Some(keys) = some_keys {
-                                if let Some(x) = self.fuzzy_list.clone() {
-                                    input_string = keys;
-                                    self.input.display = input_string.chars().collect();
-                                }
+                                input_string = keys;
+                                self.input.display = input_string.chars().collect();
                             } else {
 
                                 if self.input.unwiddle {
