@@ -3,7 +3,6 @@ pub mod terminal;
 
 use list::Entry;
 
-use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 use std::fs::{create_dir_all, metadata, OpenOptions};
 use std::io::prelude::*;
@@ -344,7 +343,7 @@ impl LsKey {
 
         // Make sure it'sall integers.
         for i in input_vec_str.into_iter() {
-            let key: Result<(usize), std::num::ParseIntError> = i.parse();
+            let key: Result<usize, std::num::ParseIntError> = i.parse();
             if key.is_ok() {
                 key_vec.push(key.unwrap());
             }
@@ -360,7 +359,7 @@ impl LsKey {
             end = key_vec.clone().into_iter().nth(1).unwrap() + 1;
         }
 
-        let range = (start..end);
+        let range = start..end;
 
         let mut filter_vec: Vec<usize> = vec![];
 
@@ -516,7 +515,7 @@ impl LsKey {
         }
     }
 
-    fn key_related_mode(&mut self, input: Result<(Option<String>), std::io::Error>, is_fuzzed: bool) {
+    fn key_related_mode(&mut self, input: Result<Option<String>, std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
                 if let Some(i) = t {
@@ -666,7 +665,7 @@ impl LsKey {
                 self.test_data_update(Some(input_string.clone()));
                 display_input(input_string.clone(), &mut screen, place);
 
-                let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
+                let key: Result<usize, std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
                     first = &'r';
                 }
@@ -831,7 +830,7 @@ fn display_input(input_string: String, screen: &mut AlternateScreen<RawTerminal<
         "{}{}{}{}", format!("{}", input_string.as_str()
         ),
        termion::clear::AfterCursor,
-       termion::cursor::Goto((position.0), (position.1 + 1)),
+       termion::cursor::Goto(position.0, position.1 + 1),
        termion::cursor::Hide,
     ).unwrap();
     screen.flush().unwrap();
@@ -856,7 +855,7 @@ fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<
                   "{}{}{}{}", format!("{}", display.as_str()
                   ),
                  termion::clear::AfterCursor,
-                 termion::cursor::Goto((position.0), (position.1 + 1)),
+                 termion::cursor::Goto(position.0, position.1 + 1),
                  termion::cursor::Hide,
               ).unwrap();
               screen.flush().unwrap();
