@@ -8,18 +8,14 @@ use std::path::{Path, PathBuf};
 use std::fs::{create_dir_all, metadata, OpenOptions};
 use std::io::prelude::*;
 use list::List;
-use fixture::{command_assistors, Fixture};
+use fixture::command_assistors;
 use termion::input::TermRead;
 use termion::event::Key;
 use termion::raw::{IntoRawMode, RawTerminal};
-use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
+use std::io::{ Write, stdout, stdin, StdoutLock};
 use std::convert::TryFrom;
-use termion::async_stdin;
 use termion::screen::AlternateScreen;
-use std::thread;
-use std::time::Duration;
-use sha2::{Sha256, Sha512, Digest};
-use sha2::digest::generic_array::{ArrayLength, GenericArray};
+use sha2::{Sha256, Digest};
 use easy_hasher::easy_hasher::*;
 
 pub mod app {
