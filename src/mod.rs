@@ -13,7 +13,6 @@ use termion::raw::{IntoRawMode, RawTerminal};
 use std::io::{ Write, stdout, stdin, StdoutLock};
 use std::convert::TryFrom;
 use termion::screen::AlternateScreen;
-use sha2::Digest;
 use easy_hasher::easy_hasher::*;
 
 pub mod app {
@@ -603,16 +602,14 @@ impl LsKey {
 
             self.input.match_event(c);
             let mut input_string: String = self.input.display.iter().collect();
-            let input_len = self.input.display.iter().count();
-            let mut input_len = u16::try_from(input_len).ok().unwrap();
             let mut input = self.input.clone();
-            let mut _first = input.display.iter().nth(0);
+            let mut first = input.display.iter().nth(0);
             let mut input = self.input.clone();
             let mut last = input.display.iter().last();
             let mut _input = self.input.clone();
 
             let place = (0, 1);
-            if let Some(mut first) = _first {
+            if let Some(_) = first {
 
                 if self.input.unwiddle {
                     self.fuzzy_list = self.pre_fuzz_list.clone();
@@ -627,13 +624,11 @@ impl LsKey {
                 self.test_data_update(Some(input_string.clone()));
                 display_input(input_string.clone(), &mut screen, place);
 
-                let key: Result<usize, std::num::ParseIntError> = first.to_string().parse();
-
                 let some_mode = self.mode_parse(input_string.clone());
 
                 if let Some(mode) = some_mode {
                     match mode {
-                        Mode::Cmd(cmd_mode_input) => {
+                        Mode::Cmd(_) => {
                              if &last == &Some(&'\n') {
                                  input_string = self.cmd_read();
 
