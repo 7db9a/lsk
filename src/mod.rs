@@ -669,7 +669,7 @@ impl LsKey {
                                 }
 
                                 if self.input.display.iter().last() != Some(&'\n') {
-                                    let ls_key = self.fuzzy_update(fuzzy_mode_input);
+                                    self.fuzzy_update(fuzzy_mode_input);
                                 }
                             }
 
