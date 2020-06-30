@@ -1,7 +1,7 @@
 pub mod list;
 pub mod terminal;
 
-use list::{Entry, FileType, fuzzy_score};
+use list::Entry;
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
