@@ -1254,7 +1254,7 @@ mod app_test {
                 if !$test_mode_bool {
                     let term_size = terminal_size().unwrap();
                     let term_width = term_size.0;
-                    let term_heigth = term_size.1;
+                    let term_height = term_size.1;
 
                     assert_eq!(term_width, 20);
                     assert_eq!(term_height, 30);
