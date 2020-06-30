@@ -211,9 +211,7 @@ impl LsKey {
             while go {
                 let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
                 let entries_keyed: Vec<String> = list::key_entries(entries.clone(), None);
-                 entries_count = entries_keyed.clone().iter().count();
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
-                let mut show = "".to_string();
                 if let Some(r) = res {
                     let grid = r.0;
                     let width = r.1;
@@ -275,7 +273,7 @@ impl LsKey {
             }
     }
 
-    fn return_file_by_key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
+    fn return_file_by_key_mode(&mut self, input: Input, is_fuzzed: bool) {
         let get_file = |key_string: String| {
              let key: usize = key_string.parse().unwrap();
              self.list.get_file_by_key(key, !is_fuzzed).unwrap()
@@ -288,7 +286,6 @@ impl LsKey {
         };
 
         if let Some (r) = input.args {
-            let files_vec: Vec<&String> = vec![];
             let output_vec: Vec<std::process::Output> =
                 r.iter()
                     .map(|mut key|
@@ -307,7 +304,7 @@ impl LsKey {
         }
     }
 
-    pub fn filter_mode(&mut self, mut list: List, input: Input, is_fuzzed: bool) {
+    pub fn filter_mode(&mut self, mut list: List, is_fuzzed: bool) {
         let mut input_string: String = self.input.display.iter().collect();
         let mut input_vec_str: Vec<&str> = input_string.split("-").collect();
         let mut key_vec: Vec<usize> = vec![];
@@ -335,7 +332,7 @@ impl LsKey {
 
         }
 
-        let mut end: usize = 0;
+        let mut end: usize;
         let start = key_vec.clone().into_iter().nth(0).unwrap();
 
         if open_range {
@@ -352,13 +349,7 @@ impl LsKey {
             filter_vec.push(i)
         );
 
-        //if filter_vec == vec![1, 2, 3, 4, 5] {
-        //    let few_ms = std::time::Duration::from_millis(1000);
-        //    std::thread::sleep(few_ms);
-        //}
         self.list.filter = Some(filter_vec);
-        let filter = true;
-        //self.update(self.list.clone());
         self.run_list_read(false, true);
     }
 
@@ -518,10 +509,10 @@ impl LsKey {
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
                                 * then type_text_spawn(text_vec);
                             */
-                            self.return_file_by_key_mode(self.list.clone(), input, is_fuzzed);
+                            self.return_file_by_key_mode(input, is_fuzzed);
                         },
                         CmdType::FilterKeys => {
-                            self.filter_mode(self.list.clone(), input, is_fuzzed);
+                            self.filter_mode(self.list.clone(), is_fuzzed);
                         },
                         _ => ()
                     }
