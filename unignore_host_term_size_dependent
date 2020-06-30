@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sed -i 's/ignore\/\*host_term_size_dependent\*\/g' src/mod.rs #test! macro by default ignores.
