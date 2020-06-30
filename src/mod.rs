@@ -208,8 +208,6 @@ impl LsKey {
                 end_grid = end_list;
             } else {
             }
-            let mut grid_row_count = 0;
-            let mut list_row_count = 0;
             while go {
                 let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
                 let entries_keyed: Vec<String> = list::key_entries(entries.clone(), None);
@@ -223,7 +221,7 @@ impl LsKey {
                     let display = grid.fit_into_width(width);
                     if display.is_some() && !self.test {
                          let display = display.unwrap(); // Safe to unwrap.
-                         grid_row_count = display.row_count();
+                         let grid_row_count = display.row_count();
                          if (grid_row_count + 4) > height {
                              //panic!("Can't fit list into screen.");
                              //
@@ -245,7 +243,7 @@ impl LsKey {
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
                     } else {
                          let display = grid.fit_into_columns(1);
-                         list_row_count = display.row_count();
+                         let list_row_count = display.row_count();
                          if (list_row_count + 5) > height {
                              //panic!("Can't fit list into screen.");
                              //panic!("Can't fit list into screen.");
