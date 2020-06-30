@@ -1256,8 +1256,8 @@ mod app_test {
                     let term_width = term_size.0;
                     let term_height = term_size.1;
 
-                    assert_eq!(term_width, 20);
-                    assert_eq!(term_height, 30);
+                    assert_eq!(term_width, 31);
+                    assert_eq!(term_height, 15);
                 }
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
@@ -1305,6 +1305,25 @@ mod app_test {
             }
         };
     }
+
+    test!(
+          false, // test_mode_bool
+          false, //list_all_bool
+          macro_term_size_enter_file,
+          "Makefile",
+          100,               //$delay in milleseconds
+          "$(printf '5\r')", //$input1
+          "$(printf ':q\r')",//$input2
+          "$(printf 'q\r')", //$input3
+          "",                //$input4
+          "",                //$input5
+          "",                //$input6
+          "",                //$input7
+          "macro_enter_file",
+          ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
+          "6e72cf41634635762cc35c32641d59ffb3eeb449f72dcc218b5cdf7016b7c279",
+          ignore/*macro_use*/
+    );
 
     test!(
           true, // test_mode_bool
