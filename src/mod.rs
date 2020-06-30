@@ -1148,11 +1148,13 @@ mod app_test {
     use std::process::Command;
     use std::env;
     use fixture::{Fixture, command_assistors};
+    use termion::terminal_size;
     use super::{Input, LsKey, CmdType, Mode};
     use super::*;
 
     macro_rules! test {
         (
+            $test_mode_bool: expr, // If false, tests are screen-size sensitive.
             $list_all_bool: expr, // lk -a would be true
             $name:ident,
             $test_file_path :expr, // We write text to a file so we know it's it when it's opened in test.
@@ -1248,6 +1250,13 @@ mod app_test {
                 //let few_ms = std::time::Duration::from_millis(5000);
                 //std::thread::sleep(few_ms);
 
+
+                if !$test_mode_bool {
+                    let term_size = terminal_size().unwrap();
+                    let term_width = term_size.0;
+                    let term_heigth = term_size.1;
+                }
+
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
                 let mut ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
                 spawn.join();
@@ -1295,6 +1304,7 @@ mod app_test {
     }
 
     test!(
+          true, // test_mode_bool
           false, //list_all_bool
           macro_enter_file,
           "Makefile",
@@ -1313,6 +1323,7 @@ mod app_test {
     );
 
     test!(
+          true, // test_mode_bool
           true, //list_all_bool
           macro_enter_file_list_all,
           ".eternal",
@@ -1331,6 +1342,7 @@ mod app_test {
     );
 
     test!(
+          true, // test_mode_bool
           false,
           macro_fuzzy_enter_file,
           "intercession",
@@ -1349,7 +1361,8 @@ mod app_test {
     );
 
     test!(
-         false,
+          true, // test_mode_bool
+          false,
           macro_fuzzy_enter_dir,
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
@@ -1367,7 +1380,8 @@ mod app_test {
     );
 
     test!(
-         false,
+          true, // test_mode_bool
+          false,
           macro_fuzzy_enter_dir_go_back_then_repeat,
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
@@ -1385,7 +1399,8 @@ mod app_test {
     );
 
     test!(
-         false,
+          true, // test_mode_bool
+          false,
           macro_go_back_fuzzy_enter_back_into_dir,
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
@@ -1403,7 +1418,8 @@ mod app_test {
     );
 
     test!(
-         false,
+          true, // test_mode_bool
+          false,
           macro_walk_in_park,
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
@@ -1421,6 +1437,7 @@ mod app_test {
     );
 
      test!(
+           true, // test_mode_bool
            false, //list_all_bool
            macro_fuzzy_backspace,
            "Makefile",
@@ -1439,6 +1456,7 @@ mod app_test {
      );
 
      test!(
+           true, // test_mode_bool
            false, //list_all_bool
            macro_bad_fuzzy_backspace_enter,
            "Makefile",
@@ -1457,6 +1475,7 @@ mod app_test {
      );
 
      test!(
+           true, // test_mode_bool
            false, //list_all_bool
            macro_file_range,
            "Makefile",
@@ -1475,6 +1494,7 @@ mod app_test {
      );
 
      test!(
+           true, // test_mode_bool
            true, //list_all_bool
            macro_list_all_fuzzy_file_range,
            "Makefile",
@@ -1493,6 +1513,7 @@ mod app_test {
      );
 
      test!(
+           true, // test_mode_bool
            true, //list_all_bool
            macro_list_all_fuzzy_undo_open_range,
            "Makefile",
