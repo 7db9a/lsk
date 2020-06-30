@@ -800,7 +800,7 @@ impl LsKey {
                  let input = input.parse(cmd_mode_input);
 
                  match input.clone().cmd_type.unwrap() {
-                     CmdType::cmd => {
+                     CmdType::Cmd => {
                          self.cmd_mode(input);
                          self.run_list_read(true, self.list.filter.is_some());
                      },
@@ -875,7 +875,7 @@ pub enum CmdType {
     SingleKey,
     MultipleKeys,
     FilterKeys,
-    cmd,
+    Cmd,
 }
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Input {
@@ -1028,12 +1028,12 @@ impl Input {
             if k {
                 CmdType::SingleKey
             } else {
-                CmdType::cmd
+                CmdType::Cmd
             }
         } else if is_filter {
             CmdType::FilterKeys
         } else {
-            CmdType::cmd
+            CmdType::Cmd
         };
 
             //if cmd_type == CmdType::FilterKeys {
@@ -1557,7 +1557,7 @@ mod app_test {
         let input = input.parse("vim Cargo.toml".to_string());
 
         assert_eq!(
-           Some(CmdType::cmd),
+           Some(CmdType::Cmd),
            input.cmd_type
         );
 
@@ -1579,7 +1579,7 @@ mod app_test {
         let input = input.parse("git clone https://github.com/7db9a/ls-key --depth 1".to_string());
 
         assert_eq!(
-           Some(CmdType::cmd),
+           Some(CmdType::Cmd),
            input.cmd_type
         );
 
@@ -1608,7 +1608,7 @@ mod app_test {
         let input = input.parse("vim".to_string());
 
         assert_eq!(
-           Some(CmdType::cmd),
+           Some(CmdType::Cmd),
            input.cmd_type
         );
 
@@ -1652,7 +1652,7 @@ mod app_test {
         let input = input.parse(" vim Cargo.toml".to_string());
 
         assert_eq!(
-           Some(CmdType::cmd),
+           Some(CmdType::Cmd),
            input.cmd_type
         );
 
