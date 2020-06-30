@@ -535,7 +535,7 @@ impl LsKey {
                             */
                             self.return_file_by_key_mode(self.list.clone(), input, is_fuzzed);
                         },
-                        CmdType::filter_keys => {
+                        CmdType::FilterKeys => {
                             self.filter_mode(self.list.clone(), input, is_fuzzed);
                         },
                         _ => ()
@@ -874,7 +874,7 @@ fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<
 pub enum CmdType {
     SingleKey,
     MultipleKeys,
-    filter_keys,
+    FilterKeys,
     cmd,
 }
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -1023,7 +1023,7 @@ impl Input {
         let cmd_type = if are_all_keys {
             CmdType::MultipleKeys
         } else if is_filter {
-            CmdType::filter_keys
+            CmdType::FilterKeys
         } else if let Some(k) = is_key {
             if k {
                 CmdType::SingleKey
@@ -1031,12 +1031,12 @@ impl Input {
                 CmdType::cmd
             }
         } else if is_filter {
-            CmdType::filter_keys
+            CmdType::FilterKeys
         } else {
             CmdType::cmd
         };
 
-            //if cmd_type == CmdType::filter_keys {
+            //if cmd_type == CmdType::FilterKeys {
             //    let few_ms = std::time::Duration::from_millis(1000);
             //    std::thread::sleep(few_ms);
             //}
