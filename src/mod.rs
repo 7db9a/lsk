@@ -12,8 +12,6 @@ use fixture::{command_assistors, Fixture};
 use termion::input::TermRead;
 use termion::event::Key;
 use termion::raw::{IntoRawMode, RawTerminal};
-use termion::terminal_size;
-use term_grid::{/*Grid,*/ GridOptions, Direction, /*Display,*/ Filling, Cell};
 use std::io::{Read, Write, stdout, stdin, Stdout, StdoutLock};
 use std::convert::TryFrom;
 use termion::async_stdin;
