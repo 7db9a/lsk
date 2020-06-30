@@ -11,7 +11,6 @@ use termion::input::TermRead;
 use termion::event::Key;
 use termion::raw::{IntoRawMode, RawTerminal};
 use std::io::{ Write, stdout, stdin, StdoutLock};
-use std::convert::TryFrom;
 use termion::screen::AlternateScreen;
 use easy_hasher::easy_hasher::*;
 
@@ -630,7 +629,7 @@ impl LsKey {
                     match mode {
                         Mode::Cmd(_) => {
                              if &last == &Some(&'\n') {
-                                 input_string = self.cmd_read();
+                                 self.cmd_read();
 
                                  //Clear the command from the lsk console after executing.
                                  input_string = "".to_string();
