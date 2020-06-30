@@ -29,3 +29,13 @@ Run tests on docker, using dev script.
 ***Undo any unstaged changes (those are the 'unignore' script)***
 
 `git restore .`
+
+#### Special cases
+
+For an unknown reason, these test only run if 'asked' to explicitly.
+
+`./dev.sh test rust-lib list`
+
+One or more tests rely on exact terminal size.
+
+`./unignore_host_term_size_dependent`
