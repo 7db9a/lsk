@@ -524,10 +524,10 @@ impl LsKey {
                     // Safe to unwrap.
                     //
                     match input.clone().cmd_type.unwrap() {
-                        CmdType::single_key => {
+                        CmdType::SingleKey => {
                             self.key_mode(self.list.clone(), input, is_fuzzed);
                         },
-                        CmdType::multiple_keys => {
+                        CmdType::MultipleKeys => {
                             /*
                                 * get_file_by_key for each key
                                 * let text_vec = vec![r#"printf '1=file1; 2=file2;...'; \n "#]
@@ -872,8 +872,8 @@ fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CmdType {
-    single_key,
-    multiple_keys,
+    SingleKey,
+    MultipleKeys,
     filter_keys,
     cmd,
 }
@@ -1021,12 +1021,12 @@ impl Input {
         };
 
         let cmd_type = if are_all_keys {
-            CmdType::multiple_keys
+            CmdType::MultipleKeys
         } else if is_filter {
             CmdType::filter_keys
         } else if let Some(k) = is_key {
             if k {
-                CmdType::single_key
+                CmdType::SingleKey
             } else {
                 CmdType::cmd
             }
@@ -1103,11 +1103,11 @@ fn parse_keys(input: &str) -> Option<String> {
     y.remove(0);
 
     let mut n = 0;
-    let single_key: bool;
+    let SingleKey: bool;
     if count == 2 {
-        single_key = true;
+        SingleKey = true;
     } else {
-        single_key = false;
+        SingleKey = false;
     }
     loop {
         y.insert(n, " ");
@@ -1118,7 +1118,7 @@ fn parse_keys(input: &str) -> Option<String> {
         }
     }
 
-    if single_key {
+    if SingleKey {
        y.remove(0);
     }
 
@@ -1630,7 +1630,7 @@ mod app_test {
         let input = input.parse("33".to_string());
 
         assert_eq!(
-           Some(CmdType::single_key),
+           Some(CmdType::SingleKey),
            input.cmd_type
         );
 
