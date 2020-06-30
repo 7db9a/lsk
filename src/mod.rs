@@ -5,7 +5,6 @@ use list::Entry;
 
 use std::path::{Path, PathBuf};
 use std::fs::{create_dir_all, metadata, OpenOptions};
-use std::io::prelude::*;
 use list::List;
 use fixture::command_assistors;
 use termion::input::TermRead;
@@ -173,11 +172,8 @@ impl LsKey {
             }
         ).collect();
 
-        let pre_fuzzy = self.list.clone();
-
         self.list.files = files_list;
 
-        //assert_ne!(pre_fuzzy, self.list);
         self.list.clone()
     }
 
@@ -197,15 +193,10 @@ impl LsKey {
 
    pub fn run_list_read(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
-            let mut grid_incr = 1;
-            let mut list_incr = 1;
             let mut list_filter = self.list.filter.clone();
-            if let Some(ls) = list_filter.clone() {
-            }
             let mut list = self.list.clone();
             let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
             let mut entries_count = entries.iter().count();
-
             let mut start_list = 0;
             let mut end_list = entries_count;
             let mut start_grid = start_list;
@@ -217,8 +208,6 @@ impl LsKey {
                 end_grid = end_list;
             } else {
             }
-            let mut grid_loops = 0;
-            let mut list_loops = 0;
             let mut grid_row_count = 0;
             let mut list_row_count = 0;
             while go {
@@ -254,7 +243,6 @@ impl LsKey {
                             go = false; 
                          }
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                         grid_loops += 1;
                     } else {
                          let display = grid.fit_into_columns(1);
                          list_row_count = display.row_count();
@@ -278,7 +266,6 @@ impl LsKey {
                             go = false; 
                          }
                          self.display = Some((self.list.parent_path.clone(), display.to_string()));
-                         list_loops += 1;
                     }
                 } else {
                     go = false;
@@ -724,8 +711,7 @@ impl LsKey {
                             }
 
                             is_fuzzed = true;
-                        },
-                        _ => {}
+                        }
                     }
                 }
             }
@@ -915,7 +901,6 @@ impl Input {
                 Key::Alt(c) => println!("^{}", c),
                 Key::Ctrl(c) => println!("*{}", c),
                 Key::Esc => println!("ESC"),
-                Key::Esc => println!("ESC"),
                 Key::Left => println!("←"),
                 Key::Right => println!("→"),
                 Key::Up => println!("↑"),
@@ -955,7 +940,7 @@ impl Input {
         let (cmd, args) = self.parse_cmd(input.clone());
         let args_count = args.clone().iter().count();
         let is_key = if args == None {
-            let key: Result<(usize), std::num::ParseIntError> = cmd.clone().unwrap().parse();
+            let key: Result<usize, std::num::ParseIntError> = cmd.clone().unwrap().parse();
             match key {
                 Ok(_) => Some(true),
                 Err(_) => Some(false)
@@ -990,7 +975,7 @@ impl Input {
 
                 // Make sure it'sall integers.
                 for i in input_vec_str.into_iter() {
-                    let key: Result<(usize), std::num::ParseIntError> = i.parse();
+                    let key: Result<usize, std::num::ParseIntError> = i.parse();
                     if !key.is_ok() {
                         res = false;
                         break;
@@ -1059,7 +1044,7 @@ impl Input {
 
      fn are_all_keys(&self, input: Vec<String>) -> bool {
         let is_num = |x: &str| {
-            let res: Result<(usize), std::num::ParseIntError> = x.parse();
+            let res: Result<usize, std::num::ParseIntError> = x.parse();
             match res {
                 Ok(_) => true,
                 Err(_) => false
@@ -1072,7 +1057,7 @@ impl Input {
 
      fn is_key(&self, input: &Vec<String>) -> bool {
         if input.iter().count() == 1 {
-            let key: Result<(usize), std::num::ParseIntError> = input.iter().next().unwrap().parse();
+            let key: Result<usize, std::num::ParseIntError> = input.iter().next().unwrap().parse();
             match key {
                 Ok(_) => true,
                 Err(_) => false
@@ -1096,39 +1081,35 @@ fn parse_keys(input: &str) -> Option<String> {
     let mut count = y.iter().count();
 
     let some = if count > 1 {
-    let z = y.iter().nth(0).unwrap();
-    //let index = |z: &str| -> usize {
-    //     y.iter().position(|x| x == &z).unwrap()
-    //};
-    y.remove(0);
+        y.remove(0);
 
-    let mut n = 0;
-    let SingleKey: bool;
-    if count == 2 {
-        SingleKey = true;
-    } else {
-        SingleKey = false;
-    }
-    loop {
-        y.insert(n, " ");
-        count = count - 1;
-        n = n + 2;
-        if count == 1 {
-            break
+        let mut n = 0;
+        let SingleKey: bool;
+        if count == 2 {
+            SingleKey = true;
+        } else {
+            SingleKey = false;
         }
-    }
+        loop {
+            y.insert(n, " ");
+            count = count - 1;
+            n = n + 2;
+            if count == 1 {
+                break
+            }
+        }
 
-    if SingleKey {
-       y.remove(0);
-    }
+        if SingleKey {
+           y.remove(0);
+        }
 
-    let z: String = y.into_iter().collect();
+        let z: String = y.into_iter().collect();
 
-    if z == "".to_string() {
-        None
-    } else {
-        Some(z)
-    }
+        if z == "".to_string() {
+            None
+        } else {
+            Some(z)
+        }
 
     } else {
         None
