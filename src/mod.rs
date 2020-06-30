@@ -540,10 +540,7 @@ impl LsKey {
     fn test_data_update(&mut self, input: Option<String>) {
         if self.test == true {
             if input.is_some() {
-                let mut hasher = Sha256::new();
                 let hash = sha256(&input.clone().unwrap());
-                //self.output_vec.push(hash.to_hex_string());
-
                 let original_dir = self.clone().list.path_history.into_iter().nth(0);
                 if original_dir.is_some() {
                     let mut original_dir = original_dir.unwrap();
@@ -561,12 +558,9 @@ impl LsKey {
                 }
             }
             if self.display.is_some() {
-                let mut hasher = Sha256::new();
-                let mut hasher = Sha256::new();
                 let hash = sha256(&self.display.clone().unwrap().1);
-                //self.output_vec.push(hash.to_hex_string());
-
                 let original_dir = self.clone().list.path_history.into_iter().nth(0);
+
                 if original_dir.is_some() {
                     let mut original_dir = original_dir.unwrap();
                     //file.write_all(stuff.as_bytes()).unwrap();
@@ -609,7 +603,7 @@ impl LsKey {
 
             self.input.match_event(c);
             let mut input_string: String = self.input.display.iter().collect();
-            let mut input_len = self.input.display.iter().count();
+            let input_len = self.input.display.iter().count();
             let mut input_len = u16::try_from(input_len).ok().unwrap();
             let mut input = self.input.clone();
             let mut _first = input.display.iter().nth(0);
@@ -634,9 +628,6 @@ impl LsKey {
                 display_input(input_string.clone(), &mut screen, place);
 
                 let key: Result<usize, std::num::ParseIntError> = first.to_string().parse();
-                if key.is_ok() {
-                    first = &'r';
-                }
 
                 let some_mode = self.mode_parse(input_string.clone());
 
