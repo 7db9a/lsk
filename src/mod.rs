@@ -26,7 +26,7 @@ pub mod app {
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
-        ls_key.run_list_read(ls_key.is_fuzzed, false);
+        ls_key.update_file_display(ls_key.is_fuzzed, false);
         let mut list = ls_key.list.clone();
 
         while ls_key.is_fuzzed {
@@ -43,7 +43,7 @@ pub mod app {
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            ls_key.run_list_read(ls_key.is_fuzzed, false);
+            ls_key.update_file_display(ls_key.is_fuzzed, false);
             list = ls_key.list.clone();
         }
 
@@ -154,7 +154,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        self.run_list_read(true, self.list.filter.is_some());
+        self.update_file_display(true, self.list.filter.is_some());
         self.fuzzy_list = Some(list);
 
         self.clone()
@@ -189,21 +189,17 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn run_list_read(&mut self, halt: bool, mut filter: bool) {
+   pub fn update_file_display(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
             let mut list_filter = self.list.filter.clone();
             let list = self.list.clone();
             let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
             let entries_count = entries.iter().count();
-            let mut start_list = 0;
-            let mut end_list = entries_count;
-            let mut start_grid = start_list;
-            let mut end_grid = end_list;
+            let mut start = 0;
+            let mut end = entries_count;
             if let Some(ls) = list_filter.clone() {
-                start_list = ls.clone().into_iter().nth(0).unwrap();
-                end_list = ls.into_iter().last().unwrap();
-                start_grid = start_list;
-                end_grid = end_list;
+                start = ls.clone().into_iter().nth(0).unwrap();
+                end = ls.into_iter().last().unwrap();
             } else {
             }
             while go {
@@ -214,56 +210,42 @@ impl LsKey {
                     let grid = r.0;
                     let width = r.1;
                     let height = r.2;
-                    let display = grid.fit_into_width(width);
-                    if display.is_some() && !self.test {
-                         let display = display.unwrap(); // Safe to unwrap.
-                         let grid_row_count = display.row_count();
-                         if (grid_row_count + 4) > height {
-                             //panic!("Can't fit list into screen.");
-                             //
-                             let range = start_grid..end_grid;
-
-                             let mut filter_vec: Vec<usize> = vec![];
-
-                             range.into_iter().for_each(|i|
-                                 filter_vec.push(i)
-                             );
-
-                             list_filter = Some(filter_vec);
-                             filter = true;
-
-                             end_grid = end_grid - 1;
-                         } else {
-                            go = false; 
-                         }
-                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                    let display: terminal::input_n_display::Display;
+                    let _display = grid.fit_into_width(width);
+                    let pad: usize;
+                    if _display.is_some() && !self.test {
+                         display = _display.unwrap(); // Safe to unwrap.
+                         pad = 4;
                     } else {
-                         let display = grid.fit_into_columns(1);
-                         let list_row_count = display.row_count();
-                         if (list_row_count + 5) > height {
-                             //panic!("Can't fit list into screen.");
-                             //panic!("Can't fit list into screen.");
-
-                             let range = start_list..end_list;
-
-                             let mut filter_vec: Vec<usize> = vec![];
-
-                             range.into_iter().for_each(|i|
-                                 filter_vec.push(i)
-                             );
-
-                             list_filter = Some(filter_vec);
-                             filter = true;
-
-                             end_list = end_list - 1;
-                         } else {
-                            go = false; 
-                         }
-                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                         display = grid.fit_into_columns(1);
+                         pad = 5;
                     }
+                    let grid_row_count = display.row_count();
+                    if (grid_row_count + pad) > height {
+                        //panic!("Can't fit list into screen.");
+                        //
+                        let range = start..end;
+
+                        let mut filter_vec: Vec<usize> = vec![];
+
+                        range.into_iter().for_each(|i|
+                            filter_vec.push(i)
+                        );
+
+                        list_filter = Some(filter_vec);
+                        filter = true;
+
+                        end = end - 1;
+
+                    } else {
+                       go = false;
+                    }
+
+                    self.display = Some((self.list.parent_path.clone(), display.to_string()));
                 } else {
                     go = false;
                 }
+
             }
 
             if !halt {
@@ -347,7 +329,7 @@ impl LsKey {
         );
 
         self.list.filter = Some(filter_vec);
-        self.run_list_read(false, true);
+        self.update_file_display(false, true);
     }
 
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
@@ -360,7 +342,7 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self.update(list);
                  self.halt = false;
-                 self.run_list_read(is_fuzzed, self.list.filter.is_some());
+                 self.update_file_display(is_fuzzed, self.list.filter.is_some());
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -368,7 +350,7 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self.update(list);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed, self.list.filter.is_some());
+                      self.update_file_display(is_fuzzed, self.list.filter.is_some());
                   } else {
                       let file_path =
                           file_pathbuf
@@ -376,7 +358,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = false;
-                      self.run_list_read(is_fuzzed, self.list.filter.is_some());
+                      self.update_file_display(is_fuzzed, self.list.filter.is_some());
                   }
             }
         }
@@ -412,7 +394,7 @@ impl LsKey {
                  }
              }
              path_cache.switch_back();
-             //self.run_list_read();
+             //self.update_file_display();
          } else {
              let as_read = input.as_read.as_str();
              match as_read {
@@ -426,7 +408,7 @@ impl LsKey {
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
-                     //self.run_list_read();
+                     //self.update_file_display();
                  },
                  "vim" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -743,7 +725,7 @@ impl LsKey {
                  match input.clone().cmd_type.unwrap() {
                      CmdType::Cmd => {
                          self.cmd_mode(input);
-                         self.run_list_read(true, self.list.filter.is_some());
+                         self.update_file_display(true, self.list.filter.is_some());
                      },
                      _ => {}
                  }

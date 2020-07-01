@@ -60,6 +60,7 @@ pub mod input_n_display {
     use termion::screen::AlternateScreen;
     use std::thread;
     use std::time::Duration;
+    pub use term_grid::{Grid, Display};
 
     pub fn read() -> Result<Option<String>, std::io::Error> {
         let stdout = stdout();
@@ -260,8 +261,6 @@ pub mod input_n_display {
 
         write!(stdout, "{}", termion::cursor::Show).unwrap();
     }
-
-    pub use term_grid::{Grid, Display};
 
    // pub fn display(grid: Grid, width: usize) {
    //     println!("{}", grid.fit_into_width(width))
