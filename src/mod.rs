@@ -284,7 +284,7 @@ impl LsKey {
         };
 
         if let Some (r) = input.args {
-            let output_vec: Vec<std::process::Output> =
+            let _output_vec: Vec<std::process::Output> =
                 r.iter()
                     .map(|key|
                          format_cmd(PathBuf::from(key))
@@ -403,12 +403,7 @@ impl LsKey {
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                  },
                  "fzc" => {
-                     let split: Vec<&str> = input.as_read.split("fzc").collect();
-                     let cmd = split.iter().last().unwrap();
-                     let cmd = format!(r#"fzc {}"#, cmd);
-                     //let output = terminal::shell::cmd(cmd.clone());
-                     //let file_path = output.unwrap();
-                     //
+                     //let split: Vec<&str> = input.as_read.split("fzc").collect();
                      terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
                      //terminal::shell::spawn("vim".to_string(), vec![file_path]);
                  },
@@ -439,9 +434,9 @@ impl LsKey {
                      );
                      path_cache.switch();
                      //Split cmd ('vim')
-                     let split: Vec<&str> = input.as_read.split("vim").collect();
-                     let cmd = split.iter().last().unwrap();
-                     let cmd = format!(r#"vim {}"#, cmd);
+                     //let split: Vec<&str> = input.as_read.split("vim").collect();
+                     //let cmd = split.iter().last().unwrap();
+                     //let cmd = format!(r#"vim {}"#, cmd);
                      terminal::shell::spawn("vim".to_string(), vec![]);
                      path_cache.switch_back();
                  },
@@ -451,9 +446,9 @@ impl LsKey {
                      );
                      path_cache.switch();
                      //Split cmd ('zsh')
-                     let split: Vec<&str> = input.as_read.split("zsh").collect();
-                     let cmd = split.iter().last().unwrap();
-                     let cmd = format!(r#"zsh {}"#, cmd);
+                     //let split: Vec<&str> = input.as_read.split("zsh").collect();
+                     //let cmd = split.iter().last().unwrap();
+                     //let cmd = format!(r#"zsh {}"#, cmd);
                      terminal::shell::spawn("zsh".to_string(), vec![]);
                      path_cache.switch_back();
                  },
@@ -1078,10 +1073,9 @@ fn parse_keys(input: &str) -> Option<String> {
 
 #[cfg(test)]
 mod app_test {
-    use std::fs::{File, metadata,};
+    use std::fs::metadata;
     use std::path::{Path, PathBuf};
     use std::process::Command;
-    use std::env;
     use fixture::{Fixture, command_assistors};
     use termion::terminal_size;
     use super::{Input, LsKey, CmdType, Mode};
@@ -1196,15 +1190,14 @@ mod app_test {
                 }
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                let mut ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
+                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
                 spawn.join();
 
                 let mut test_output_path = path_path.clone();
                 test_output_path.push("sample_files");
                 test_output_path.push(".lsk_test_output");
-                let mut test_output_path_string = test_output_path.clone().into_os_string().into_string().unwrap();
-                let mut output_mv_to_path = path_path.clone();
-                let mut output_mv_to_path_string = path_path.clone().into_os_string().into_string().unwrap();
+                let test_output_path_string = test_output_path.clone().into_os_string().into_string().unwrap();
+                let output_mv_to_path_string = path_path.clone().into_os_string().into_string().unwrap();
 
                 Command::new("mv")
                     .arg(test_output_path_string)
@@ -1217,12 +1210,11 @@ mod app_test {
 
                 let mut output_mv_to_path = path_path.clone();
                 output_mv_to_path.push(".lsk_test_output");
-                let mut output_mv_to_path_string = output_mv_to_path.clone().into_os_string().into_string().unwrap();
+                let output_mv_to_path_string = output_mv_to_path.clone().into_os_string().into_string().unwrap();
 
                 println!("\npath:\n{}", output_mv_to_path_string.clone());
 
                 let file256 = file_sha256(output_mv_to_path_string.clone());
-                let hash: Hash;
 
                 match file256 {
                     Ok(h) => {
@@ -1623,27 +1615,24 @@ mod app_test {
     }
 
     //#[test]
-    fn shell_spawn_vim() {
-        super::terminal::shell::spawn("vim".to_string(), vec!["-c".to_string(), "vsplit README.md".to_string(), "dev.sh".to_string()]);
-    }
+    //fn shell_spawn_vim() {
+    //    super::terminal::shell::spawn("vim".to_string(), vec!["-c".to_string(), "vsplit README.md".to_string(), "dev.sh".to_string()]);
+    //}
 
     //#[test]
-    #[ignore]
-    fn shell_pipe_cmd() {
-        super::terminal::shell::cmd(r#"du -ah . | sort -hr | head -n 10"#.to_string());
-    }
+    //fn shell_pipe_cmd() {
+    //    super::terminal::shell::cmd(r#"du -ah . | sort -hr | head -n 10"#.to_string());
+    //}
 
     //#[test]
-    #[ignore]
-    fn shell_cat_cmd() {
-        super::terminal::shell::cmd("cat Cargo.toml".to_string());
-    }
+    //fn shell_cat_cmd() {
+    //    super::terminal::shell::cmd("cat Cargo.toml".to_string());
+    //}
 
     //#[test]
-    #[ignore]
-    fn shell_cat() {
-        super::terminal::shell::spawn("cat".to_string(), vec!["Cargo.toml".to_string()]);
-    }
+    //fn shell_cat() {
+    //    super::terminal::shell::spawn("cat".to_string(), vec!["Cargo.toml".to_string()]);
+    //}
 
      #[test]
      #[ignore]//docker

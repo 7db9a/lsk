@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate seahorse;
 extern crate ls_key;
 

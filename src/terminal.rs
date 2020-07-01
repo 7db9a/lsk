@@ -404,8 +404,6 @@ pub mod grid_display {
 
 #[cfg(test)]
 mod tests {
-    use std::thread;
-
     //#[test]
     //#[ignore] // Need a spawn in a spawn.
     //fn xdotool_type_text() {
@@ -422,56 +420,29 @@ mod tests {
 
     //#[test]
     //#[ignore]//play
-    fn termion_read_process_chars() {
-	    let test_spawn = thread::spawn(move || {
-            let result = super::input_n_display::read_process_chars();
-            assert_eq!(result, Some("lift off!".to_string()));
-	    });
+    //fn termion_key() {
+	//    let test_spawn = thread::spawn(move || {
+    //        super::input_n_display::read_char()
+	//    });
 
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+    //    //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
 
-        test_spawn.join();
-        //spawn.join();
-    }
+    //    test_spawn.join();
+    //    //spawn.join();
+    //}
 
     //#[test]
     //#[ignore]//play
-    fn termion_alternate_screen() {
-	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::alternate_screen()
-	    });
+    //fn termion_async_key() {
+	//    let test_spawn = thread::spawn(move || {
+    //        super::input_n_display::read_char_async()
+	//    });
 
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+    //    //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
 
-        test_spawn.join();
-        //spawn.join();
-    }
-
-    #[test]
-    #[ignore]//play
-    fn termion_key() {
-	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::read_char()
-	    });
-
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
-
-        test_spawn.join();
-        //spawn.join();
-    }
-
-    //#[test]
-    #[ignore]//play
-    fn termion_async_key() {
-	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::read_char_async()
-	    });
-
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
-
-        test_spawn.join();
-        //spawn.join();
-    }
+    //    test_spawn.join();
+    //    //spawn.join();
+    //}
 
     #[test]
     #[ignore]//docker
@@ -484,7 +455,7 @@ mod tests {
     fn takes_input_read() {
         println!("");
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
-        spawn.join();
+        spawn.join().expect("failed to spawn thread");
         super::input_n_display::read();
     }
 
