@@ -405,7 +405,11 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self.update(list);
                  self.halt = false;
-                 self.update_file_display(is_fuzzed, self.list.filter.is_some());
+                 let halt = self.list.filter.is_some();
+                 self._update_file_display(is_fuzzed, halt);
+                 if !halt {
+                     self.run_cmd();
+                 }
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
