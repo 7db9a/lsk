@@ -723,8 +723,6 @@ impl LsKey {
              } else {
                   let mode: String = input.drain(..2).collect();
                   let mode = mode.as_str();
-                  let fuzzy = "f ";
-                  let cmd = "c ";
                   match mode {
                       "f " => Some(Mode::Fuzzy(input.clone())),
                       "c " => Some(Mode::Cmd(input.clone())),
@@ -842,7 +840,6 @@ pub struct Input {
 
 impl Input {
     pub fn new() -> Self {
-        let input: Input = Default::default();
         let mut input: Input = Default::default();
         input.execute = true;
         input.unwiddle = false;
@@ -870,7 +867,7 @@ impl Input {
                 Key::Down => println!("↓"),
                 Key::Backspace => {
                     self.unwiddle = true;
-                    if let Some(x) = self.display.pop() {
+                    if self.display.pop().is_some() {
                         let count = self.display.iter().count();
                         if count  == 0 {
                             self.execute = false;
