@@ -131,7 +131,7 @@ impl LsKey {
     }
 
     // Filter out no-scores.
-    fn fuzzy_filter(&mut self, mut scores: list::fuzzy_score::Scores) -> list::fuzzy_score::Scores {
+    fn fuzzy_filter(&mut self, scores: list::fuzzy_score::Scores) -> list::fuzzy_score::Scores {
          let mut files_vec: Vec<list::fuzzy_score::Score> = vec![];
          for score in scores.files.iter() {
              let path = score.score().0;
@@ -161,7 +161,7 @@ impl LsKey {
     }
 
 
-    pub fn scores_to_list(&mut self, mut scores: list::fuzzy_score::Scores) -> list::List {
+    pub fn scores_to_list(&mut self, scores: list::fuzzy_score::Scores) -> list::List {
         let files_list: Vec<Entry> = scores.files.iter().map(|score|
             Entry {
                 path: score.score().0.path,
@@ -192,9 +192,9 @@ impl LsKey {
    pub fn run_list_read(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
             let mut list_filter = self.list.filter.clone();
-            let mut list = self.list.clone();
+            let list = self.list.clone();
             let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
-            let mut entries_count = entries.iter().count();
+            let entries_count = entries.iter().count();
             let mut start_list = 0;
             let mut end_list = entries_count;
             let mut start_grid = start_list;
@@ -286,14 +286,13 @@ impl LsKey {
         if let Some (r) = input.args {
             let output_vec: Vec<std::process::Output> =
                 r.iter()
-                    .map(|mut key|
+                    .map(|key|
                          format_cmd(PathBuf::from(key))
-                    ).map(|mut statement|
+                    ).map(|statement|
                         format!(r#""$(printf '{} \n ')""#, statement)
-                    ).map(|mut cmd|
+                    ).map(|cmd|
                         terminal::parent_shell::type_text(
                             cmd,
-                            //format!(r#""$(printf '1={} && 2={} \n ')""#, "README", "LICENSE"),
                             0
                         )
                     ).collect();
@@ -302,8 +301,8 @@ impl LsKey {
         }
     }
 
-    pub fn filter_mode(&mut self, mut list: List) {
-        let mut input_string: String = self.input.display.iter().collect();
+    pub fn filter_mode(&mut self, list: List) {
+        let input_string: String = self.input.display.iter().collect();
         let mut input_vec_str: Vec<&str> = input_string.split("-").collect();
         let mut key_vec: Vec<usize> = vec![];
 
@@ -330,7 +329,7 @@ impl LsKey {
 
         }
 
-        let mut end: usize;
+        let end: usize;
         let start = key_vec.clone().into_iter().nth(0).unwrap();
 
         if open_range {
@@ -583,14 +582,14 @@ impl LsKey {
         let stdout = stdout();
         let stdout = stdout.lock().into_raw_mode().unwrap();
         let mut screen: AlternateScreen<RawTerminal<StdoutLock>> = AlternateScreen::from(stdout);
-        let mut stdin = stdin.lock();
+        let stdin = stdin.lock();
         let mut result: Option<String> =  None;
         let mut is_fuzzed = false;
         let orig_ls_key = self.clone();
 
         clear_display(&mut screen);
 
-        let mut input_string: String = self.input.display.iter().collect();
+        let input_string: String = self.input.display.iter().collect();
         self.test_data_update(Some(input_string));
         display_files(self.clone(), b"", &mut screen, (0, 3));
 
@@ -602,9 +601,9 @@ impl LsKey {
             self.input.match_event(c);
             let mut input_string: String = self.input.display.iter().collect();
             let mut input = self.input.clone();
-            let mut first = input.display.iter().nth(0);
-            let mut input = self.input.clone();
-            let mut last = input.display.iter().last();
+            let first = input.display.iter().nth(0);
+            let input = self.input.clone();
+            let last = input.display.iter().last();
             let mut _input = self.input.clone();
 
             let place = (0, 1);

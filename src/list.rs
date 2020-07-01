@@ -356,7 +356,7 @@ pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
                     let _path = entry.path.clone();
                     let _path = _path.as_path();
                     let os_str = _path.iter().last().unwrap();
-                    let mut entry_str = os_str.to_str().unwrap();
+                    let entry_str = os_str.to_str().unwrap();
                     if entry_str != "/" {
                           let entry_string = format!("../{}", entry_str);
                           Colour::Blue.bold().paint(entry_string).to_string()

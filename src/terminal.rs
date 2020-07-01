@@ -330,7 +330,6 @@ pub mod input_n_display {
         */
 
         let w = usize::from(w);
-        let h = usize::from(h);
 
         println!("{}", grid.fit_into_width(w).unwrap());
     }
