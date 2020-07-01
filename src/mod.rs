@@ -391,7 +391,8 @@ impl LsKey {
         );
 
         self.list.filter = Some(filter_vec);
-        self.update_file_display(false, true);
+        self._update_file_display(false, true);
+        self.run_cmd()
     }
 
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
