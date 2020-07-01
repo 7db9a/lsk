@@ -494,8 +494,6 @@ mod fuzzy_tests {
         let file_b = "xyazabc";
         let file_c = "xyza";
         let file_d = "afd";
-        let dir_a = "dirxyzabc";
-        let dir_b = "dirxzabc";
 
         let res_a = super::fuzzy_score::score(file_a, guess);
         let res_b = super::fuzzy_score::score(file_b, guess);

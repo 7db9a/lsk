@@ -175,8 +175,7 @@ pub mod input_n_display {
                 Key::Up => println!("↑"),
                 Key::Down => println!("↓"),
                 Key::Backspace => {
-                    if let Some(x) = input.pop() {
-                    } else {
+                    if !input.pop().is_some() {
                         write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
                     }
                 },
