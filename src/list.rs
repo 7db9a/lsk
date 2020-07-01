@@ -2,8 +2,7 @@ use std::path::{Path, PathBuf};
 use std::fs::metadata;
 use std::borrow::Cow;
 use walkdir::{DirEntry, WalkDir, Error as WalkDirError};
-use ansi_term::{Colour, Style};
-use ansi_term::Colour::*;
+use ansi_term::Colour;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileType {
@@ -22,7 +21,7 @@ pub struct Entry {
 // Can't alphabetyize PathBuf case insensitively, so we convert to String then back again.
 pub fn alphabetize_paths_vec(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
     let mut strings_vec: Vec<String> = vec![];
-    let mut alphabetized_paths_vec: Vec<PathBuf> = {
+    let alphabetized_paths_vec: Vec<PathBuf> = {
         let mut _alphabetized_paths_vec: Vec<PathBuf> = vec![];
         for path in paths_vec.iter() {
             let path = path.clone();
@@ -43,7 +42,7 @@ pub fn alphabetize_paths_vec(paths_vec: Vec<PathBuf>) -> Vec<PathBuf> {
 
 pub fn alphabetize_entry(a: &Entry, b: &Entry) -> std::cmp::Ordering {
     let paths_vec: Vec<PathBuf> = vec![a.path.clone(), b.path.clone()];
-    let mut paths_vec = alphabetize_paths_vec(paths_vec.clone());
+    let paths_vec = alphabetize_paths_vec(paths_vec.clone());
 
     if &a.path == &b.path {
         std::cmp::Ordering::Equal
@@ -114,7 +113,7 @@ impl List {
         let p = path.as_ref().to_str().unwrap();
         let np: String = basename(p, '/').into_owned();
         let basename = Path::new(&np);
-        let mut list: List = Default::default();
+        let list: List = Default::default();
         self = list;
         self.path_history = old_path_history;
         self.parent_path = old_parent_path.join(basename);
@@ -123,8 +122,8 @@ impl List {
         self
     }
 
-    pub fn list_skip_hidden(mut self) -> Result<(Self), std::io::Error> {
-        let mut list: List = Default::default();
+    pub fn list_skip_hidden(mut self) -> Result<Self, std::io::Error> {
+        let list: List = Default::default();
         let walker = WalkDir::new(&self.parent_path).max_depth(1).into_iter();
         for entry in walker.filter_entry(|e| !list.clone().skip(e)) {
                 self = list_maker(entry, self)?;
@@ -133,7 +132,7 @@ impl List {
         Ok(self)
     }
 
-    pub fn list_include_hidden(mut self) -> Result<(Self), std::io::Error> {
+    pub fn list_include_hidden(mut self) -> Result<Self, std::io::Error> {
         let mut _list: List = Default::default();
         for entry in WalkDir::new(&self.parent_path).max_depth(1) {
                 self = list_maker(entry, self)?;
@@ -169,8 +168,6 @@ impl List {
             }
         );
 
-        let count = all_files.iter().count();
-
         // Add keys
         let mut n = 0;
         let mut final_all_files: Vec<Entry> = vec![];
@@ -186,15 +183,7 @@ impl List {
         // Filter entries
         if filter {
 
-
-            let entry_test = Entry {
-                path: PathBuf::from("entry_test"),
-                file_type: FileType::File,
-                key: Some(3)
-
-            };
-
-           fn filter_closure(x: &Entry, filter: &Option<Vec<usize>>) -> bool {
+           fn filter_thing(x: &Entry, filter: &Option<Vec<usize>>) -> bool {
                if let Some(fl) = filter {
                    if let Some(key) = x.key {
                        fl.iter().find(|n| &key == *n).is_some()
@@ -208,7 +197,7 @@ impl List {
 
            let find_in_range = final_all_files.clone().into_iter().filter(|x|
                // !filter.as_ref().unwrap().iter().find(|n| &x.key.unwrap() == *n).is_some()
-               filter_closure(x, &filter_vec)
+               filter_thing(x, &filter_vec)
            );
 
             let files: Vec<Entry> = find_in_range.collect();
@@ -253,7 +242,7 @@ impl List {
     }
 
     // Caution ahead, side-effect: set parent dir field.
-    fn skip(mut self, entry: &DirEntry) -> bool {
+    fn skip(self, entry: &DirEntry) -> bool {
 
         //if is_parent_dir(entry) {
         //    return true
@@ -289,11 +278,10 @@ fn file_or_dir_name(path: &PathBuf) -> Option<PathBuf> {
     }
 }
 
-fn list_maker(entry: Result<(DirEntry), WalkDirError>, mut list: List) -> Result<(List), std::io::Error> {
+fn list_maker(entry: Result<DirEntry, WalkDirError>, mut list: List) -> Result<List, std::io::Error> {
     match entry {
         Ok(entry) => {
             let entry = entry.path();
-            let previous_path = list.path_history.iter().last().unwrap();
             let parent_file_name = file_or_dir_name(&list.parent_path);
 
                 match metadata(entry) {
@@ -353,7 +341,7 @@ pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
 //    let last = component.as_os_str();
 //}
 
-pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<String> {
+pub fn key_entries(entries: Vec<Entry>) -> Vec<String> {
     let mut entries_keyed: Vec<String> = vec![];
     for entry in entries.clone() {
         let n = entry.key.unwrap();
@@ -368,10 +356,9 @@ pub fn key_entries(entries: Vec<Entry>, filter: Option<Vec<usize>>) -> Vec<Strin
                     let _path = entry.path.clone();
                     let _path = _path.as_path();
                     let os_str = _path.iter().last().unwrap();
-                    let mut entry_str = os_str.to_str().unwrap();
-                    let mut entry_string = entry_str.to_string();
+                    let entry_str = os_str.to_str().unwrap();
                     if entry_str != "/" {
-                          entry_string = format!("../{}", entry_str);
+                          let entry_string = format!("../{}", entry_str);
                           Colour::Blue.bold().paint(entry_string).to_string()
                     } else {
                         "/".to_string()
@@ -407,8 +394,6 @@ pub fn order_and_sort_list(list: &List, sort: bool) -> Vec<Entry> {
         }
     );
 
-    let count = all_files.iter().count();
-
     //all_files.iter().map(|mut x|
     //    (0..count).for_each(|n| all_files.into_iter().nth(n).unwrap().key = Some(n))
     //);
@@ -439,9 +424,8 @@ pub fn print_list_with_keys(list: List) -> Result<(), std::io::Error> {
 }
 
 pub mod fuzzy_score {
-    use super::{FileType, Entry};
+    use super::Entry;
     use fuzzy_matcher;
-    use std::path::PathBuf;
     use fuzzy_matcher::FuzzyMatcher;
     use fuzzy_matcher::skim::SkimMatcherV2;
 
@@ -510,8 +494,6 @@ mod fuzzy_tests {
         let file_b = "xyazabc";
         let file_c = "xyza";
         let file_d = "afd";
-        let dir_a = "dirxyzabc";
-        let dir_b = "dirxzabc";
 
         let res_a = super::fuzzy_score::score(file_a, guess);
         let res_b = super::fuzzy_score::score(file_b, guess);
@@ -604,7 +586,7 @@ mod fuzzy_tests {
 #[cfg(test)]
 mod tests {
     use std::fs::metadata;
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
     use fixture::Fixture;
 
     #[test]

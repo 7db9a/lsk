@@ -50,8 +50,6 @@ pub mod parent_shell {
     }
 }
 pub mod input_n_display {
-    use std::path::{Path, PathBuf};
-    use std::convert::TryFrom;
     use termion::input::TermRead;
     use termion::event::Key;
     use termion::raw::{IntoRawMode, RawTerminal};
@@ -63,7 +61,7 @@ pub mod input_n_display {
     use std::thread;
     use std::time::Duration;
 
-    pub fn read() -> Result<(Option<String>), std::io::Error> {
+    pub fn read() -> Result<Option<String>, std::io::Error> {
         let stdout = stdout();
         let mut stdout = stdout.lock();
         let stdin = stdin();
@@ -126,7 +124,7 @@ pub mod input_n_display {
         let stdin = stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
-        let mut stdin = stdin.lock();
+        let stdin = stdin.lock();
         let mut result: Option<String> =  None;
 
         write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
@@ -172,25 +170,21 @@ pub mod input_n_display {
                 Key::Alt(c) => println!("^{}", c),
                 Key::Ctrl(c) => println!("*{}", c),
                 Key::Esc => println!("ESC"),
-                Key::Esc => println!("ESC"),
                 Key::Left => println!("←"),
                 Key::Right => println!("→"),
                 Key::Up => println!("↑"),
                 Key::Down => println!("↓"),
                 Key::Backspace => {
-                    if let Some(x) = input.pop() {
-                    } else {
+                    if !input.pop().is_some() {
                         write!(stdout, "{}{}", termion::cursor::Goto(0, 2), termion::clear::AfterCursor).unwrap();
                     }
                 },
                 _ => {}
             }
             let input_string: String = input.iter().collect();
-            let input_len = input.iter().count();
-            let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
             if let Some(mut first) = _first {
-                let key: Result<(usize), std::num::ParseIntError> = first.to_string().parse();
+                let key: Result<usize, std::num::ParseIntError> = first.to_string().parse();
                 if key.is_ok() {
                     first = &'r';
                 } else {
@@ -320,12 +314,7 @@ pub mod input_n_display {
                 grid.add(Cell::from(s.as_str()));
         }
 
-        let stdout = stdout();
-        let mut stdout = stdout.lock();
-        let stdin = stdin();
-        let mut stdin = stdin.lock();
-
-        let (w, h) = terminal_size()/*; match this     */.unwrap();
+        let (w, _) = terminal_size()/*; match this     */.unwrap();
         /*match (w, h) {
             Ok((w, h)) => {
                 let w = usize::from(w);
@@ -339,14 +328,13 @@ pub mod input_n_display {
         */
 
         let w = usize::from(w);
-        let h = usize::from(h);
 
         println!("{}", grid.fit_into_width(w).unwrap());
     }
 }
 
 pub mod shell {
-    use cmd_lib::{run_fun, info};
+    use cmd_lib::run_fun;
 
     pub fn spawn(cmd: String, args: Vec<String>) {
         std::process::Command::new(cmd)
@@ -357,7 +345,7 @@ pub mod shell {
             .expect("unrecoverable failure to execute shell process.");
     }
 
-    pub fn cmd(cmd: String) -> Result<(String), std::io::Error> {
+    pub fn cmd(cmd: String) -> Result<String, std::io::Error> {
         run_fun!("{}", cmd)
     }
 }
@@ -416,9 +404,6 @@ pub mod grid_display {
 
 #[cfg(test)]
 mod tests {
-    use std::path::{Path, PathBuf};
-    use std::thread;
-
     //#[test]
     //#[ignore] // Need a spawn in a spawn.
     //fn xdotool_type_text() {
@@ -435,56 +420,29 @@ mod tests {
 
     //#[test]
     //#[ignore]//play
-    fn termion_read_process_chars() {
-	    let test_spawn = thread::spawn(move || {
-            let result = super::input_n_display::read_process_chars();
-            assert_eq!(result, Some("lift off!".to_string()));
-	    });
+    //fn termion_key() {
+	//    let test_spawn = thread::spawn(move || {
+    //        super::input_n_display::read_char()
+	//    });
 
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+    //    //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
 
-        test_spawn.join();
-        //spawn.join();
-    }
+    //    test_spawn.join();
+    //    //spawn.join();
+    //}
 
     //#[test]
     //#[ignore]//play
-    fn termion_alternate_screen() {
-	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::alternate_screen()
-	    });
+    //fn termion_async_key() {
+	//    let test_spawn = thread::spawn(move || {
+    //        super::input_n_display::read_char_async()
+	//    });
 
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
+    //    //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
 
-        test_spawn.join();
-        //spawn.join();
-    }
-
-    #[test]
-    #[ignore]//play
-    fn termion_key() {
-	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::read_char()
-	    });
-
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
-
-        test_spawn.join();
-        //spawn.join();
-    }
-
-    //#[test]
-    #[ignore]//play
-    fn termion_async_key() {
-	    let test_spawn = thread::spawn(move || {
-            super::input_n_display::read_char_async()
-	    });
-
-        //let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'q \n ')""#.to_string()], 200);
-
-        test_spawn.join();
-        //spawn.join();
-    }
+    //    test_spawn.join();
+    //    //spawn.join();
+    //}
 
     #[test]
     #[ignore]//docker
@@ -497,8 +455,8 @@ mod tests {
     fn takes_input_read() {
         println!("");
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
-        spawn.join();
-        super::input_n_display::read();
+        spawn.join().expect("failed to spawn thread");
+        super::input_n_display::read().expect("failed to read input");
     }
 
     #[test]

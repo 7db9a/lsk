@@ -1,11 +1,10 @@
-#[macro_use]
 extern crate seahorse;
 extern crate ls_key;
 
 use std::path::{Path, PathBuf};
 use std::env;
-use ls_key::{LsKey, list, app};
-use list::{List, print_list_with_keys, is_dir, is_file};
+use ls_key::{list, app};
+use list::{List, is_dir};
 use seahorse::{App, Command, Context, Flag, FlagType};
 
 fn main() {
@@ -40,7 +39,7 @@ fn get_file_by_key_action(c: &Context) {
        _ => ()
     };
 
-    let mut use_path = PathBuf::new();
+    let use_path: PathBuf;
     if path != "" {
         use_path = Path::new(path).to_path_buf();
     } else {
@@ -60,7 +59,6 @@ fn get_file_by_key_action(c: &Context) {
 
 fn is_dir_action(c: &Context) {
     let mut args = c.args.iter();
-    let path = "";
     let arg_count = args.clone().count();
     let path = match arg_count {
        1 => args.next().unwrap(),
@@ -68,7 +66,7 @@ fn is_dir_action(c: &Context) {
        _ => ""
     };
 
-    let mut use_path = PathBuf::new();
+    let use_path: PathBuf;
     if path != "" {
         use_path = Path::new(path).to_path_buf();
     } else {
@@ -99,9 +97,7 @@ fn get_file_by_key_command() -> Command {
 }
 
 fn default_action(c: &Context) {
-    let mut list: List = Default::default();
     let mut args = c.args.iter();
-    let path = "";
     let arg_count = args.clone().count();
     let path = match arg_count {
        1 => args.next().unwrap(),
@@ -127,7 +123,7 @@ fn default_action(c: &Context) {
 #[cfg(test)]
 mod cli {
     use std::fs::metadata;
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
     use fixture::Fixture;
     use fixture::command_assistors;
     use std::process::Command;
@@ -154,7 +150,7 @@ mod cli {
 
         // Changing directories.
         path_cache.switch();
-        let output = Command::new("/ls-key/target/debug/lsk")
+        let _output = Command::new("/ls-key/target/debug/lsk")
             .arg("-a")
             .output()
             .expect("failed to execute lsk process");

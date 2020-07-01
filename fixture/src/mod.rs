@@ -127,8 +127,8 @@ impl Fixture {
 
 pub fn is_git<T: AsRef<str>>(path: T) -> bool {
     let is_git = match Repository::open(Path::new(path.as_ref())) {
-            Ok(repo) => true,
-            Err(e) =>false
+            Ok(_) => true,
+            Err(_) => false
     };
 
     is_git
