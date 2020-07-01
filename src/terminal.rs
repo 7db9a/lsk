@@ -50,7 +50,6 @@ pub mod parent_shell {
     }
 }
 pub mod input_n_display {
-    use std::convert::TryFrom;
     use termion::input::TermRead;
     use termion::event::Key;
     use termion::raw::{IntoRawMode, RawTerminal};
@@ -125,7 +124,7 @@ pub mod input_n_display {
         let stdin = stdin();
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode().unwrap();
-        let mut stdin = stdin.lock();
+        let stdin = stdin.lock();
         let mut result: Option<String> =  None;
 
         write!(stdout, "{}{}\n\r", termion::clear::CurrentLine, termion::cursor::Goto(1, 1)).unwrap();
@@ -316,7 +315,7 @@ pub mod input_n_display {
                 grid.add(Cell::from(s.as_str()));
         }
 
-        let (w, h) = terminal_size()/*; match this     */.unwrap();
+        let (w, _) = terminal_size()/*; match this     */.unwrap();
         /*match (w, h) {
             Ok((w, h)) => {
                 let w = usize::from(w);
@@ -406,7 +405,6 @@ pub mod grid_display {
 
 #[cfg(test)]
 mod tests {
-    use std::path::{Path, PathBuf};
     use std::thread;
 
     //#[test]

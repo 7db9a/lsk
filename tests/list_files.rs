@@ -1,9 +1,9 @@
 use ls_key;
 use std::fs::metadata;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use fixture::Fixture;
 use fixture::command_assistors;
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 
 // Linux's top level files and directories. The files have not content.
 fn build_files(path: &str) {
@@ -199,7 +199,6 @@ fn fuzzy_list() {
 #[test]
 #[ignore]//docker
 fn list_go_up_one_level() {
-        let input = "cr";
         fixture::Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .build();

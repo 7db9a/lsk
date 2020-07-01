@@ -588,7 +588,7 @@ mod fuzzy_tests {
 #[cfg(test)]
 mod tests {
     use std::fs::metadata;
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
     use fixture::Fixture;
 
     #[test]
