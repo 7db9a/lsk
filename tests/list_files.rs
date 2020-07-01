@@ -7,7 +7,7 @@ use std::process::{Command, Stdio};
 
 // Linux's top level files and directories. The files have not content.
 fn build_files(path: &str) {
-        let mut fixture = Fixture::new()
+        Fixture::new()
              .add_dirpath(path.to_string() + "arch")
              .add_dirpath(path.to_string() + "block")
              .add_dirpath(path.to_string() + "certs")
@@ -41,7 +41,7 @@ fn build_files(path: &str) {
 
         // build usr/ subdir.
         let path_usr = path.to_string() + "usr/";
-        let mut fixture = Fixture::new()
+        Fixture::new()
              .add_file(path_usr.to_string() + "default_cpio_list")
              .add_file(path_usr.to_string() + "gen_init_cpio.c")
              .add_file(path_usr.to_string() + "gen_initramfs.sh")
@@ -122,7 +122,7 @@ fn list() {
 
         // Changing directories.
         path_cache.switch();
-        let ls_key = ls_key::LsKey::new(path, list_all, false);
+        let _ls_key = ls_key::LsKey::new(path, list_all, false);
 
         path_cache.switch_back();
 
@@ -284,11 +284,6 @@ fn list_enter_into_dir() {
 
         let file_pathbuf = list_original.get_file_by_key(key, !is_fuzzed).unwrap();
         if metadata(file_pathbuf.clone()).unwrap().is_dir() {
-            let file_path =
-                file_pathbuf
-                .to_str().unwrap()
-                .to_string();
-
             let list = ls_key.list.clone().update(file_pathbuf);
             ls_key.update(list);
         } else {
@@ -339,15 +334,6 @@ fn list_enter_into_fuzzed_dir() {
         let ls_key_fuzzed = ls_key.clone().fuzzy_update(input.to_string());
         let list_fuzzed = ls_key_fuzzed.fuzzy_list.clone().unwrap();
 
-        let is_fuzzed = false;
-        //let key = "0";
-        //let input =
-        //    ls_key::Input {
-        //         cmd: Some(key.to_string()),
-        //         args: Some(vec![key.to_string()]),
-        //         as_read: key.to_string(),
-        //         cmd_type: Some(ls_key::CmdType::single_key)
-        //    };
         ls_key.list.parent_path.pop();
         let file_pathbuf = ls_key.list.parent_path.clone();
         ls_key.list.parent_path.pop();

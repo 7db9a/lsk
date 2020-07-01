@@ -473,7 +473,7 @@ impl LsKey {
                          self.list.parent_path.as_path()
                      );
                      path_cache.switch();
-                     let output = terminal::shell::cmd(as_read.to_string()).unwrap();
+                     let _output = terminal::shell::cmd(as_read.to_string()).unwrap();
                      path_cache.switch_back();
                  }
              }
@@ -600,7 +600,7 @@ impl LsKey {
 
             self.input.match_event(c);
             let mut input_string: String = self.input.display.iter().collect();
-            let mut input = self.input.clone();
+            let input = self.input.clone();
             let first = input.display.iter().nth(0);
             let input = self.input.clone();
             let last = input.display.iter().last();
@@ -1013,17 +1013,17 @@ impl Input {
         is_all_nums
      }
 
-     fn is_key(&self, input: &Vec<String>) -> bool {
-        if input.iter().count() == 1 {
-            let key: Result<usize, std::num::ParseIntError> = input.iter().next().unwrap().parse();
-            match key {
-                Ok(_) => true,
-                Err(_) => false
-            }
-        } else {
-            false
-        }
-     }
+     //fn is_key(&self, input: &Vec<String>) -> bool {
+     //   if input.iter().count() == 1 {
+     //       let key: Result<usize, std::num::ParseIntError> = input.iter().next().unwrap().parse();
+     //       match key {
+     //           Ok(_) => true,
+     //           Err(_) => false
+     //       }
+     //   } else {
+     //       false
+     //   }
+     //}
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -1042,11 +1042,11 @@ fn parse_keys(input: &str) -> Option<String> {
         y.remove(0);
 
         let mut n = 0;
-        let SingleKey: bool;
+        let single_key: bool;
         if count == 2 {
-            SingleKey = true;
+            single_key = true;
         } else {
-            SingleKey = false;
+            single_key = false;
         }
         loop {
             y.insert(n, " ");
@@ -1057,7 +1057,7 @@ fn parse_keys(input: &str) -> Option<String> {
             }
         }
 
-        if SingleKey {
+        if single_key {
            y.remove(0);
         }
 
