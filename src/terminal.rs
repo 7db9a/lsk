@@ -171,7 +171,6 @@ pub mod input_n_display {
                 Key::Alt(c) => println!("^{}", c),
                 Key::Ctrl(c) => println!("*{}", c),
                 Key::Esc => println!("ESC"),
-                Key::Esc => println!("ESC"),
                 Key::Left => println!("←"),
                 Key::Right => println!("→"),
                 Key::Up => println!("↑"),
@@ -185,8 +184,6 @@ pub mod input_n_display {
                 _ => {}
             }
             let input_string: String = input.iter().collect();
-            let input_len = input.iter().count();
-            let input_len = u16::try_from(input_len).ok().unwrap();
             let _first = input.iter().nth(0);
             if let Some(mut first) = _first {
                 let key: Result<usize, std::num::ParseIntError> = first.to_string().parse();
@@ -318,11 +315,6 @@ pub mod input_n_display {
         {
                 grid.add(Cell::from(s.as_str()));
         }
-
-        let stdout = stdout();
-        let mut stdout = stdout.lock();
-        let stdin = stdin();
-        let mut stdin = stdin.lock();
 
         let (w, h) = terminal_size()/*; match this     */.unwrap();
         /*match (w, h) {

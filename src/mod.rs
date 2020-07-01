@@ -22,7 +22,7 @@ pub mod app {
             let mut path = path.as_ref().to_path_buf();
             create_dir_all(&path).expect("Failed to create directories.");
             path.push(".lsk_test_output");
-            let mut file = std::fs::File::create(&path).unwrap();
+            std::fs::File::create(&path).expect("failed to create lsk output file");
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
