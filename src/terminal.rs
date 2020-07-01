@@ -456,7 +456,7 @@ mod tests {
         println!("");
         let spawn = super::parent_shell::type_text_spawn(vec![r#""$(printf 'hello \n ')""#.to_string()], 200);
         spawn.join().expect("failed to spawn thread");
-        super::input_n_display::read();
+        super::input_n_display::read().expect("failed to read input");
     }
 
     #[test]

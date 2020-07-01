@@ -150,7 +150,7 @@ mod cli {
 
         // Changing directories.
         path_cache.switch();
-        let output = Command::new("/ls-key/target/debug/lsk")
+        let _output = Command::new("/ls-key/target/debug/lsk")
             .arg("-a")
             .output()
             .expect("failed to execute lsk process");

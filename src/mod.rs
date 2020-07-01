@@ -1191,7 +1191,7 @@ mod app_test {
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
                 let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
-                spawn.join();
+                spawn.join().expect("failed to spawn thread");
 
                 let mut test_output_path = path_path.clone();
                 test_output_path.push("sample_files");

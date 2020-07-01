@@ -314,7 +314,6 @@ fn list_enter_into_dir() {
 #[test]
 #[ignore]//docker
 fn list_enter_into_fuzzed_dir() {
-        let input = "cr";
         fixture::Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .build();
@@ -330,9 +329,6 @@ fn list_enter_into_fuzzed_dir() {
         let mut ls_key = ls_key::LsKey::new(path, list_all, false);
 
         let list_original = ls_key.list.clone();
-        let ls_key_fuzzed = ls_key.clone().fuzzy_update(input.to_string());
-        let list_fuzzed = ls_key_fuzzed.fuzzy_list.clone().unwrap();
-
         ls_key.list.parent_path.pop();
         let file_pathbuf = ls_key.list.parent_path.clone();
         ls_key.list.parent_path.pop();
