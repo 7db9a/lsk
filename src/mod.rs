@@ -898,7 +898,6 @@ impl Input {
 
     pub fn parse(mut self, input: String) -> Self {
         let (cmd, args) = self.parse_cmd(input.clone());
-        let args_count = args.clone().iter().count();
         let is_key = if args == None {
             let key: Result<usize, std::num::ParseIntError> = cmd.clone().unwrap().parse();
             match key {
