@@ -214,56 +214,42 @@ impl LsKey {
                     let grid = r.0;
                     let width = r.1;
                     let height = r.2;
-                    let display = grid.fit_into_width(width);
-                    if display.is_some() && !self.test {
-                         let display = display.unwrap(); // Safe to unwrap.
-                         let grid_row_count = display.row_count();
-                         if (grid_row_count + 4) > height {
-                             //panic!("Can't fit list into screen.");
-                             //
-                             let range = start_grid..end_grid;
-
-                             let mut filter_vec: Vec<usize> = vec![];
-
-                             range.into_iter().for_each(|i|
-                                 filter_vec.push(i)
-                             );
-
-                             list_filter = Some(filter_vec);
-                             filter = true;
-
-                             end_grid = end_grid - 1;
-                         } else {
-                            go = false; 
-                         }
-                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                    let display: terminal::input_n_display::Display;
+                    let _display = grid.fit_into_width(width);
+                    let pad: usize;
+                    if _display.is_some() && !self.test {
+                         display = _display.unwrap(); // Safe to unwrap.
+                         pad = 4;
                     } else {
-                         let display = grid.fit_into_columns(1);
-                         let list_row_count = display.row_count();
-                         if (list_row_count + 5) > height {
-                             //panic!("Can't fit list into screen.");
-                             //panic!("Can't fit list into screen.");
-
-                             let range = start_list..end_list;
-
-                             let mut filter_vec: Vec<usize> = vec![];
-
-                             range.into_iter().for_each(|i|
-                                 filter_vec.push(i)
-                             );
-
-                             list_filter = Some(filter_vec);
-                             filter = true;
-
-                             end_list = end_list - 1;
-                         } else {
-                            go = false; 
-                         }
-                         self.display = Some((self.list.parent_path.clone(), display.to_string()));
+                         display = grid.fit_into_columns(1);
+                         pad = 5;
                     }
+                    let grid_row_count = display.row_count();
+                    if (grid_row_count + pad) > height {
+                        //panic!("Can't fit list into screen.");
+                        //
+                        let range = start_grid..end_grid;
+
+                        let mut filter_vec: Vec<usize> = vec![];
+
+                        range.into_iter().for_each(|i|
+                            filter_vec.push(i)
+                        );
+
+                        list_filter = Some(filter_vec);
+                        filter = true;
+
+                        end_grid = end_grid - 1;
+
+                    } else {
+                       go = false; 
+                    }
+
+                    self.display = Some((self.list.parent_path.clone(), display.to_string()));
                 } else {
                     go = false;
                 }
+
             }
 
             if !halt {
