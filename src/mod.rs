@@ -799,8 +799,7 @@ impl LsKey {
                          self.cmd_mode(input);
                          let halt = self.list.filter.is_some();
                          self._update_file_display(true, halt);
-
-                         if !halt {
+                         if halt {
                              self.run_cmd();
                          }
                      },
