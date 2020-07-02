@@ -428,8 +428,11 @@ impl LsKey {
                           .to_str().unwrap()
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                      self.halt = false;
-                      self.update_file_display(is_fuzzed, self.list.filter.is_some());
+                      self.halt = true;
+                      self._update_file_display(is_fuzzed, self.halt);
+                      if self.halt {
+                          self.run_cmd();
+                      }
                   }
             }
         }
