@@ -396,7 +396,9 @@ impl LsKey {
                  },
                  "fzc" => {
                      //let split: Vec<&str> = input.as_read.split("fzc").collect();
-                     terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
+                     let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
+                     let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
+                     terminal::shell::spawn("sh".to_string(), vec![fzc_path_string]);
                      //terminal::shell::spawn("vim".to_string(), vec![file_path]);
                  },
                  _ => {
