@@ -430,9 +430,7 @@ impl LsKey {
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
                       self.halt = true;
                       self._update_file_display(is_fuzzed, self.halt);
-                      if self.halt {
-                          self.run_cmd();
-                      }
+                      self.run_cmd();
                   }
             }
         }
