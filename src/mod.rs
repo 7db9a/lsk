@@ -27,6 +27,7 @@ pub mod app {
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test);
         ls_key.update_file_display(ls_key.is_fuzzed, false);
+        ls_key.run_cmd();
         let mut list = ls_key.list.clone();
 
         while ls_key.is_fuzzed {
@@ -44,6 +45,7 @@ pub mod app {
                 ls_key.display = display;
             }
             ls_key.update_file_display(ls_key.is_fuzzed, false);
+            ls_key.run_cmd();
             list = ls_key.list.clone();
         }
 
@@ -154,7 +156,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        self.update_file_display(true, self.list.filter.is_some());
+        self.update_file_display(true, false);
         self.fuzzy_list = Some(list);
 
         self.clone()
@@ -247,10 +249,6 @@ impl LsKey {
                 }
 
             }
-
-            if !halt {
-                self.run_cmd();
-            }
     }
 
     fn return_file_by_key_mode(&mut self, input: Input, is_fuzzed: bool) {
@@ -330,6 +328,7 @@ impl LsKey {
 
         self.list.filter = Some(filter_vec);
         self.update_file_display(false, true);
+        self.run_cmd()
     }
 
     pub fn key_mode(&mut self, list: List, input: Input, is_fuzzed: bool) {
@@ -342,7 +341,11 @@ impl LsKey {
                  let list = self.list.clone().update(file_pathbuf);
                  self.update(list);
                  self.halt = false;
-                 self.update_file_display(is_fuzzed, self.list.filter.is_some());
+                 let halt = self.list.filter.is_some();
+                 self.update_file_display(is_fuzzed, halt);
+                 if !halt {
+                     self.run_cmd();
+                 }
             },
             _ => {
                   let file_pathbuf = list.get_file_by_key(key, !is_fuzzed).unwrap();
@@ -350,15 +353,20 @@ impl LsKey {
                       let list = self.list.clone().update(file_pathbuf);
                       self.update(list);
                       self.halt = false;
-                      self.update_file_display(is_fuzzed, self.list.filter.is_some());
+                      let halt = self.list.filter.is_some();
+                      self.update_file_display(is_fuzzed, halt);
+                      if !halt {
+                          self.run_cmd();
+                      }
                   } else {
                       let file_path =
                           file_pathbuf
                           .to_str().unwrap()
                           .to_string();
                       terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                      self.halt = false;
-                      self.update_file_display(is_fuzzed, self.list.filter.is_some());
+                      self.halt = true;
+                      self.update_file_display(is_fuzzed, self.halt);
+                      self.run_cmd();
                   }
             }
         }
@@ -394,7 +402,6 @@ impl LsKey {
                  }
              }
              path_cache.switch_back();
-             //self.update_file_display();
          } else {
              let as_read = input.as_read.as_str();
              match as_read {
@@ -408,7 +415,6 @@ impl LsKey {
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
-                     //self.update_file_display();
                  },
                  "vim" => {
                      let mut path_cache = command_assistors::PathCache::new(
@@ -725,7 +731,6 @@ impl LsKey {
                  match input.clone().cmd_type.unwrap() {
                      CmdType::Cmd => {
                          self.cmd_mode(input);
-                         self.update_file_display(true, self.list.filter.is_some());
                      },
                      _ => {}
                  }
