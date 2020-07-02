@@ -113,12 +113,12 @@ fn default_action(c: &Context) {
             app::run(env::current_dir().unwrap(), true, false, None);
         }
     } else if let Some(fzc_path) = c.string_flag("fuzzy-cmd") {
-        assert_eq!(fzc_path, "/home/me/.zsh_history".to_string());
-        //if path != "" {
-        //    app::run(path, true, false, None);
-        //} else {
-        //    app::run(env::current_dir().unwrap(), true, false, None);
-        //}
+        //assert_eq!(fzc_path, "/home/me/.zsh_history".to_string());
+        if path != "" {
+            app::run(path, true, false, Some(PathBuf::from(fzc_path)));
+        } else {
+            app::run(env::current_dir().unwrap(), true, false, Some(PathBuf::from(fzc_path)));
+        }
     } else {
         if path != "" {
             app::run(path, false, false, None);
