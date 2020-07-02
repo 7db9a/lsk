@@ -797,11 +797,12 @@ impl LsKey {
                  match input.clone().cmd_type.unwrap() {
                      CmdType::Cmd => {
                          self.cmd_mode(input);
-                         self.update_file_display(true, self.list.filter.is_some());
+                         let halt = self.list.filter.is_some();
+                         self.update_file_display(true, halt);
 
-                        if !self.list.filter.is_some() {
-                            self.run_cmd();
-                        }
+                         if !halt {
+                             self.run_cmd();
+                         }
                      },
                      _ => {}
                  }
