@@ -798,6 +798,10 @@ impl LsKey {
                      CmdType::Cmd => {
                          self.cmd_mode(input);
                          self.update_file_display(true, self.list.filter.is_some());
+
+                        if !self.list.filter.is_some() {
+                            self.run_cmd();
+                        }
                      },
                      _ => {}
                  }
