@@ -16,6 +16,7 @@ fn main() {
         .usage("cli [path]")
         .action(default_action)
         .flag(Flag::new("all", "cli [path] --all(-a)", FlagType::Bool).alias("a"))
+        .flag(Flag::new("fuzzy-cmd", "cli [path] --fuzzy-cmd(-c)", FlagType::String).alias("c"))
         .command(is_dir_command())
         .command(get_file_by_key_command());
 
