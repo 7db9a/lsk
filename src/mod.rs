@@ -1467,6 +1467,25 @@ mod app_test {
            ignore/*macro_use*/
      );
 
+     test!(
+           true, // test_mode_bool
+           true, //list_all_bool
+           macro_list_all_fuzzy_undo_vim_command_range,
+           "Makefile",
+           100,
+           "f i\r",
+           "5-17\n",
+           "7-\r",
+           "c vim rust-toolchain\r",
+           ":q\r",
+           "1-\n",
+           "q\r",
+           "macro_list_all_fuzzy_undo_vim_command_range",
+           ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open rust-toolchain fie  with command vim\n>Quite Vim\n>List entire range, 1-\n>Quite lsk",
+           "1659b7ab163e020baaa331aa05addca7480bac4072cb0c1df4cf0d199c70b362",
+           ignore/*macro_use*/
+     );
+
     #[test]
     #[ignore]//docker
     fn parse() {
