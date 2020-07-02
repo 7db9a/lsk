@@ -17,7 +17,7 @@ use easy_hasher::easy_hasher::*;
 pub mod app {
     use super::*;
 
-    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) -> LsKey {
+    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool, fzc_hook_path: Option<PathBuf>) -> LsKey {
         if test {
             let mut path = path.as_ref().to_path_buf();
             create_dir_all(&path).expect("Failed to create directories.");
@@ -25,7 +25,7 @@ pub mod app {
             std::fs::File::create(&path).expect("failed to create lsk output file");
         }
         let path = path.as_ref();
-        let mut ls_key = LsKey::new(path, all, test);
+        let mut ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
         ls_key.update_file_display(ls_key.is_fuzzed, false);
         ls_key.run_cmd();
         let mut list = ls_key.list.clone();
@@ -35,12 +35,12 @@ pub mod app {
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all, test);
+                ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
                 ls_key.list = fuzzy_list.clone();
                 ls_key.display = display;
             } else if !ls_key.halt {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all, test);
+                ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
                 ls_key.list = _list;
                 ls_key.display = display;
             }
@@ -65,11 +65,12 @@ pub struct LsKey {
     pub is_fuzzed: bool,
     pub test: bool,
     pub input_vec: Vec<String>,
-    pub output_vec: Vec<String>
+    pub output_vec: Vec<String>,
+    pub fzc_hook_path: Option<PathBuf>
 }
 
 impl LsKey {
-    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool) -> Self {
+    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool, fzc_hook_path: Option<PathBuf>) -> Self {
         let mut ls_key: LsKey = Default::default();
         let list = if all {
            list::List::new(path)
@@ -86,6 +87,7 @@ impl LsKey {
         ls_key.halt = true;
         ls_key.is_fuzzed = false;
         ls_key.test = test;
+        ls_key.fzc_hook_path = fzc_hook_path;
 
         ls_key
     }
@@ -1177,7 +1179,7 @@ mod app_test {
                 }
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
+                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true, None);
                 spawn.join().expect("failed to spawn thread");
 
                 let mut test_output_path = path_path.clone();
@@ -1643,7 +1645,7 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_mode_parse() {
-        let mut ls_key = LsKey::new("/tmp", false, false);
+        let mut ls_key = LsKey::new("/tmp", false, false, None);
         let input_single = "f something".to_string();
         let some_fuzzy_search_single = ls_key.mode_parse(input_single.clone());
 
@@ -1689,7 +1691,7 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_bad_mode_parse() {
-        let mut ls_key = LsKey::new("/tmp", false, false);
+        let mut ls_key = LsKey::new("/tmp", false, false, None);
 
         let input_lack = "f ".to_string();
         let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
