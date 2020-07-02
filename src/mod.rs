@@ -421,6 +421,17 @@ impl LsKey {
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
                  },
+                 "fzc" => {
+                     let mut path_cache = command_assistors::PathCache::new(
+                         self.list.parent_path.as_path()
+                     );
+                     path_cache.switch();
+                     let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
+                     let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
+                     let cmd_path = terminal::shell::cmd(fzc_path_string).unwrap();
+                     let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
+                     path_cache.switch_back();
+                 },
                  "vim" => {
                      let mut path_cache = command_assistors::PathCache::new(
                          self.list.parent_path.as_path()
@@ -443,17 +454,6 @@ impl LsKey {
                      //let cmd = split.iter().last().unwrap();
                      //let cmd = format!(r#"zsh {}"#, cmd);
                      terminal::shell::spawn("zsh".to_string(), vec![]);
-                     path_cache.switch_back();
-                 },
-                 "fzc" => {
-                     let mut path_cache = command_assistors::PathCache::new(
-                         self.list.parent_path.as_path()
-                     );
-                     path_cache.switch();
-                     //let output = terminal::shell::cmd("fzc".to_string());
-                     //let file_path = output.unwrap();
-                     //
-                     terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
                      path_cache.switch_back();
                  },
                  _ => {
