@@ -344,6 +344,12 @@ pub mod shell {
             .expect("unrecoverable failure to execute shell process.");
     }
 
+    pub fn output(cmd: String, args: Vec<String>) -> Result<std::process::Output, std::io::Error> {
+        std::process::Command::new(cmd)
+            .args(args)
+            .output()
+    }
+
     pub fn cmd(cmd: String) -> Result<String, std::io::Error> {
         run_fun!("{}", cmd)
     }
