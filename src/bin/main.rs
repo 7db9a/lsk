@@ -18,6 +18,7 @@ fn main() {
         .flag(Flag::new("all", "cli [path] --all(-a)", FlagType::Bool).alias("a"))
         .flag(Flag::new("fuzzy-cmd", "cli [path] --fuzzy-cmd(-c)", FlagType::String).alias("c"))
         .flag(Flag::new("fuzzy-find", "cli [path] --fuzzy-find(-f)", FlagType::String).alias("f"))
+        .flag(Flag::new("fuzzy-dir", "cli [path] --fuzzy-dir(-d)", FlagType::String).alias("d"))
         .command(is_dir_command())
         .command(get_file_by_key_command());
 
@@ -111,6 +112,7 @@ fn default_action(c: &Context) {
     let mut test =  false;
     let mut fzf_path: Option<PathBuf> =  None;
     let mut fzc_path: Option<PathBuf> = None;
+    let mut fzd_path: Option<PathBuf> = None;
     let path = if path != "" {
         PathBuf::from(path)
     } else {
@@ -126,7 +128,10 @@ fn default_action(c: &Context) {
     if let Some(path) = c.string_flag("fuzzy-cmd") {
         fzc_path = Some(PathBuf::from(path));
     }
-    app::run(path, all, test, fzf_path, fzc_path);
+    if let Some(path) = c.string_flag("fuzzy-dir") {
+        fzd_path = Some(PathBuf::from(path));
+    }
+    app::run(path, all, test, fzf_path, fzc_path, fzd_path);
 }
 
 #[cfg(test)]
