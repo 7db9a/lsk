@@ -16,6 +16,7 @@ fn main() {
         .usage("cli [path]")
         .action(default_action)
         .flag(Flag::new("all", "cli [path] --all(-a)", FlagType::Bool).alias("a"))
+        .flag(Flag::new("fuzzy-cmd", "cli [path] --fuzzy-cmd(-c)", FlagType::String).alias("c"))
         .command(is_dir_command())
         .command(get_file_by_key_command());
 
@@ -107,15 +108,22 @@ fn default_action(c: &Context) {
 
     if c.bool_flag("all") {
         if path != "" {
-            app::run(path, true, false);
+            app::run(path, true, false, None);
         } else {
-            app::run(env::current_dir().unwrap(), true, false);
+            app::run(env::current_dir().unwrap(), true, false, None);
+        }
+    } else if let Some(fzc_path) = c.string_flag("fuzzy-cmd") {
+        //assert_eq!(fzc_path, "/home/me/.zsh_history".to_string());
+        if path != "" {
+            app::run(path, true, false, Some(PathBuf::from(fzc_path)));
+        } else {
+            app::run(env::current_dir().unwrap(), true, false, Some(PathBuf::from(fzc_path)));
         }
     } else {
         if path != "" {
-            app::run(path, false, false);
+            app::run(path, false, false, None);
         } else {
-            app::run(env::current_dir().unwrap(), false, false);
+            app::run(env::current_dir().unwrap(), false, false, None);
         }
     }
 }

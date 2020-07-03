@@ -17,7 +17,7 @@ use easy_hasher::easy_hasher::*;
 pub mod app {
     use super::*;
 
-    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool) -> LsKey {
+    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool, fzc_hook_path: Option<PathBuf>) -> LsKey {
         if test {
             let mut path = path.as_ref().to_path_buf();
             create_dir_all(&path).expect("Failed to create directories.");
@@ -25,7 +25,7 @@ pub mod app {
             std::fs::File::create(&path).expect("failed to create lsk output file");
         }
         let path = path.as_ref();
-        let mut ls_key = LsKey::new(path, all, test);
+        let mut ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
         ls_key.update_file_display(ls_key.is_fuzzed, false);
         ls_key.run_cmd();
         let mut list = ls_key.list.clone();
@@ -35,12 +35,12 @@ pub mod app {
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all, test);
+                ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
                 ls_key.list = fuzzy_list.clone();
                 ls_key.display = display;
             } else if !ls_key.halt {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all, test);
+                ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
                 ls_key.list = _list;
                 ls_key.display = display;
             }
@@ -65,11 +65,12 @@ pub struct LsKey {
     pub is_fuzzed: bool,
     pub test: bool,
     pub input_vec: Vec<String>,
-    pub output_vec: Vec<String>
+    pub output_vec: Vec<String>,
+    pub fzc_hook_path: Option<PathBuf>
 }
 
 impl LsKey {
-    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool) -> Self {
+    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool, fzc_hook_path: Option<PathBuf>) -> Self {
         let mut ls_key: LsKey = Default::default();
         let list = if all {
            list::List::new(path)
@@ -86,6 +87,7 @@ impl LsKey {
         ls_key.halt = true;
         ls_key.is_fuzzed = false;
         ls_key.test = test;
+        ls_key.fzc_hook_path = fzc_hook_path;
 
         ls_key
     }
@@ -378,8 +380,9 @@ impl LsKey {
              let args = a;
              // Unwrap is safe because is_key is not None and there are args.
              let cmd = input.cmd.unwrap();
+             let list_parent_path = self.list.parent_path.clone();
              let mut path_cache = command_assistors::PathCache::new(
-                 self.list.parent_path.as_path()
+                 list_parent_path.as_path()
              );
              path_cache.switch();
              match cmd.as_str() {
@@ -392,11 +395,17 @@ impl LsKey {
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                  },
-                 "fzc" => {
-                     //let split: Vec<&str> = input.as_read.split("fzc").collect();
-                     terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
-                     //terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                 },
+                 //"fzc" => {
+                 //    //let split: Vec<&str> = input.as_read.split("fzc").collect();
+                 //    let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
+                 //    let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
+                 //    let output = terminal::shell::output("sh".to_string(), vec![fzc_path_string]).expect("fail to get output from fzc hook script");
+                 //    let cmd = String::from_utf8_lossy(&output.stdout).to_string();
+                 //    let mut input = Input::new();
+                 //    let input = input.parse(cmd);
+                 //    assert!(input.args.is_some());
+                 //    self.cmd_mode(input);
+                 //},
                  _ => {
                       terminal::shell::spawn(cmd.to_string(), args);
                  }
@@ -416,18 +425,33 @@ impl LsKey {
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
                  },
-                 "vim" => {
+                 "fzc" => {
                      let mut path_cache = command_assistors::PathCache::new(
                          self.list.parent_path.as_path()
                      );
                      path_cache.switch();
-                     //Split cmd ('vim')
-                     //let split: Vec<&str> = input.as_read.split("vim").collect();
-                     //let cmd = split.iter().last().unwrap();
-                     //let cmd = format!(r#"vim {}"#, cmd);
-                     terminal::shell::spawn("vim".to_string(), vec![]);
+                     let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
+                     let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
+                     let cmd = terminal::shell::cmd(fzc_path_string).unwrap();
+                     let mut input = Input::new();
+                     let input = input.parse(cmd);
+                     //assert!(input.args.is_some());
+                     //let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
                      path_cache.switch_back();
+                     self.cmd_mode(input);
                  },
+                 //"vim" => {
+                 //    let mut path_cache = command_assistors::PathCache::new(
+                 //        self.list.parent_path.as_path()
+                 //    );
+                 //    path_cache.switch();
+                 //    //Split cmd ('vim')
+                 //    //let split: Vec<&str> = input.as_read.split("vim").collect();
+                 //    //let cmd = split.iter().last().unwrap();
+                 //    //let cmd = format!(r#"vim {}"#, cmd);
+                 //    terminal::shell::spawn("vim".to_string(), vec![]);
+                 //    path_cache.switch_back();
+                 //},
                  "zsh" => {
                      let mut path_cache = command_assistors::PathCache::new(
                          self.list.parent_path.as_path()
@@ -438,17 +462,6 @@ impl LsKey {
                      //let cmd = split.iter().last().unwrap();
                      //let cmd = format!(r#"zsh {}"#, cmd);
                      terminal::shell::spawn("zsh".to_string(), vec![]);
-                     path_cache.switch_back();
-                 },
-                 "fzc" => {
-                     let mut path_cache = command_assistors::PathCache::new(
-                         self.list.parent_path.as_path()
-                     );
-                     path_cache.switch();
-                     //let output = terminal::shell::cmd("fzc".to_string());
-                     //let file_path = output.unwrap();
-                     //
-                     terminal::shell::spawn("sh".to_string(), vec!["/home/me/projects/work/ls-key/fzc/fzc.sh".to_string()]);
                      path_cache.switch_back();
                  },
                  _ => {
@@ -1177,7 +1190,7 @@ mod app_test {
                 }
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true);
+                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true, None);
                 spawn.join().expect("failed to spawn thread");
 
                 let mut test_output_path = path_path.clone();
@@ -1643,7 +1656,7 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_mode_parse() {
-        let mut ls_key = LsKey::new("/tmp", false, false);
+        let mut ls_key = LsKey::new("/tmp", false, false, None);
         let input_single = "f something".to_string();
         let some_fuzzy_search_single = ls_key.mode_parse(input_single.clone());
 
@@ -1689,7 +1702,7 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_bad_mode_parse() {
-        let mut ls_key = LsKey::new("/tmp", false, false);
+        let mut ls_key = LsKey::new("/tmp", false, false, None);
 
         let input_lack = "f ".to_string();
         let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
