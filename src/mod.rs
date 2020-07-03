@@ -380,8 +380,9 @@ impl LsKey {
              let args = a;
              // Unwrap is safe because is_key is not None and there are args.
              let cmd = input.cmd.unwrap();
+             let list_parent_path = self.list.parent_path.clone();
              let mut path_cache = command_assistors::PathCache::new(
-                 self.list.parent_path.as_path()
+                 list_parent_path.as_path()
              );
              path_cache.switch();
              match cmd.as_str() {
@@ -394,14 +395,17 @@ impl LsKey {
                      let file_path = output.unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                  },
-                 "fzc" => {
-                     //let split: Vec<&str> = input.as_read.split("fzc").collect();
-                     let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
-                     let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
-                     let output = terminal::shell::output("sh".to_string(), vec![fzc_path_string]).expect("fail to get output from fzc hook script");
-                     let file_path = String::from_utf8_lossy(&output.stdout);
-                     terminal::shell::spawn("vim".to_string(), vec![file_path.to_string()]);
-                 },
+                 //"fzc" => {
+                 //    //let split: Vec<&str> = input.as_read.split("fzc").collect();
+                 //    let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
+                 //    let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
+                 //    let output = terminal::shell::output("sh".to_string(), vec![fzc_path_string]).expect("fail to get output from fzc hook script");
+                 //    let cmd = String::from_utf8_lossy(&output.stdout).to_string();
+                 //    let mut input = Input::new();
+                 //    let input = input.parse(cmd);
+                 //    assert!(input.args.is_some());
+                 //    self.cmd_mode(input);
+                 //},
                  _ => {
                       terminal::shell::spawn(cmd.to_string(), args);
                  }
@@ -428,22 +432,26 @@ impl LsKey {
                      path_cache.switch();
                      let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
                      let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
-                     let cmd_path = terminal::shell::cmd(fzc_path_string).unwrap();
-                     let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
+                     let cmd = terminal::shell::cmd(fzc_path_string).unwrap();
+                     let mut input = Input::new();
+                     let input = input.parse(cmd);
+                     //assert!(input.args.is_some());
+                     //let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
                      path_cache.switch_back();
+                     self.cmd_mode(input);
                  },
-                 "vim" => {
-                     let mut path_cache = command_assistors::PathCache::new(
-                         self.list.parent_path.as_path()
-                     );
-                     path_cache.switch();
-                     //Split cmd ('vim')
-                     //let split: Vec<&str> = input.as_read.split("vim").collect();
-                     //let cmd = split.iter().last().unwrap();
-                     //let cmd = format!(r#"vim {}"#, cmd);
-                     terminal::shell::spawn("vim".to_string(), vec![]);
-                     path_cache.switch_back();
-                 },
+                 //"vim" => {
+                 //    let mut path_cache = command_assistors::PathCache::new(
+                 //        self.list.parent_path.as_path()
+                 //    );
+                 //    path_cache.switch();
+                 //    //Split cmd ('vim')
+                 //    //let split: Vec<&str> = input.as_read.split("vim").collect();
+                 //    //let cmd = split.iter().last().unwrap();
+                 //    //let cmd = format!(r#"vim {}"#, cmd);
+                 //    terminal::shell::spawn("vim".to_string(), vec![]);
+                 //    path_cache.switch_back();
+                 //},
                  "zsh" => {
                      let mut path_cache = command_assistors::PathCache::new(
                          self.list.parent_path.as_path()
