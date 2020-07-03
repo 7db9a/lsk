@@ -107,31 +107,26 @@ fn default_action(c: &Context) {
        _ => ""
     };
 
-    if c.bool_flag("all") {
-        if path != "" {
-            app::run(path, true, false, None, None);
-        } else {
-            app::run(env::current_dir().unwrap(), true, false, None, None);
-        }
-    } else if let Some(fzf_path) = c.string_flag("fuzzy-find") {
-        if path != "" {
-            app::run(path, true, false, None, Some(PathBuf::from(fzf_path)));
-        } else {
-            app::run(env::current_dir().unwrap(), true, false, Some(PathBuf::from(fzf_path)), None);
-        }
-    } else if let Some(fzc_path) = c.string_flag("fuzzy-cmd") {
-        if path != "" {
-            app::run(path, true, false, None, Some(PathBuf::from(fzc_path)));
-        } else {
-            app::run(env::current_dir().unwrap(), true, false, None, Some(PathBuf::from(fzc_path)));
-        }
+    let mut all = false;
+    let mut test =  false;
+    let mut fzf_path: Option<PathBuf> =  None;
+    let mut fzc_path: Option<PathBuf> = None;
+    let path = if path != "" {
+        PathBuf::from(path)
     } else {
-        if path != "" {
-            app::run(path, false, false, None, None);
-        } else {
-            app::run(env::current_dir().unwrap(), false, false, None, None);
-        }
+        env::current_dir().unwrap()
+    };
+
+    if c.bool_flag("all") {
+        all = true;
     }
+    if let Some(path) = c.string_flag("fuzzy-find") {
+        fzf_path = Some(PathBuf::from(path));
+    }
+    if let Some(path) = c.string_flag("fuzzy-cmd") {
+        fzc_path = Some(PathBuf::from(path));
+    }
+    app::run(path, all, test, fzf_path, fzc_path);
 }
 
 #[cfg(test)]
