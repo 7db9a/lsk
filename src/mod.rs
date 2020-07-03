@@ -1254,19 +1254,19 @@ mod app_test {
     test!(
           true, // test_mode_bool
           false, //list_all_bool
-          macro_fzf_enter_file,
+          macro_fzc_enter_file,
           "Makefile",
           100,               //$delay in milleseconds
-          "$(printf 'c fzf\r')", //$input1
-          "$(printf 'dockers\r')",//$input2
+          "$(printf 'c fzc\r')", //$input1
+          "$(printf 'vimread\r')",//$input2
           "$(printf ':q\r')", //$input3
           "$(printf 'q\r')", //$input4
           "",                //$input5
           "",                //$input6
           "",                //$input7
-          "macro_fzf_enter_file",
-          ">Run lsk\n>Open file with fzf hook\n>Quite vim\n>Quite lsk",
-          "27e218cfae990c8aa6b91ed1d53af121ec02827fdc0b7ed9d17ab1c16f890015",
+          "macro_fzc_enter_file",
+          ">Run lsk\n>Open file using vim with fzc hook\n>Quite vim\n>Quite lsk",
+          "64e1b450ebdc532da6ebd5b11df4347d67b48405aa166b05800180e1a1136bf2",
           ignore/*macro_use*/
     );
 
