@@ -456,11 +456,26 @@ impl LsKey {
                      let fzd_pathbuf = self.fzd_hook_path.as_ref().expect("fzd fail: no fzd hook path specified");
                      let fzd_path_string = fzd_pathbuf.clone().into_os_string().into_string().unwrap();
                      let dir = terminal::shell::cmd(fzd_path_string).unwrap();
-                     let dir_pathbuf = PathBuf::from(dir);
+                     let mut dir_pathbuf = PathBuf::from(dir);
                      let is_fuzzed = false;
+                     let mut pathbuf_vec: Vec<PathBuf> = vec![];
                      if metadata(dir_pathbuf.clone()).unwrap().is_dir() {
-                         let list = self.list.clone().update(dir_pathbuf);
-                         self.update(list);
+                         loop {
+                             if dir_pathbuf != PathBuf::from("") {
+                                 if dir_pathbuf != PathBuf::from("/") {
+                                     pathbuf_vec.push(dir_pathbuf.clone());
+                                 } else {
+                                     break
+                                 }
+                             } else {
+                                 break
+                             }
+                             dir_pathbuf.pop();
+                         }
+                         for dir_pathbuf in pathbuf_vec.iter().rev() {
+                             let list = self.list.clone().update(dir_pathbuf);
+                             self.update(list);
+                         }
                          self.halt = false;
                          let halt = self.list.filter.is_some();
                          self.update_file_display(is_fuzzed, halt);
@@ -1545,15 +1560,15 @@ mod app_test {
            "Makefile",
            100,
            "f i\r",
-           "5-17\n",
            "7-\n",
            "c fzd\r",
            "bin\r",
-           "",
+           "1\r",
+           ":q\r",
            "q\r",
            "macro_list_all_fuzzy_dir",
            ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open bind dir fzd command, but main.rs doesn't show.\n>Quite lsk",
-           "85fb9bbb1e367dad5808c31e7fa401068b4e36d0dee12ee7041953e793c6e090",
+           "f0314455ac7d9bee466366f83966280ad1292909fe8071dce0af9cb5ff0f40a1",
            ignore/*macro_use*/
      );
 
