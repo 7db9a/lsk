@@ -1517,6 +1517,28 @@ mod app_test {
            ignore/*macro_use*/
      );
 
+     // It's good if this test is broken. For some reason, and bin/<file> doesn't show up when
+     // running fzd.
+     test!(
+           true, // test_mode_bool
+           true, //list_all_bool
+           macro_bad_list_all_fuzzy_dir,
+           "Makefile",
+           100,
+           "f i\r",
+           "5-17\n",
+           "7-\n",
+           "c fzd\r",
+           "bin\r",
+           "",
+           "q\r",
+           "macro_list_all_fuzzy_dir",
+           ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open bind dir fzd command, but main.rs doesn't show.\n>Quite lsk",
+           "85fb9bbb1e367dad5808c31e7fa401068b4e36d0dee12ee7041953e793c6e090",
+           ignore/*macro_use*/
+     );
+
+
     #[test]
     #[ignore]//docker
     fn parse() {
