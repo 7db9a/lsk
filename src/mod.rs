@@ -17,7 +17,7 @@ use easy_hasher::easy_hasher::*;
 pub mod app {
     use super::*;
 
-    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool, fzc_hook_path: Option<PathBuf>) -> LsKey {
+    pub fn run<P: AsRef<Path>>(path: P, all: bool, test: bool, fzf_hook_path: Option<PathBuf>, fzc_hook_path: Option<PathBuf>) -> LsKey {
         if test {
             let mut path = path.as_ref().to_path_buf();
             create_dir_all(&path).expect("Failed to create directories.");
@@ -25,7 +25,7 @@ pub mod app {
             std::fs::File::create(&path).expect("failed to create lsk output file");
         }
         let path = path.as_ref();
-        let mut ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
+        let mut ls_key = LsKey::new(path, all, test, fzf_hook_path.clone(), fzc_hook_path.clone());
         ls_key.update_file_display(ls_key.is_fuzzed, false);
         ls_key.run_cmd();
         let mut list = ls_key.list.clone();
@@ -35,12 +35,12 @@ pub mod app {
             let display = ls_key.display.clone();
             if let Some(fuzzy_list) = ls_key.fuzzy_list.clone() {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
+                ls_key = LsKey::new(path, all, test, fzf_hook_path.clone(), fzc_hook_path.clone());
                 ls_key.list = fuzzy_list.clone();
                 ls_key.display = display;
             } else if !ls_key.halt {
                 let _list = ls_key.list;
-                ls_key = LsKey::new(path, all, test, fzc_hook_path.clone());
+                ls_key = LsKey::new(path, all, test, fzf_hook_path.clone(), fzc_hook_path.clone());
                 ls_key.list = _list;
                 ls_key.display = display;
             }
@@ -66,11 +66,12 @@ pub struct LsKey {
     pub test: bool,
     pub input_vec: Vec<String>,
     pub output_vec: Vec<String>,
-    pub fzc_hook_path: Option<PathBuf>
+    pub fzf_hook_path: Option<PathBuf>,
+    pub fzc_hook_path: Option<PathBuf>,
 }
 
 impl LsKey {
-    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool, fzc_hook_path: Option<PathBuf>) -> Self {
+    pub fn new<P: AsRef<Path>>(path: P, all: bool, test: bool, fzf_hook_path: Option<PathBuf>, fzc_hook_path: Option<PathBuf>) -> Self {
         let mut ls_key: LsKey = Default::default();
         let list = if all {
            list::List::new(path)
@@ -87,6 +88,7 @@ impl LsKey {
         ls_key.halt = true;
         ls_key.is_fuzzed = false;
         ls_key.test = test;
+        ls_key.fzf_hook_path = fzf_hook_path;
         ls_key.fzc_hook_path = fzc_hook_path;
 
         ls_key
@@ -386,15 +388,15 @@ impl LsKey {
              );
              path_cache.switch();
              match cmd.as_str() {
-                 "fzf" => {
-                     //Split cmd ('fzf')
-                     let split: Vec<&str> = input.as_read.split("fzf").collect();
-                     let cmd = split.iter().last().unwrap();
-                     let cmd = format!(r#"fzf {}"#, cmd);
-                     let output = terminal::shell::cmd(cmd.clone());
-                     let file_path = output.unwrap();
-                     terminal::shell::spawn("vim".to_string(), vec![file_path]);
-                 },
+                 //"fzf" => {
+                 //    //Split cmd ('fzf')
+                 //    let split: Vec<&str> = input.as_read.split("fzf").collect();
+                 //    let cmd = split.iter().last().unwrap();
+                 //    let cmd = format!(r#"fzf {}"#, cmd);
+                 //    let output = terminal::shell::cmd(cmd.clone());
+                 //    let file_path = output.unwrap();
+                 //    terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                 //},
                  //"fzc" => {
                  //    //let split: Vec<&str> = input.as_read.split("fzc").collect();
                  //    let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
@@ -420,8 +422,11 @@ impl LsKey {
                          self.list.parent_path.as_path()
                      );
                      path_cache.switch();
-                     let output = terminal::shell::cmd("fzf".to_string());
-                     let file_path = output.unwrap();
+                     let fzf_pathbuf = self.fzf_hook_path.as_ref().expect("fzf fail: no fzf hook path specified");
+                     let fzf_path_string = fzf_pathbuf.clone().into_os_string().into_string().unwrap();
+                     let file_path = terminal::shell::cmd(fzf_path_string).unwrap();
+                     //assert!(input.args.is_some());
+                     //let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
                      path_cache.switch_back();
                  },
@@ -1190,7 +1195,7 @@ mod app_test {
                 }
 
                 let spawn = super::terminal::parent_shell::type_text_spawn(text_vec, $delay);
-                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true, None);
+                let _ls_key = super::app::run(test_path_string.clone(), $list_all_bool, true, None, None);
                 spawn.join().expect("failed to spawn thread");
 
                 let mut test_output_path = path_path.clone();
@@ -1656,7 +1661,7 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_mode_parse() {
-        let mut ls_key = LsKey::new("/tmp", false, false, None);
+        let mut ls_key = LsKey::new("/tmp", false, false, None, None);
         let input_single = "f something".to_string();
         let some_fuzzy_search_single = ls_key.mode_parse(input_single.clone());
 
@@ -1702,7 +1707,7 @@ mod app_test {
      #[test]
      #[ignore]//docker
      fn test_bad_mode_parse() {
-        let mut ls_key = LsKey::new("/tmp", false, false, None);
+        let mut ls_key = LsKey::new("/tmp", false, false, None, None);
 
         let input_lack = "f ".to_string();
         let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
