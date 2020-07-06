@@ -1,6 +1,6 @@
 # ls-key
 
-![](giphy.gif)
+![Demo Animation](giphy.gif?raw=true)
 
 ## Development
 
