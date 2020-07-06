@@ -1,6 +1,6 @@
 # ls-key
 
-![](demo1.gif)
+![](giphy.gify)
 
 ## Development
 
