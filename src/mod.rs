@@ -200,7 +200,7 @@ impl LsKey {
    pub fn update_file_display(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
             let entries = self.list.order_and_sort_list(true, filter);
-            let entries_count = entries.iter().count();
+            let entries_count = self.list.files.iter().count();
             let mut start = 0;
             let mut end = entries_count;
             if let Some(ls) = &self.list.filter {
@@ -211,8 +211,10 @@ impl LsKey {
             while go {
                 let entries = self.list.order_and_sort_list(true, filter);
                 let mut entries_keyed: Vec<String> = list::key_entries(entries.clone());
-                let last = format!("[{}...]", end + 1);
-                entries_keyed.push(last);
+                if end  < entries_count {
+                    let last = format!("[{}...{}]", end + 1, entries_count);
+                    entries_keyed.push(last);
+                }
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 if let Some(r) = res {
                     let grid = r.0;
