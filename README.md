@@ -1,6 +1,6 @@
 # ls-key
 
-[![asciicast](https://asciinema.org/a/L9jaxLPtp2AFs4AOSU3KJ7Tss.png)](https://asciinema.org/a/L9jaxLPtp2AFs4AOSU3KJ7Tss)
+![](demo1.gif)
 
 ## Development
 
