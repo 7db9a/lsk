@@ -200,7 +200,7 @@ impl LsKey {
    pub fn update_file_display(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
             let entries = self.list.order_and_sort_list(true, filter);
-            let entries_count = entries.iter().count();
+            let entries_count = self.list.files.iter().count();
             let mut start = 0;
             let mut end = entries_count;
             if let Some(ls) = &self.list.filter {
@@ -210,7 +210,11 @@ impl LsKey {
             }
             while go {
                 let entries = self.list.order_and_sort_list(true, filter);
-                let entries_keyed: Vec<String> = list::key_entries(entries.clone());
+                let mut entries_keyed: Vec<String> = list::key_entries(entries.clone());
+                if end  < entries_count {
+                    let last = format!("[{}...{}]", end + 1, entries_count);
+                    entries_keyed.push(last);
+                }
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 if let Some(r) = res {
                     let grid = r.0;
@@ -1298,8 +1302,8 @@ mod app_test {
           "",                //$input7
           "macro_enter_file",
           ">Run lsk\n>Open file by key (2)\n>Quite vim\n>Quite lsk",
-          "6e72cf41634635762cc35c32641d59ffb3eeb449f72dcc218b5cdf7016b7c279",
-          ignore/*host_term_size_dependent*/
+         "dab8010a2c67e6986aa511180b41132058be77ad72a9c9c5fc076e371dccf584",
+         ignore/*host_term_size_dependent*/
     );
 
     test!(
@@ -1507,7 +1511,7 @@ mod app_test {
            "q\r",
            "macro_list_all_all_file_range",
            ">Run lsk\n>List all\n>Fuzzy search 'm'\n>List range 1-10\n>Enter mk dir\n>Open qemu.mk\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
-           "c3e7bfb6e9b3051368bca98785942b60a120cd14096b0d38e5f63e1d7be1974d",
+           "05531386cec08ed4ae1d58c0f31aa13be8bb98a35cab2b491c1036e118180092",
            ignore/*macro_use*/
      );
 
