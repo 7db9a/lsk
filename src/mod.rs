@@ -210,7 +210,9 @@ impl LsKey {
             }
             while go {
                 let entries = self.list.order_and_sort_list(true, filter);
-                let entries_keyed: Vec<String> = list::key_entries(entries.clone());
+                let mut entries_keyed: Vec<String> = list::key_entries(entries.clone());
+                let last = format!("[{}...]", end + 1);
+                entries_keyed.push(last);
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 if let Some(r) = res {
                     let grid = r.0;
