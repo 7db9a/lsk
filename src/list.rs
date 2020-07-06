@@ -153,7 +153,7 @@ impl List {
         self
     }
 
-    pub fn order_and_sort_list(self, sort: bool, filter: bool, filter_vec: Option<Vec<usize>>) -> Vec<Entry> {
+    pub fn order_and_sort_list(&mut self, sort: bool, filter: bool) -> Vec<Entry> {
         let mut all_files = self.files.clone();
         let previous_path = self.path_history.iter().last().unwrap();
         if sort {
@@ -197,7 +197,7 @@ impl List {
 
            let find_in_range = final_all_files.clone().into_iter().filter(|x|
                // !filter.as_ref().unwrap().iter().find(|n| &x.key.unwrap() == *n).is_some()
-               filter_thing(x, &filter_vec)
+               filter_thing(x, &self.filter)
            );
 
             let files: Vec<Entry> = find_in_range.collect();

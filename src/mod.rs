@@ -199,19 +199,17 @@ impl LsKey {
 
    pub fn update_file_display(&mut self, halt: bool, mut filter: bool) {
             let mut go = true;
-            let mut list_filter = self.list.filter.clone();
-            let list = self.list.clone();
-            let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
+            let entries = self.list.order_and_sort_list(true, filter);
             let entries_count = entries.iter().count();
             let mut start = 0;
             let mut end = entries_count;
-            if let Some(ls) = list_filter.clone() {
+            if let Some(ls) = &self.list.filter {
                 start = ls.clone().into_iter().nth(0).unwrap();
-                end = ls.into_iter().last().unwrap();
+                end = *ls.into_iter().last().unwrap();
             } else {
             }
             while go {
-                let entries = list.clone().order_and_sort_list(true, filter, list_filter.clone());
+                let entries = self.list.order_and_sort_list(true, filter);
                 let entries_keyed: Vec<String> = list::key_entries(entries.clone());
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
                 if let Some(r) = res {
@@ -240,7 +238,7 @@ impl LsKey {
                             filter_vec.push(i)
                         );
 
-                        list_filter = Some(filter_vec);
+                        self.list.filter = Some(filter_vec);
                         filter = true;
 
                         end = end - 1;
