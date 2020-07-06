@@ -1501,7 +1501,7 @@ mod app_test {
            true, //list_all_bool
            macro_list_all_fuzzy_file_range,
            "Makefile",
-           100,
+           700,
            "f m\r",
            "1-10\r",
            "10\r",
