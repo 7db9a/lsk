@@ -1,6 +1,6 @@
 # ls-key
 
-If you use `ls` regularly for simply poking around your files, you may appreciate `ls-key`. Each file and dir has numbered key. Type the number and enter and voila! It's in beta but it's useful for doing simple things, which is usually what you need most of the time.
+If you use `ls` regularly for simply poking around your files, you may appreciate `ls-key`. Each file and dir has a numbered key. Type the number + enter and voila! It's in beta but it's useful for doing simple things, which is usually what you need most of the time.
 
 ![](assets/demo_intro.gif)
 
