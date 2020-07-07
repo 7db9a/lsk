@@ -1,6 +1,6 @@
 # ls-key
 
-If you use `ls` regularly for simply poking around your files, you may appreciate `ls-key`. Each file and dir has a numbered key. Type the number + enter and voila! It's in beta but it's useful for doing simple things, which is usually what you need most of the time.
+This is an experimental cli file navigator. If you use `ls` regularly for simply poking around your files, you may appreciate `ls-key`. Each file and dir has a numbered key. Type the number + enter and voila! At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
 
 ![](assets/demo_intro.gif)
 
@@ -30,7 +30,7 @@ Hit enter when you want to execute.
 
 **Show first file onwards:** `0-`
 
-### Goals
+## Goals
 
 * Easy installation for non-rust users.
 
@@ -52,11 +52,11 @@ Hit enter when you want to execute.
 
 * Maybe figure out an alternative to xdo-tool (using env var to return file names is sorta hacky).
 
-* Use more of screen real-estate and handle file name wraps.
+* Use more screen real-estate and handle file name wraps.
 
-#### Other usage (very experimental, but useful)
+## Other usage
 
-If you like tools like `fzf`, you may like this. You can run ls-key with scripts you make (bash, python, etc) for fuzzy directory jumping, fuzzy file opening, and fuzzy commands.
+If you like tools like `fzf`, you may like this. You can run ls-key with scripts you make (bash, python, etc) for fuzzy directory jumping, fuzzy file opening, and fuzzy commands (very experimental).
 
 ####  Fuzzy dir
 
@@ -77,11 +77,15 @@ find -type d | cut -c 3- | fzf
 The script I use.
 
 ```
-/.fzf.sh
 #!/bin/bash
 
 fzf
 ```
+
+You can pass all these args together and alias it to `lsk` for your convenience.
+
+`lsk --fuzzy-dir /path/to/fuzzy/dir/script --fuzzy-find /path/to/fuzzy/file/open/script`
+
 ## Development
 
 ### Testing
