@@ -1,6 +1,6 @@
 # ls-key
 
-![](assets/demo1_cut1.gif)
+![](assets/demo2.gif)
 
 ## Development
 
