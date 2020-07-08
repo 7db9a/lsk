@@ -58,6 +58,10 @@ Hit enter when you want to execute.
 
 If you like tools like `fzf`, you may like this. You can run ls-key with scripts you make (bash, python, etc) for fuzzy directory jumping, fuzzy file opening, and fuzzy commands (very experimental).
 
+`c` is for command.
+
+![](assets/demo_fzd_fzf.gif)
+
 ####  Fuzzy dir
 
 `lsk --fuzzy-dir /path/to/fuzzy/dir/script`
