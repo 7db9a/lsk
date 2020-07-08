@@ -278,7 +278,9 @@ impl LsKey {
         let mut n = 0;
         let mut format_cmd = |key: PathBuf| {
                     n +=1;
-                   format!(r#"{}={}"#, n, get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string())
+                    let file_string = get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string();
+                    let file_string = file_string.replace(" ", r"\ ");
+                   format!(r#"{}={}"#, n, file_string)
         };
 
         if let Some (r) = input.args {
