@@ -108,8 +108,8 @@ fn default_action(c: &Context) {
        _ => ""
     };
 
+    let test = false;
     let mut all = false;
-    let mut test =  false;
     let mut fzf_path: Option<PathBuf> =  None;
     let mut fzc_path: Option<PathBuf> = None;
     let mut fzd_path: Option<PathBuf> = None;

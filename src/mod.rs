@@ -27,7 +27,7 @@ pub mod app {
         }
         let path = path.as_ref();
         let mut ls_key = LsKey::new(path, all, test, fzf_hook_path.clone(), fzc_hook_path.clone(), fzd_hook_path.clone());
-        ls_key.update_file_display(ls_key.is_fuzzed, false);
+        ls_key.update_file_display(false);
         ls_key.run_cmd();
         let mut list = ls_key.list.clone();
 
@@ -45,7 +45,7 @@ pub mod app {
                 ls_key.list = _list;
                 ls_key.display = display;
             }
-            ls_key.update_file_display(ls_key.is_fuzzed, false);
+            ls_key.update_file_display(false);
             ls_key.run_cmd();
             list = ls_key.list.clone();
         }
@@ -90,7 +90,7 @@ impl LsKey {
             Ok(editor) => {
                  ls_key.default_editor = editor
             },
-            Err(e) => {
+            Err(_) => {
                 ls_key.default_editor = "nano".to_string()
             }
         };
@@ -173,7 +173,7 @@ impl LsKey {
         let scores = self.fuzzy_rank(scores);
         let scores = self.fuzzy_filter(scores);
         let list = self.scores_to_list(scores);
-        self.update_file_display(true, false);
+        self.update_file_display(false);
         self.fuzzy_list = Some(list);
 
         self.clone()
@@ -208,9 +208,8 @@ impl LsKey {
             self.list = list;
     }
 
-   pub fn update_file_display(&mut self, halt: bool, mut filter: bool) {
+   pub fn update_file_display(&mut self, mut filter: bool) {
             let mut go = true;
-            let entries = self.list.order_and_sort_list(true, filter);
             let entries_count = self.list.files.iter().count();
             let mut start = 0;
             let mut end = entries_count;
@@ -346,7 +345,7 @@ impl LsKey {
         );
 
         self.list.filter = Some(filter_vec);
-        self.update_file_display(false, true);
+        self.update_file_display(true);
         self.run_cmd()
     }
 
@@ -361,7 +360,7 @@ impl LsKey {
                  self.update(list);
                  self.halt = false;
                  let halt = self.list.filter.is_some();
-                 self.update_file_display(is_fuzzed, halt);
+                 self.update_file_display(halt);
                  if !halt {
                      self.run_cmd();
                  }
@@ -373,7 +372,7 @@ impl LsKey {
                       self.update(list);
                       self.halt = false;
                       let halt = self.list.filter.is_some();
-                      self.update_file_display(is_fuzzed, halt);
+                      self.update_file_display(halt);
                       if !halt {
                           self.run_cmd();
                       }
@@ -384,7 +383,7 @@ impl LsKey {
                           .to_string();
                       terminal::shell::spawn(self.default_editor.clone(), vec![file_path]);
                       self.halt = true;
-                      self.update_file_display(is_fuzzed, self.halt);
+                      self.update_file_display(self.halt);
                       self.run_cmd();
                   }
             }
@@ -453,7 +452,7 @@ impl LsKey {
                      let fzc_pathbuf = self.fzc_hook_path.as_ref().expect("fzc fail: no fzc hook path specified");
                      let fzc_path_string = fzc_pathbuf.clone().into_os_string().into_string().unwrap();
                      let cmd = terminal::shell::cmd(fzc_path_string).unwrap();
-                     let mut input = Input::new();
+                     let input = Input::new();
                      let input = input.parse(cmd);
                      //assert!(input.args.is_some());
                      //let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
@@ -470,7 +469,6 @@ impl LsKey {
                      let fzd_path_string = fzd_pathbuf.clone().into_os_string().into_string().unwrap();
                      let dir = terminal::shell::cmd(fzd_path_string).unwrap();
                      let mut dir_pathbuf = PathBuf::from(dir);
-                     let is_fuzzed = false;
                      let mut pathbuf_vec: Vec<PathBuf> = vec![];
                      if metadata(dir_pathbuf.clone()).unwrap().is_dir() {
                          loop {
@@ -491,7 +489,7 @@ impl LsKey {
                          }
                          self.halt = false;
                          let halt = self.list.filter.is_some();
-                         self.update_file_display(is_fuzzed, halt);
+                         self.update_file_display(halt);
                      }
                      path_cache.switch_back();
                  },
