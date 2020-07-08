@@ -8,6 +8,12 @@ This is an experimental cli file navigator. If you use `ls` regularly for simply
 
 You'll need xdo-tool installed to use `w` and `r` commands.
 
+Also set your default editor, such as
+
+`export EDITOR="vim"`
+
+otherwise it will default to nano editor.
+
 ## Usage
 
 For the equivalent of `ls -a`, do `lsk -a`.
@@ -36,15 +42,13 @@ Hit enter when you want to execute.
 
 * Test on MacOS and maybe see about Windows compatibility.
 
-* Opens files with any editor besides Vim.
-
 * Add more file colors (only file and dir differentiated right now).
 
 * LS_COLOR support and don't rely on hard-coding color scheme.
 
 * Add async and do more pass-by-reference: it's slow if there are a ton of files in the top of directory.
 
-* Edit a command with having to simply backspace.
+* Edit a command without having to rely solely on backspace.
 
 * Cursor (blinky thing that moves when you type) should be visible.
 
@@ -109,7 +113,6 @@ Run the following scripts, which uncomment #[ignore] for either host or docker t
 Run tests on host.
 
 `cargo test -- --test-threads=1 --nocapture`
-
 Run tests on docker, using dev script.
 
 `./dev.sh test rust-lib`
