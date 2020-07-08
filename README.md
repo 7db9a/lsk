@@ -4,11 +4,20 @@ This is an experimental cli file navigator. If you use `ls` regularly for simply
 
 ![](assets/demo_intro.gif)
 
-## Dependencies
+## Install
 
-You'll need xdo-tool installed to use `w` and `r` commands.
+You'll need rust installed.
 
-Not really a dependency, but you can set the default editor, such as
+```
+git clone https://github.com/7db9a/lsk.git
+cargo install --path lsk
+```
+
+## Optional (highly recommended) setup and deps
+
+You'll need xdotool installed to use `w` and `r` commands. Find it on your favorite package manager for your system.
+
+To open files with your prefered editor using $EDITOR env var, do something like
 
 `export EDITOR="vim"`
 
@@ -36,7 +45,13 @@ Hit enter when you want to execute.
 
 ## Goals
 
-* Easy installation for non-rust users.
+* Publish to crates.io.
+
+* Interactive help.
+
+* If xdotool isn't found, print returned files or directory paths.
+
+* Docker and nix installation for non-rust users.
 
 * Test on MacOS and maybe see about Windows compatibility.
 
