@@ -3,6 +3,7 @@ pub mod terminal;
 
 use list::Entry;
 
+use std::env;
 use std::path::{Path, PathBuf};
 use std::fs::{create_dir_all, metadata, OpenOptions};
 use list::List;
@@ -69,6 +70,7 @@ pub struct LsKey {
     pub fzf_hook_path: Option<PathBuf>,
     pub fzc_hook_path: Option<PathBuf>,
     pub fzd_hook_path: Option<PathBuf>,
+    pub default_editor: String,
 }
 
 impl LsKey {
@@ -82,6 +84,15 @@ impl LsKey {
            list::List::new(path)
                .list_skip_hidden()
                .unwrap()
+        };
+
+        match env::var("EDITOR") {
+            Ok(editor) => {
+                 ls_key.default_editor = editor
+            },
+            Err(e) => {
+                ls_key.default_editor = "nano".to_string()
+            }
         };
 
         ls_key.list = list;
@@ -371,7 +382,7 @@ impl LsKey {
                           file_pathbuf
                           .to_str().unwrap()
                           .to_string();
-                      terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                      terminal::shell::spawn(self.default_editor.clone(), vec![file_path]);
                       self.halt = true;
                       self.update_file_display(is_fuzzed, self.halt);
                       self.run_cmd();
@@ -431,7 +442,7 @@ impl LsKey {
                      let file_path = terminal::shell::cmd(fzf_path_string).unwrap();
                      //assert!(input.args.is_some());
                      //let cmd_res = terminal::shell::cmd(cmd_path).unwrap();
-                     terminal::shell::spawn("vim".to_string(), vec![file_path]);
+                     terminal::shell::spawn(self.default_editor.clone(), vec![file_path]);
                      path_cache.switch_back();
                  },
                  "fzc" => {
