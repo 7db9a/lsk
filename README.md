@@ -1,6 +1,6 @@
-# ls-key
+# lsk
 
-This is an experimental cli file navigator. If you use `ls` regularly for simply poking around your files, you may appreciate `ls-key`. Each file and dir has a numbered key. Type the number + enter and voila! At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
+This is an experimental cli file navigator. If you use `ls` regularly for simply poking around your files, you may appreciate `lsk`. Each file and dir has a numbered key. Type the number + enter and voila! At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
 
 ![](assets/demo_intro.gif)
 
@@ -8,11 +8,11 @@ This is an experimental cli file navigator. If you use `ls` regularly for simply
 
 You'll need xdo-tool installed to use `w` and `r` commands.
 
-Also set your default editor, such as
+Not really a dependency, but you can set the default editor, such as
 
 `export EDITOR="vim"`
 
-otherwise it will default to nano editor.
+otherwise it will default to nano editor when opening up files.
 
 ## Usage
 
@@ -33,8 +33,6 @@ Hit enter when you want to execute.
 **Return file/dir paths:** `r <key1> <key2> [...]`
 
 **Next-page:** `<key>-` (e.g. For example `49-` if there are more than 49 files.
-
-**Show first file onwards:** `0-`
 
 ## Goals
 
@@ -60,7 +58,7 @@ Hit enter when you want to execute.
 
 ## Other usage
 
-If you like tools like `fzf`, you may like this. You can run ls-key with scripts you make (bash, python, etc) for fuzzy directory jumping, fuzzy file opening, and fuzzy commands (very experimental).
+If you like tools like `fzf`, you may like this. You can run lsk with scripts you make (bash, python, etc) for fuzzy directory jumping, fuzzy file opening, and fuzzy commands (very experimental).
 
 `c` is for command.
 
@@ -98,7 +96,7 @@ You can pass all these args together and alias it to `lsk` for your convenience.
 
 ### Testing
 
-At the moment, some tests must be ran on host while others in docker. ls-key's tests simulates keyboard input and I can't figure out how to do that in docker.
+At the moment, some tests must be ran on host while others in docker. lsk's tests simulates keyboard input and I can't figure out how to do that in docker.
 
 **Run tests for host or docker**
 

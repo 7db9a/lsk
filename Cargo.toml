@@ -1,5 +1,5 @@
 [package]
-name = "ls-key"
+name = "lsk"
 version = "0.1.0"
 authors = ["7db9a"]
 edition = "2018"
