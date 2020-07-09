@@ -26,4 +26,3 @@ xdotool = "~0.0.2"
 sha2 = "~0.8.2"
 easy-hasher = "~2.1.1"
 ansi_term = "~0.12.0"
-fixture = { path = "fixture" }

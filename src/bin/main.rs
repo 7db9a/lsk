@@ -138,8 +138,7 @@ fn default_action(c: &Context) {
 mod cli {
     use std::fs::metadata;
     use std::path::Path;
-    use fixture::Fixture;
-    use fixture::command_assistors;
+    use super::ls_key::fixtures::{Fixture, command_assistors};
     use std::process::Command;
 
     #[test]

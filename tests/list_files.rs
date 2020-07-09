@@ -1,8 +1,7 @@
 use ls_key;
 use std::fs::metadata;
 use std::path::Path;
-use fixture::Fixture;
-use fixture::command_assistors;
+use ls_key::fixtures::{Fixture, command_assistors};
 use std::process::Stdio;
 
 // Linux's top level files and directories. The files have not content.
@@ -104,7 +103,7 @@ fn list_build_files() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath(path.to_string())
             .teardown(true);
 
@@ -130,7 +129,7 @@ fn list() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath(path.to_string())
             .teardown(true);
 
@@ -162,7 +161,7 @@ fn fuzzy_list() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath(path.to_string())
             .teardown(true);
 
@@ -199,7 +198,7 @@ fn fuzzy_list() {
 #[test]
 #[ignore]//docker
 fn list_go_up_one_level() {
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .build();
         let path = "/tmp/lsk_tests/list_enter_dir/";
@@ -238,7 +237,7 @@ fn list_go_up_one_level() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .teardown(true);
 
@@ -255,7 +254,7 @@ fn list_go_up_one_level() {
 #[test]
 #[ignore]//docker
 fn list_enter_into_dir() {
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .build();
         let path = "/tmp/lsk_tests/list_enter_dir/";
@@ -297,7 +296,7 @@ fn list_enter_into_dir() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .teardown(true);
 
@@ -314,7 +313,7 @@ fn list_enter_into_dir() {
 #[test]
 #[ignore]//docker
 fn list_enter_into_fuzzed_dir() {
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .build();
         let path = "/tmp/lsk_tests/list_enter_dir/";
@@ -342,7 +341,7 @@ fn list_enter_into_fuzzed_dir() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath("/tmp/lsk_tests/".to_string())
             .teardown(true);
 
@@ -396,7 +395,7 @@ fn list_test_cmd_in_different_dir() {
 
         assert_eq!(true, Path::new(path).exists());
 
-        fixture::Fixture::new()
+        Fixture::new()
             .add_dirpath(path.to_string())
             .teardown(true);
 
@@ -417,3 +416,108 @@ fn list_test_cmd_in_different_dir() {
 //         parent_dir: Some("/tmp/lsk_tests/"),
 //         path_history: ["/tmp/lsk_tests/"]
 //    };
+
+#[cfg(test)]
+mod list {
+    use std::fs::metadata;
+    use std::path::Path;
+    use super::{ls_key::list::List, ls_key::list::print_list_with_keys, Fixture};
+
+    #[test]
+    #[ignore]//docker
+    fn current_print_list_include_hidden() {
+        let path = "./";
+
+        let list = List::new(path)
+            .list_include_hidden()
+            .unwrap();
+
+        print_list_with_keys(list).unwrap();
+    }
+
+    #[test]
+    #[ignore]//docker
+    fn get_non_hidden_paths_by_key() {
+        let path = "/tmp/lsk_tests/get_non_hidden_paths_by_key/";
+
+        let mut fixture = Fixture::new()
+            .add_dirpath(path.to_string())
+            .add_dirpath(path.to_string() + "a-dir")
+            .add_dirpath(path.to_string() + ".a-hidden-dir")
+            .add_file(path.to_string() + "a-file")
+            .add_file(path.to_string() + "a-dir/a-file")
+            .add_file(path.to_string() + "a-dir/b-file")
+            .add_file(path.to_string() + ".a-hidden-dir/a-file")
+            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
+            .add_file(path.to_string() + ".a-hidden-file")
+            .build();
+
+        let list = List::new(path)
+            .list_skip_hidden()
+            .unwrap();
+
+        let file_path_1 = list.get_file_by_key(1, true).unwrap();
+        let file_path_2 = list.get_file_by_key(2, true).unwrap();
+        let file_path_3 = list.get_file_by_key(3, true);
+
+        assert_eq!(
+            true,
+            metadata(file_path_1.clone()).unwrap().is_dir()
+        );
+        assert_eq!(
+            true,
+            metadata(file_path_2.clone()).unwrap().is_file()
+        );
+
+        fixture.teardown(true);
+
+        assert_eq!(file_path_1, Path::new("/tmp/lsk_tests/get_non_hidden_paths_by_key/a-dir").to_path_buf());
+        assert_eq!(file_path_2, Path::new("/tmp/lsk_tests/get_non_hidden_paths_by_key/a-file").to_path_buf());
+        assert_eq!(file_path_3, None);
+    }
+
+    #[test]
+    #[ignore]//docker
+    fn get_all_paths_by_key() {
+        let path = "/tmp/lsk_tests/get_all_paths_by_key/";
+
+        let mut fixture = Fixture::new()
+            .add_dirpath(path.to_string())
+            .add_dirpath(path.to_string() + "a-dir")
+            .add_dirpath(path.to_string() + ".a-hidden-dir")
+            .add_file(path.to_string() + "a-file")
+            .add_file(path.to_string() + "a-dir/a-file")
+            .add_file(path.to_string() + "a-dir/b-file")
+            .add_file(path.to_string() + ".a-hidden-dir/a-file")
+            .add_file(path.to_string() + ".a-hidden-dir/.a-hidden-file")
+            .add_file(path.to_string() + ".a-hidden-file")
+            .build();
+
+        let list = List::new(path)
+            .list_include_hidden()
+            .unwrap();
+
+        let file_path_1 = list.get_file_by_key(1, true).unwrap();
+        let file_path_2 = list.get_file_by_key(2, true).unwrap();
+        let file_path_3 = list.get_file_by_key(3, true).unwrap();
+        let file_path_4 = list.get_file_by_key(4, true).unwrap();
+        let file_path_5 = list.get_file_by_key(5, true);
+
+        //assert_eq!(
+        //    true,
+        //    metadata(file_path_1.clone()).unwrap().is_file()
+        //);
+        //assert_eq!(
+        //    true,
+        //    metadata(file_path_2.clone()).unwrap().is_dir()
+        //);
+
+        fixture.teardown(true);
+
+        assert_eq!(file_path_1, Path::new("/tmp/lsk_tests/get_all_paths_by_key/.a-hidden-dir").to_path_buf());
+        assert_eq!(file_path_2, Path::new("/tmp/lsk_tests/get_all_paths_by_key/.a-hidden-file").to_path_buf());
+        assert_eq!(file_path_3, Path::new("/tmp/lsk_tests/get_all_paths_by_key/a-dir").to_path_buf());
+        assert_eq!(file_path_4, Path::new("/tmp/lsk_tests/get_all_paths_by_key/a-file").to_path_buf());
+        assert_eq!(file_path_5, None);
+    }
+}

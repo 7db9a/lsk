@@ -1,5 +1,6 @@
 pub mod list;
 pub mod terminal;
+pub mod fixtures;
 
 use list::Entry;
 
@@ -7,7 +8,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::fs::{create_dir_all, metadata, OpenOptions};
 use list::List;
-use fixture::command_assistors;
+use fixtures::command_assistors;
 use termion::input::TermRead;
 use termion::event::Key;
 use termion::raw::{IntoRawMode, RawTerminal};
@@ -1119,7 +1120,7 @@ mod app_test {
     use std::fs::metadata;
     use std::path::{Path, PathBuf};
     use std::process::Command;
-    use fixture::{Fixture, command_assistors};
+    use fixtures::{Fixture, command_assistors};
     use termion::terminal_size;
     use super::{Input, LsKey, CmdType, Mode};
     use super::*;
