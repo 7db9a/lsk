@@ -810,7 +810,7 @@ impl LsKey {
                   let mode: String = input.drain(..2).collect();
                   let mode = mode.as_str();
                   match mode {
-                      "f " => Some(Mode::Fuzzy(input.clone())),
+                      "s " => Some(Mode::Fuzzy(input.clone())),
                       "c " => Some(Mode::Cmd(input.clone())),
                       _ => None
                   }
@@ -1428,7 +1428,7 @@ mod app_test {
           macro_fuzzy_enter_file,
           "intercession",
           100,               //$delay in milleseconds
-          "$(printf 'f boo\r')",
+          "$(printf 's boo\r')",
           "$(printf '4\r')",
           "$(printf ':q\r')",
           "$(printf 'q\r')",
@@ -1437,7 +1437,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_file",
           ">Run lsk\n>Fuzzy widdle\n>Open file by key (1)\n>Quite vim\n>Quite lsk",
-          "0ba01081b893ec3fd0e7dcff4577c565c058ce7d8d49d0f601fe7a05dd1e9005",
+          "d7e51ab94b12bcb1773b2a92d0b4dec550c38f845add73850347a8bd03cc8f49",
           ignore/*macro_use*/
     );
 
@@ -1447,7 +1447,7 @@ mod app_test {
           macro_fuzzy_enter_dir,
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
-          "$(printf 'f ins\r')",
+          "$(printf 's ins\r')",
           "$(printf '4\r')",
           "$(printf 'q\r')",
           "",
@@ -1456,7 +1456,7 @@ mod app_test {
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Quite vim\n>Quite lsk",
-          "ffd4c27b3132750622f8c2075064800bec6ae5d8a3654391a1a2aa548bd4a002",
+          "9127fec0401b363161da1931c49795066cb21a98fd025be9816655019be48b2f",
           ignore/*macro_use*/
     );
 
@@ -1466,16 +1466,16 @@ mod app_test {
           macro_fuzzy_enter_dir_go_back_then_repeat,
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
-          "$(printf 'f do\r')",
+          "$(printf 's do\r')",
           "$(printf '2\r')",
           "$(printf '0\r')",
-          "$(printf 'f do\r')",
+          "$(printf 's do\r')",
           "$(printf '2\r')",
           "$(printf 'q\r')",
           "",
           "macro_fuzzy_enter_dir",
           ">Run lsk\n>Fuzzy widdle\n>Open dir by key (1)\n>Go back (0) and repeat\n>Quite vim\n>Quite lsk",
-          "3438acd815476b946b6196934d31af5b96a240949bd15a2a6d9e3f0b77b505f3",
+          "27a1709e1aaa369079a83d411e082c22bccca5987b008d71865e091864264e9f",
           ignore/*macro_use*/
     );
 
@@ -1486,7 +1486,7 @@ mod app_test {
           "a-file",
           100,               //inrease 200 => 500 ms to see better.
           "$(printf '0\r')",
-          "$(printf 'f sa\r')",
+          "$(printf 's sa\r')",
           "$(printf '2\r')",
           "$(printf 'q\r')",
           "",
@@ -1494,7 +1494,7 @@ mod app_test {
           "",
           "macro_go_back_fuzzy_enter_back_into_dir",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "2541172a470e8c8ea31f451292eec20999a2a788d60fc0dc3465f743e37b2bed",
+          "399976731f562f608d1d4c04afc1fa4f8f3530acf8683c39917d8771afebe5d1",
           ignore/*macro_use*/
     );
 
@@ -1506,14 +1506,14 @@ mod app_test {
           100,               //inrease 200 => 500 ms to see better.
           "$(printf '24\r')",
           "$(printf '1\r')",
-          "$(printf 'f con\r')",
+          "$(printf 's con\r')",
           "$(printf '2\r')",
           "$(printf ':q\r')",
           "$(printf 'q\r')",
           "",
           "macro_walk_in_park",
           ">Run lsk\n>Go back (0)\n>Fuzzy widdle\n>Open back into original dir by key (2)\n>\n>Quite lsk",
-          "1642667a77cde39adce4927ec6a6c61a6773c9d2261b1a4d4fe1d02c7e53cbf0",
+          "668f2e7980c6260f572e837375b1e4a2beea20d3683b5293f0b968f00a4e68b0",
           ignore/*macro_use*/
     );
 
@@ -1523,7 +1523,7 @@ mod app_test {
            macro_fuzzy_backspace,
            "Makefile",
            100,
-           "f itf",
+           "s itf",
            "BackSpace",
            "BackSpace",
            "BackSpace",
@@ -1532,7 +1532,7 @@ mod app_test {
            "q\r",
            "macro_fuzzy_backspace",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace fully (bad behavior)\n>Quite lsk",
-           "cef9ca29708d0077c26750ac76a443cc02c637a9d9bf49dd3bdc990f1fcf4447",
+           "ee86f4888a18c074a2df32a467ee94027ea5f437d0fede8125e3526e07ee8147",
            ignore/*macro_use*/
      );
 
@@ -1542,7 +1542,7 @@ mod app_test {
            macro_bad_fuzzy_backspace_enter,
            "Makefile",
            100,
-           "f itf",
+           "s itf",
            "BackSpace",
            "BackSpace",
            "",
@@ -1551,7 +1551,7 @@ mod app_test {
            "q\r",
            "macro_bad_fuzzy_backspace_enter",
            ">Run lsk\n>OFuzzy widdle (2)\n>Backspace partially (bad behavior)\n>Quite lsk",
-           "cbce709ccb1d782baa4ff20f80076d5f315c683b108e4ecd05a4ba51bd872570",
+           "83f5005ed89aca8834f69b3e064afca283c3ec6f90000e6e902473e1a582d11c",
            ignore/*macro_use*/
      );
 
@@ -1580,7 +1580,7 @@ mod app_test {
            macro_list_all_fuzzy_file_range,
            "Makefile",
            100,
-           "f m\r",
+           "s m\r",
            "1-10\r",
            "10\r",
            "9\r",
@@ -1589,7 +1589,7 @@ mod app_test {
            "q\r",
            "macro_list_all_all_file_range",
            ">Run lsk\n>List all\n>Fuzzy search 'm'\n>List range 1-10\n>Enter mk dir\n>Open qemu.mk\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
-           "05531386cec08ed4ae1d58c0f31aa13be8bb98a35cab2b491c1036e118180092",
+           "2d2affc2169c8f5262b97fa7b0788df5d4d4062c0c1ebcb6bb2498c8b777e7d2",
            ignore/*macro_use*/
      );
 
@@ -1599,7 +1599,7 @@ mod app_test {
            macro_list_all_fuzzy_undo_open_range,
            "Makefile",
            100,
-           "f i\r",
+           "s i\r",
            "5-17\n",
            "7-\r",
            "17\r",
@@ -1608,7 +1608,7 @@ mod app_test {
            "q\r",
            "macro_list_all_fuzzy_undo_open_range",
            ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open last one, key 17\n>Quite Vim\n>List entire range, 1-\n>Quite lsk",
-           "a4884dc18df5b571708e292e90a9a26b9de11294a0215945c850804a9413900d",
+           "83796531204cd54871410774f6858b0e79b2e291eb7c0a77b06a1314bca8ebd7",
            ignore/*macro_use*/
      );
 
@@ -1618,7 +1618,7 @@ mod app_test {
            macro_list_all_fuzzy_dir,
            "Makefile",
            100,
-           "f i\r",
+           "s i\r",
            "c fzd\r",
            "redoxgitl\r",
            "1\r",
@@ -1627,7 +1627,7 @@ mod app_test {
            "q\r",
            "macro_list_all_fuzzy_dir",
            ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open rust-toolchain fie  with command vim\n>Quite Vim\n>List entire range, 1-\n>Quite lsk",
-           "8e79d5a01e252cbf5057b40316bcc71eaf8b6fa9c0b423e92c73881b3af2b5e6",
+           "20fc38f75c6739dbce70e86974cc2b7f58f8212279c47f05fe29f639ab1977f7",
            ignore/*macro_use*/
      );
 
@@ -1639,7 +1639,7 @@ mod app_test {
            macro_bad_list_all_fuzzy_dir,
            "Makefile",
            100,
-           "f i\r",
+           "s i\r",
            "7-\n",
            "c fzd\r",
            "bin\r",
@@ -1648,7 +1648,7 @@ mod app_test {
            "q\r",
            "macro_list_all_fuzzy_dir",
            ">Run lsk\n>List all\n>Fuzzy search 'i'\n>List range 5 - 17.\n>List range 7 open-ended\n>Open bind dir fzd command, but main.rs doesn't show.\n>Quite lsk",
-           "f0314455ac7d9bee466366f83966280ad1292909fe8071dce0af9cb5ff0f40a1",
+           "9d2896a092c094c6073fe65408d38aa5d672dccf3f34597174774d8098194075",
            ignore/*macro_use*/
      );
 
@@ -1811,16 +1811,16 @@ mod app_test {
      #[ignore]//docker
      fn test_mode_parse() {
         let mut ls_key = LsKey::new("/tmp", false, false, None, None, None);
-        let input_single = "f something".to_string();
+        let input_single = "s something".to_string();
         let some_fuzzy_search_single = ls_key.mode_parse(input_single.clone());
 
-        let input_multi = "f something and more".to_string();
+        let input_multi = "s something and more".to_string();
         let some_fuzzy_search_multi = ls_key.mode_parse(input_multi.clone());
 
-        let input_invalid = "fd".to_string();
+        let input_invalid = "sd".to_string();
         let some_fuzzy_search_invalid = ls_key.mode_parse(input_invalid.clone());
 
-        let input_lack_more = "f".to_string();
+        let input_lack_more = "s".to_string();
         let some_fuzzy_search_lack_more = ls_key.mode_parse(input_lack_more.clone());
 
         let input_wrong = "d something".to_string();
@@ -1858,7 +1858,7 @@ mod app_test {
      fn test_bad_mode_parse() {
         let mut ls_key = LsKey::new("/tmp", false, false, None, None, None);
 
-        let input_lack = "f ".to_string();
+        let input_lack = "s ".to_string();
         let some_fuzzy_search_lack = ls_key.mode_parse(input_lack.clone());
 
         assert_eq!(
