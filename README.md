@@ -2,7 +2,7 @@
 
 Imagine ls, but you can 'key' into the file or dir instead of just starring at it.
 
-It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something. And it's a bit slow at times if you have a whole lot of files in the top dir, but it'll be way faster soon.
+It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
 
 ![](assets/demo_work.gif)
 
@@ -70,8 +70,6 @@ Here's all the important ones. Note some of the commands below require a space.
 **Original-page** `0-` (Don't confuse with `0`, which is goes back a directory level)
 
 ## Goals
-
-* Make it a billion times faster.
 
 * Publish to crates.io.
 
