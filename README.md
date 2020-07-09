@@ -17,6 +17,8 @@ cargo install --path lsk
 
 ## Optional (highly recommended) setup and deps
 
+lsk works out-of-the-box, but you may consider the following.
+
 ### xdotool
 
 You'll need xdotool installed to use `w` and `r` commands. Find it on your favorite package manager for your system.
@@ -33,7 +35,7 @@ To open any file using $LSK_FILE_OPENER
 
 `export LSK_FILE_OPENER="<favorite-file-opener>"`
 
-If unset, it uses xdg-open to open random files, link pngs or music files.
+If unset, it uses xdg-open to open random files, link pics or music files.
 
 ## Usage
 
