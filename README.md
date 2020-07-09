@@ -35,7 +35,7 @@ To open any file using $LSK_FILE_OPENER
 
 `export LSK_FILE_OPENER="<favorite-file-opener>"`
 
-If unset, it uses xdg-open to open random files, link pics or music files.
+If unset, it uses xdg-open to open random files, such as pics or music files.
 
 ## Usage
 
