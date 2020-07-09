@@ -4,7 +4,11 @@ version = "0.1.0"
 authors = ["7db9a"]
 edition = "2018"
 license = "MIT"
+description="Imagine ls, but you can 'key' into the file or dir instead of just starring at it."
 homepage = "https://github.com/7db9a/lsk"
+repository = "https://github.com/7db9a/lsk"
+readme = "README.md"
+keywords = ["file", "ls", "cli", "terminal"]
 
 [[bin]]
 name = "lsk"
