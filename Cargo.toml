@@ -9,6 +9,10 @@ homepage = "https://github.com/7db9a/lsk"
 repository = "https://github.com/7db9a/lsk"
 readme = "README.md"
 keywords = ["file", "ls", "cli", "terminal"]
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
 
 [[bin]]
 name = "lsk"
