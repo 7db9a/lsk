@@ -233,7 +233,7 @@ impl LsKey {
                 let entries = self.list.order_and_sort_list(true, filter);
                 let mut entries_keyed: Vec<String> = list::key_entries(entries.clone());
                 if end  < entries_count {
-                    let last = format!("[{}...{}]", end + 1, entries_count);
+                    let last = format!("[{}...{}]", end, entries_count);
                     entries_keyed.push(last);
                 }
                 let res = terminal::input_n_display::grid(entries_keyed.clone());
@@ -255,9 +255,13 @@ impl LsKey {
                     if (grid_row_count + pad) > height {
                         //panic!("Can't fit list into screen.");
                         //
-                        let range = start..end;
 
                         let mut filter_vec: Vec<usize> = vec![];
+
+                        let diff = (grid_row_count + pad).checked_sub(height).unwrap_or(1);
+
+                        end = end.checked_sub(diff).unwrap_or(end);
+                        let range = start..end;
 
                         range.into_iter().for_each(|i|
                             filter_vec.push(i)
@@ -266,7 +270,6 @@ impl LsKey {
                         self.list.filter = Some(filter_vec);
                         filter = true;
 
-                        end = end - 1;
 
                     } else {
                        go = false;
@@ -276,7 +279,6 @@ impl LsKey {
                 } else {
                     go = false;
                 }
-
             }
     }
 
@@ -1589,7 +1591,7 @@ mod app_test {
            "q\r",
            "macro_list_all_all_file_range",
            ">Run lsk\n>List all\n>Fuzzy search 'm'\n>List range 1-10\n>Enter mk dir\n>Open qemu.mk\n>Quite Vim\n>Go back/up a dir level\n>Quite lsk",
-           "2d2affc2169c8f5262b97fa7b0788df5d4d4062c0c1ebcb6bb2498c8b777e7d2",
+           "0eea81e276ad3766422bf859f4d9d3e76b84ef11e9d5233fe1aa206f8115e4f8",
            ignore/*macro_use*/
      );
 
