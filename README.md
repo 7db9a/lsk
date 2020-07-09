@@ -4,7 +4,7 @@ Imagine ls, but you can 'key' into the file or dir instead of just starring at i
 
 It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
 
-![](assets/demo_intro.gif)
+![](assets/demo_work.gif)
 
 ## Install
 
