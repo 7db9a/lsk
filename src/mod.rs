@@ -72,6 +72,7 @@ pub struct LsKey {
     pub fzc_hook_path: Option<PathBuf>,
     pub fzd_hook_path: Option<PathBuf>,
     pub default_editor: String,
+    pub default_opener: String,
 }
 
 impl LsKey {
@@ -93,6 +94,15 @@ impl LsKey {
             },
             Err(_) => {
                 ls_key.default_editor = "nano".to_string()
+            }
+        };
+
+        match env::var("LSK_FILE_OPENER") {
+            Ok(editor) => {
+                 ls_key.default_opener = editor
+            },
+            Err(_) => {
+                ls_key.default_opener = "xdg-open".to_string()
             }
         };
 
@@ -520,6 +530,40 @@ impl LsKey {
         }
     }
 
+    fn open_file_by_key_mode(&mut self, input: Input, is_fuzzed: bool) {
+        let get_file = |key_string: String| {
+             let key: usize = key_string.parse().unwrap();
+             self.list.get_file_by_key(key, !is_fuzzed).unwrap()
+        };
+
+        //let mut n = 0;
+        //let mut format_cmd = |key: PathBuf| {
+        //            n +=1;
+        //            let file_string = get_file(key.to_str().unwrap().to_string()).to_str().unwrap().to_string();
+        //            let file_string = file_string.replace(" ", r"\ ");
+        //           format!(r#"{}={}"#, n, file_string)
+        //};
+
+        if let Some (r) = input.args {
+            let _output_vec: Vec<String> =
+                r.iter()
+                    .map(|key|
+                         get_file(key.to_string())
+                    ).map(|file|
+                        terminal::shell::cmd(format!("{:?} {:?}", self.default_opener, file)).unwrap()
+                    ).collect();
+        } else {
+            ()
+        }
+
+        self.halt = false;
+        let halt = self.list.filter.is_some();
+        self.update_file_display(halt);
+        if !halt {
+            self.run_cmd();
+        }
+    }
+
     fn key_related_mode(&mut self, input: Result<Option<String>, std::io::Error>, is_fuzzed: bool) {
         match input {
             Ok(t) =>  {
@@ -531,6 +575,9 @@ impl LsKey {
                     match input.clone().cmd_type.unwrap() {
                         CmdType::SingleKey => {
                             self.key_mode(self.list.clone(), input, is_fuzzed);
+                        },
+                        CmdType::OpenKeys => {
+                            self.open_file_by_key_mode(input, is_fuzzed);
                         },
                         CmdType::MultipleKeys => {
                             /*
@@ -859,6 +906,7 @@ fn display_files(ls_key: LsKey, some_stuff: &[u8], screen: &mut AlternateScreen<
 pub enum CmdType {
     SingleKey,
     MultipleKeys,
+    OpenKeys,
     FilterKeys,
     Cmd,
 }
@@ -1002,8 +1050,26 @@ impl Input {
             false
         };
 
+        let are_all_keys_open = if let Some(c) = cmd.clone() {
+             if c == "o".to_string() {
+                 let _args = args.clone();
+                 if let Some(a) = _args {
+                      self.are_all_keys(a)
+                 }
+                 else {
+                     false
+                 }
+             } else {
+                 false
+             }
+        } else {
+            false
+        };
+
         let cmd_type = if are_all_keys {
             CmdType::MultipleKeys
+        } else if are_all_keys_open {
+            CmdType::OpenKeys
         } else if is_filter {
             CmdType::FilterKeys
         } else if let Some(k) = is_key {
