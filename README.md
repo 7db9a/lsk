@@ -1,6 +1,8 @@
 # lsk
 
-This is an experimental cli file navigator. If you use `ls` regularly for simply poking around your files, you may appreciate `lsk`. Each file and dir has a numbered key. Type the number + enter and voila! At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
+Imagine ls, but you can 'key' into the file or dir instead of just starring at it.
+
+At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
 
 ![](assets/demo_intro.gif)
 
