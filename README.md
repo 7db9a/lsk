@@ -2,7 +2,7 @@
 
 Imagine ls, but you can 'key' into the file or dir instead of just starring at it.
 
-It's experimental. Kinda lugs, but it'll be super-fast soon. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
+It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something. And it's a bit slow at times if you have a whole lot of files in the top dir, but it'll be way faster soon.
 
 ![](assets/demo_work.gif)
 
@@ -17,7 +17,11 @@ cargo install --path lsk
 
 ## Optional (highly recommended) setup and deps
 
+### xdotool
+
 You'll need xdotool installed to use `w` and `r` commands. Find it on your favorite package manager for your system.
+
+### envronmental variables
 
 To open files with your prefered editor using $EDITOR env var, do something like
 
@@ -25,16 +29,27 @@ To open files with your prefered editor using $EDITOR env var, do something like
 
 otherwise it will default to nano editor when opening up files.
 
+To open any file using $LSK_FILE_OPENER
+
+`export LSK_FILE_OPENER="<favorite-file-opener>"`
+
+If unset, it uses xdg-open to open random files, link pngs or music files.
+
 ## Usage
 
 For the equivalent of `ls -a`, do `lsk -a`. Other useful options like ls has aren't yet supported, but it's a goal.
-
 
 ### Inside lsk
 
 The rationale is you can just punch in the key number + Enter. That 90% of it. To go back a dir, punch `0`.
 
 Here's all the important ones. Note some of the commands below require a space.
+
+**open file with editor**: `<key>`
+
+**open dir**: `<key>
+
+**open any file**: `o <key>` (default is xdg-open)
 
 **search/fuzzy-widdle the list:** `s ` (remember the space and then type)
 
