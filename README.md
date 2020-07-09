@@ -2,9 +2,9 @@
 
 Imagine ls, but you can 'key' into the file or dir instead of just starring at it.
 
-It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
+It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something. And it's a bit slow at times if you have a whole lot of files in the top dir, but it'll be way faster soon.
 
-![](assets/demo_intro.gif)
+![](assets/demo_work.gif)
 
 ## Install
 
@@ -17,7 +17,13 @@ cargo install --path lsk
 
 ## Optional (highly recommended) setup and deps
 
+lsk works out-of-the-box, but you may consider the following.
+
+### xdotool
+
 You'll need xdotool installed to use `w` and `r` commands. Find it on your favorite package manager for your system.
+
+### envronmental variables
 
 To open files with your prefered editor using $EDITOR env var, do something like
 
@@ -25,27 +31,47 @@ To open files with your prefered editor using $EDITOR env var, do something like
 
 otherwise it will default to nano editor when opening up files.
 
+To open any file using $LSK_FILE_OPENER
+
+`export LSK_FILE_OPENER="<favorite-file-opener>"`
+
+If unset, it uses xdg-open to open random files, link pics or music files.
+
 ## Usage
 
-For the equivalent of `ls -a`, do `lsk -a`.
+For the equivalent of `ls -a`, do `lsk -a`. Other useful options like ls has aren't yet supported, but it's a goal.
 
-Hit enter when you want to execute.
+### Inside lsk
 
-**fuzzy-widdle:** 's ` (remember the space and then type)
+The rationale is you can just punch in the key number + Enter. That 90% of it. To go back a dir, punch `0`.
 
-**Go back:** `0`
+Here's all the important ones. Note some of the commands below require a space.
+
+**open file with editor**: `<key>`
+
+**open dir**: `<key>`
+
+**open any file**: `o <key>` (default is xdg-open)
+
+**search/fuzzy-widdle the list:** `s ` (remember the space and then type)
+
+**Go back a dir:** `0`
 
 **Quite:** `q`
 
-**Work in viewed dir:** `w`
+**Work in viewed dir:** `w` (sort-a-like `cd`)
 
-**Select range of files:** `<key_start>-<key_end>` (e.g. 7-5)
+**Select range of files:** `<key_start>-<key_end>` (e.g. `7-5`)
 
-**Return file/dir paths:** `r <key1> <key2> [...]`
+**Return file/dir paths:** `r <key1> <key2> [...]` (e.g. `r 1 2 3`)
 
-**Next-page:** `<key>-` (e.g. For example `49-` if there are more than 49 files.
+**Next-page:** `<key>-` (e.g. For example `49-` if there are more than 48 results on current page page.)
+
+**Original-page** `0-` (Don't confuse with `0`, which is goes back a directory level)
 
 ## Goals
+
+* Make it a billion times faster.
 
 * Publish to crates.io.
 
