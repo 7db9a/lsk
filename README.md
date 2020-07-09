@@ -11,8 +11,7 @@ It's experimental. At the momement, only files and dirs are differentiated by ha
 You'll need rust installed.
 
 ```
-git clone https://github.com/7db9a/lsk.git
-cargo install --path lsk
+cargo install lsk
 ```
 
 ## Optional (highly recommended) setup and deps
