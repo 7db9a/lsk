@@ -49,7 +49,7 @@ Here's all the important ones. Note some of the commands below require a space.
 
 **open file with editor**: `<key>`
 
-**open dir**: `<key>
+**open dir**: `<key>`
 
 **open any file**: `o <key>` (default is xdg-open)
 
