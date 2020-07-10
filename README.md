@@ -1,8 +1,8 @@
 # lsk
 
-Imagine ls, but you can 'key' into the file or dir instead of just starring at it.
+Imagine ls, but you can 'key' into the file or dir instead of just starring at it. WIP, but it's immediately useful.
 
-It's experimental. At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
+At the momement, only files and dirs are differentiated by hard-coded colors, so you can't see if a file is executable or something.
 
 ![](assets/demo_work.gif)
 
@@ -24,17 +24,17 @@ You'll need xdotool installed to use `w` and `r` commands. Find it on your favor
 
 ### envronmental variables
 
-To open files with your prefered editor using $EDITOR env var, do something like
+To open files with your prefered editor using $EDITOR env var, add something like
 
 `export EDITOR="vim"`
 
-otherwise it will default to nano editor when opening up files.
+to your shell config file, otherwise it will default to nano editor when opening up files.
 
 To open any file using $LSK_FILE_OPENER
 
 `export LSK_FILE_OPENER="<favorite-file-opener>"`
 
-If unset, it uses xdg-open to open random files, such as pics or music files.
+If unset, it uses xdg-open to open random files, such as pics or music.
 
 ## Usage
 
@@ -42,35 +42,39 @@ For the equivalent of `ls -a`, do `lsk -a`. Other useful options like ls has are
 
 ### Inside lsk
 
-The rationale is you can just punch in the key number + Enter. That 90% of it. To go back a dir, punch `0`.
+The rationale is you can just punch in the key number + Enter. That's90% of it. To go back a dir, punch `0`.
 
 Here's all the important ones. Note some of the commands below require a space.
 
-**open file with editor**: `<key>`
+**Open file with editor**: `<key>`
 
-**open dir**: `<key>`
+**Open dir**: `<key>`
 
-**open any file**: `o <key>` (default is xdg-open)
+**Open any file**: `o <key>` (default is xdg-open)
 
-**search/fuzzy-widdle the list:** `s ` (remember the space and then type)
+**Search/fuzzy-widdle the list:** `s ` (remember the space and then type)
 
-**Go back a dir:** `0`
+**Go back a dir level:** `0`
 
-**Quite:** `q`
+**Quit:** `q`
 
 **Work in viewed dir:** `w` (sort-a-like `cd`)
 
-**Select range of files:** `<key_start>-<key_end>` (e.g. `7-5`)
+**Select range of files (xdotool dep):** `<key_start>-<key_end>` (e.g. `3-7`)
 
-**Return file/dir paths:** `r <key1> <key2> [...]` (e.g. `r 1 2 3`)
+**Return file/dir paths (xdotool dep):** `r <key1> <key2> [...]` (e.g. `r 1 2 3`)
 
 **Next-page:** `<key>-` (e.g. For example `49-` if there are more than 48 results on current page page.)
 
-**Original-page** `0-` (Don't confuse with `0`, which is goes back a directory level)
+**Original-page** `0-` (Don't confuse with `0` for going back a directory level)
 
 ## Goals
 
-* Publish to crates.io.
+* Keep refactoring code-base until it looks nice.
+
+* Allow spaces in fuzzy search/widdle.
+
+* Truncate display of long file names to avoid screen wrapping.
 
 * Interactive help.
 
@@ -82,9 +86,9 @@ Here's all the important ones. Note some of the commands below require a space.
 
 * Add more file colors (only file and dir differentiated right now).
 
-* LS_COLOR support and don't rely on hard-coding color scheme.
+* $LS_COLOR support and don't rely on hard-coding color scheme.
 
-* Add async and do more pass-by-reference: it's slow if there are a ton of files in the top of directory.
+* Add async and do more pass-by-reference.
 
 * Edit a command without having to rely solely on backspace.
 
@@ -93,8 +97,6 @@ Here's all the important ones. Note some of the commands below require a space.
 * Escape a file view from widdling-down or selecting a range.
 
 * Maybe figure out an alternative to xdo-tool (using env var to return file names is sorta hacky).
-
-* Use more screen real-estate and handle file name wraps.
 
 ## Other usage
 
@@ -134,6 +136,9 @@ You can pass all these args together and alias it to `lsk` for your convenience.
 
 ## Development
 
+git clone --depth https://github.com/7db9a/lsk.git
+cargo install --path lsk
+
 ### Testing
 
 At the moment, some tests must be ran on host while others in docker. lsk's tests simulates keyboard input and I can't figure out how to do that in docker.
@@ -146,14 +151,14 @@ Stage code changes, if any. It's very important that you do this.
 
 Run the following scripts, which uncomment #[ignore] for either host or docker tests.
 
-`./unignore_host_tests` or `./unignore_host_tests`
+`./dev/unignore_host_tests` or `./unignore_host_tests`
 
 Run tests on host.
 
 `cargo test -- --test-threads=1 --nocapture`
 Run tests on docker, using dev script.
 
-`./dev.sh test rust-lib`
+`./dev/dev.sh test rust-lib`
 
 ***Undo any unstaged changes (those are the 'unignore' script)***
 
@@ -163,8 +168,8 @@ Run tests on docker, using dev script.
 
 For an unknown reason, these test only run if 'asked' to explicitly.
 
-`./dev.sh test rust-lib list`
+`./dev/dev.sh test rust-lib list`
 
 One or more tests rely on exact terminal size.
 
-`./unignore_host_term_size_dependent`
+`./dev/unignore_host_term_size_dependent`
