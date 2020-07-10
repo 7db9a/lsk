@@ -42,7 +42,7 @@ For the equivalent of `ls -a`, do `lsk -a`. Other useful options like ls has are
 
 ### Inside lsk
 
-The rationale is you can just punch in the key number + Enter. That's90% of it. To go back a dir, punch `0`.
+The rationale is that you can just punch in the key number + Enter. That's 90% of it. To go back a dir, punch `0`.
 
 Here's all the important ones. Note some of the commands below require a space.
 
