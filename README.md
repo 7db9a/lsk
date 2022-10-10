@@ -1,4 +1,4 @@
-# lsk
+# lsk is on Turbosrc
 
 Imagine ls, but you can 'key' into the file or dir instead of just starring at it.
 
